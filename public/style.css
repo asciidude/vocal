@@ -1,0 +1,27 @@
+:root {
+    --theme-purple: #B24592;
+    --theme-red: #F15F79;
+    --theme-gradient: linear-gradient(45deg, var(--theme-purple), var(--theme-red));
+}
+
+.gradient-text {
+    background-color: white;
+
+    background-image: var(--theme-gradient);
+
+    background-size: 100%;
+    background-repeat: repeat;
+    
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; 
+    -moz-background-clip: text;
+    -moz-text-fill-color: transparent;
+}
+
+.div-sm {
+    border: 3px solid var(--theme-red);
+    padding-left: 25px;
+    padding-right: 25px;
+    border-radius: 5px;
+}

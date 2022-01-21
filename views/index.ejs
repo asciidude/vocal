@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <title>👋 vocal</title>
+        <%- include('./partials/head.ejs') %>
+    </head>
+    <body class="bg-dark text-white">
+        <% if(!inputCode) { %>
+            <div class="vh-100 d-flex flex-column justify-content-center align-items-center">
+                <p><i class="bi bi-soundwave gradient-text display-1"></i></p>
+                <p class="h2 text-center ms-2 me-2 fw-light">👋 welcome to vocal, the future of communications</p>
+                <p class="text-center ms-2 me-2">vocal is currently in development, you can join early if you find the secret code! 🔊</p>
+                <span class="div-sm"></span>
+                <a class="btn fw-light text-white mt-3 shadow-none" href="?inputCode=true" style="background: linear-gradient(45deg, #B24592, #F15F79);">
+                    wanna give it a try?
+                </a>
+            </div>
+        <% } else { %>
+            <div class="vh-100 d-flex flex-column justify-content-center align-items-center">
+                <p><i class="bi bi-soundwave gradient-text display-1"></i></p>
+                <p class="h2 text-center ms-2 me-2 fw-light">🧐 so you wanna give it a try?</p>
+                <p class="text-center ms-2 me-2">simply input the secret code in the input box below and press "submit" 🙂</p>
+                <span class="div-sm"></span>
+                <% if(fail === null || fail === true) { %>
+                    <form action="/?inputCode=true" method="post" class="row g-3 mt-1">
+                        <div class="input-group mb-3">
+                            <input type="text" name="code" placeholder="🤫 shhh..." class="form-control shadow-none">
+                            <button type="submit" class="btn fw-light text-white shadow-none form-control" style="background: linear-gradient(45deg, #B24592, #F15F79);">
+                                submit
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <% if(fail === true) { %>
+                        <p class="mb-0 mt-0">
+                            oops! that wasn't the right code.
+                            <a href="https://discord.gg/pjnpQDQgjB" target="_blank" class="gradient-text text-decoration-none" title="discord">get a hint here</a>
+                        </p>
+                    <% } else { %>
+                        <a href="https://discord.gg/pjnpQDQgjB" target="_blank" class="gradient-text text-decoration-none" title="discord">get a hint here</a>
+                    <% } %>
+                <% } else { %>
+                    <a href="/auth" class="btn fw-light text-white shadow-none mt-3" style="background: linear-gradient(45deg, #B24592, #F15F79);">
+                        <i class="bi bi-discord"></i> login with discord
+                    </a>
+
+                    <p class="mb-0 mt-2">
+                        you must be 13+ to use vocal.
+                        <a href="https://youtu.be/cODKB9fApXk" target="_blank" class="gradient-text text-decoration-none" title="youtube">learn more</a>
+                    </p>
+                <% } %>
+            </div>
+        <% } %>
+    </body>
+</html>

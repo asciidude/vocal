@@ -1,0 +1,21 @@
+{
+  "name": "vocal",
+  "version": "1.0.0",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "nodemon ."
+  },
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^14.2.0",
+    "ejs": "^3.1.6",
+    "ejs-lint": "^1.2.1",
+    "express": "^4.17.2",
+    "express-session": "^1.17.2",
+    "mongoose": "^6.1.7",
+    "passport": "^0.5.2",
+    "passport-discord": "https://github.com/tonestrike/passport-discord.git",
+    "passport-oauth2": "^1.6.1",
+    "passport-oauth2-refresh": "^2.1.0"
+  }
+}
