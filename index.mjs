@@ -2,9 +2,9 @@
 import express from 'express';
 import ssl from 'express-ssl';
 const app = express();
-app.use(ssl((req, res) => {
-    res.redirect('/');
-}));
+app.use((req, res, next) => {
+    if(!req.secure) res.redirect(req.originalUrl);
+});
 
 import dotenv from 'dotenv';
 dotenv.config();
