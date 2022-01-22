@@ -2,7 +2,13 @@
 import express from 'express';
 import ssl from 'express-ssl';
 const app = express();
-app.use(ssl());
+app.use(ssl({
+    disabled: false,
+    trustProxy: false,
+    disallow: (req, res) => {
+        res.redirect('/');
+    }
+}));
 
 import dotenv from 'dotenv';
 dotenv.config();
