@@ -19,23 +19,6 @@
     -moz-text-fill-color: rgba(255, 255, 255, 0);
 }
 
-.gradient-text i {
-    background-color: --theme-red;
-
-    @supports {
-        background-image: var(--theme-gradient);
-
-        background-size: 100%;
-        background-repeat: repeat;
-        
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: rgba(255, 255, 255, 0); 
-        -moz-background-clip: text;
-        -moz-text-fill-color: rgba(255, 255, 255, 0);
-    }
-}
-
 .div-sm {
     border: 3px solid var(--theme-red);
     padding-left: 25px;
