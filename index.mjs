@@ -1,9 +1,9 @@
 // Imports
 import express from 'express';
-import ssl from 'express-ssl';
 const app = express();
+
 app.use((req, res, next) => {
-    if(!req.secure) res.redirect(req.originalUrl);
+    if(!req.secure) res.redirect('https://' + req.headers.host + req.originalUrl);
 });
 
 import dotenv from 'dotenv';
@@ -49,6 +49,7 @@ app.use(passport.session());
 // Super secret 🤫
 app.get('/', (req, res) => {
     if(req.isAuthenticated()) return res.redirect('/feed');
+    console.log(req.headers.host + req.originalUrl);
 
     res.render('index', {
         inputCode: req.query.inputCode,
