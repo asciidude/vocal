@@ -5,12 +5,12 @@ const router = express.Router();
 
 router.get('/', passport.authenticate('discord'));
 
-router.get('/redirect',
+router.get('/redirect', 
     passport.authenticate('discord', {
-        successRedirect: '/',
-        failureRedirect: `/`
-    })
-);
+        successRedirect: '/feed',
+        failureRedirect: '/auth'
+    }
+));
 
 router.get('/logout', (req, res) => {
     req.logout();

@@ -24,27 +24,23 @@ import authRoute from './api/auth.mjs';
 import session from 'express-session';
 
 // Express Setup
+app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 
 // Middleware
+app.use(express.static('public'));
 
-app.use(express.urlencoded({
-    extended: true
+// Strategies
+import Discord from './api/strategies/Discord.mjs';
+
+app.set('trust proxy', 1);
+app.use(session({
+    secret: process.env.PASSPORT_SECRET,
+    saveUninitialized: false,
+    resave: false
 }));
 
 app.use(passport.initialize());
-app.use(express.static('public'));
-app.use('/auth', authRoute);
-
-// Strategies
-import('./api/strategies/Discord.mjs');
-
-app.use(session({
-    secret: process.env.PASSPORT_SECRET,
-    saveUninitialized: true,
-    resave: true
-}));
-
 app.use(passport.session());
 
 // Routes
@@ -80,4 +76,5 @@ app.get('/feed', (req, res) => {
     res.render('feed', { user: req.user });
 });
 
+app.use('/auth', authRoute);
 app.listen(process.env.PORT || 8000, () => console.log(`listening @ http://localhost:${process.env.PORT || 8000}`));
