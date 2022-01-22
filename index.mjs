@@ -1,16 +1,16 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 // Imports
 import express from 'express';
 const app = express();
 
 app.use((req, res, next) => {
-  if (!req.secure && req.get('x-forwarded-proto') !== 'https' && process.env.NODE_ENV !== "development")
+  if (!req.secure && req.get('x-forwarded-proto') !== 'https' && !process.env.INDEV)
     return res.redirect('https://' + req.get('host') + req.url);
 
   next();
 });
-
-import dotenv from 'dotenv';
-dotenv.config();
 
 import passport from 'passport';
 
@@ -52,7 +52,6 @@ app.use(passport.session());
 // Super secret 🤫
 app.get('/', (req, res) => {
     if(req.isAuthenticated()) return res.redirect('/feed');
-    console.log(req.headers.host + req.originalUrl);
 
     res.render('index', {
         inputCode: req.query.inputCode,

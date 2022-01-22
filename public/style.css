@@ -5,7 +5,7 @@
 }
 
 .gradient-text {
-    background-color: white;
+    color: --theme-red;
 
     background-image: var(--theme-gradient);
 
@@ -14,9 +14,9 @@
     
     background-clip: text;
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent; 
+    -webkit-text-fill-color: rgba(255, 255, 255, 0); 
     -moz-background-clip: text;
-    -moz-text-fill-color: transparent;
+    -moz-text-fill-color: rgba(255, 255, 255, 0);
 }
 
 .div-sm {
