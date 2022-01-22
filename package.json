@@ -12,6 +12,7 @@
     "ejs-lint": "^1.2.1",
     "express": "^4.17.2",
     "express-session": "^1.17.2",
+    "express-ssl": "^3.1.0",
     "mongoose": "^6.1.7",
     "passport": "^0.5.2",
     "passport-discord": "https://github.com/tonestrike/passport-discord.git",

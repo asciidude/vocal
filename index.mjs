@@ -1,6 +1,8 @@
 // Imports
 import express from 'express';
+import ssl from 'express-ssl';
 const app = express();
+app.use(ssl());
 
 import dotenv from 'dotenv';
 dotenv.config();
