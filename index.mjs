@@ -3,7 +3,7 @@ import express from 'express';
 const app = express();
 
 app.use((req, res, next) => {
-    if(!req.secure) res.redirect('https://' + req.headers.host + req.originalUrl);
+    if(req.protocol != 'https') res.redirect('https://' + req.headers.host + req.originalUrl);
 });
 
 import dotenv from 'dotenv';
