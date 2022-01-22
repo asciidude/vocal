@@ -21,7 +21,7 @@ passport.deserializeUser(async (_user, done) => {
 const strat = new DiscordStrategy.Strategy({
     clientID: '933926092098637856',
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: '/auth/redirect',
+    callbackURL: 'https://vocal.wtf/auth/redirect',
     scope: ['identify', 'email'],
 }, async (accessToken, refreshToken, profile, done) => {
     const user = await User.findOne({discordId: profile.id});

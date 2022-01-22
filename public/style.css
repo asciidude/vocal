@@ -2,14 +2,12 @@
     --theme-purple: #B24592;
     --theme-red: #F15F79;
     --theme-gradient: linear-gradient(45deg, var(--theme-purple), var(--theme-red));
-    --theme-gradient-webkit: -webkit-linear-gradient(45deg, var(--theme-purple), var(--theme-red));;
 }
 
 .gradient-text {
     background-color: --theme-red;
 
     background-image: var(--theme-gradient);
-    background-image: var(--theme-gradient-webkit);
 
     background-size: 100%;
     background-repeat: repeat;
