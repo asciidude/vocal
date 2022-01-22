@@ -7,16 +7,18 @@
 .gradient-text {
     color: --theme-red;
 
-    background-image: var(--theme-gradient);
-
-    background-size: 100%;
-    background-repeat: repeat;
+    @supports {
+        background-image: var(--theme-gradient);
     
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: rgba(255, 255, 255, 0); 
-    -moz-background-clip: text;
-    -moz-text-fill-color: rgba(255, 255, 255, 0);
+        background-size: 100%;
+        background-repeat: repeat;
+        
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: rgba(255, 255, 255, 0); 
+        -moz-background-clip: text;
+        -moz-text-fill-color: rgba(255, 255, 255, 0);
+    }
 }
 
 .div-sm {
