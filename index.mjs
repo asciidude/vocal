@@ -20,7 +20,7 @@ mongoose.connect(process.env.MONGO_URI, {
     useUnifiedTopology: true
 }).then(() => console.log('Connected to MongoDB!'));
 
-import session from 'express-session';
+import session from 'cookie-session';
 
 // Express Setup
 app.use(express.urlencoded({ extended: true }));
