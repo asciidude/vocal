@@ -6,10 +6,42 @@
         <%- include('./partials/head.ejs') %>
     </head>
     <body class="bg-dark text-white">
-        <div class="vh-100 d-flex flex-column justify-content-center align-items-center">
-            <p><i class="bi bi-soundwave gradient-text display-1"></i></p>
-            <p class="h2 text-center ms-2 me-2 fw-light">🏗️ vocal</p>
-            <p class="text-center ms-2 me-2">🤔 huh, how'd you find this page?</p>
+        <div class="container mb-3" style="max-width: 50rem;">
+            <%- include('./partials/nav.ejs') %>
+            <p class="mt-2 text-center">
+                <i class="bi bi-stars text-warning"></i> This is a work in progress. If you notice any bugs or issues, report them to us!
+            </p>
+
+            <div class="mt-2"></div>
+
+            <div class="input-group mb-3">
+                <input
+                    class="input-gradient-sm rounded-pill form-control text-white shadow-none"
+                    style="background: rgb(25, 25, 25)"
+                    id="postBox"
+                    placeholder="what's up?"
+                >
+
+                <div class="input-group-append">
+                    <button
+                        class="input-group-text rounded-circle input-gradient-sm text-white ms-2"
+                        id="basic-addon2"
+                        style="background: rgb(25, 25, 25)"
+                    >
+                        <i class="bi bi-image-fill p-1"></i>
+                    </button>
+                </div>
+
+                <div class="input-group-append">
+                    <button
+                        class="input-group-text rounded-circle input-gradient-sm text-white ms-2"
+                        id="basic-addon2"
+                        style="background: rgb(25, 25, 25)"
+                    >
+                        <i class="bi bi-send-fill p-1"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </body>
 </html>

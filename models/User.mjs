@@ -12,7 +12,9 @@ const userSchema = new Schema({
     posts: Array,
     likes: Array,
     dislikes: Array,
-    followers: Array
+    followers: Array,
+    following: Array,
+    bio: String
 });
 
 export default model('User', userSchema);

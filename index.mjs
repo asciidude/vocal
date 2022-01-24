@@ -32,6 +32,7 @@ app.use(express.static('public'));
 
 // Strategies
 import Discord from './api/strategies/Discord.mjs';
+import User from './models/User.mjs';
 
 app.set('trust proxy', 1);
 app.use(session({
@@ -74,6 +75,15 @@ app.post('/', (req, res) => {
 app.get('/feed', (req, res) => {
     if(req.isUnauthenticated()) return res.redirect('/');
     res.render('feed', { user: req.user });
+});
+
+app.get('/users/:id', async (req, res) => {
+    if(req.isUnauthenticated()) return res.redirect('/');
+
+    const user = await User.findOne({ id: req.params.id });
+    if(!user) return res.redirect('/feed');
+
+    res.render('user', { user: req.user, profile: user });
 });
 
 app.use('/auth', authRoute);

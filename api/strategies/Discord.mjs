@@ -32,7 +32,7 @@ const strat = new DiscordStrategy.Strategy({
             const _user = await User.create({
                 username: profile.username,
                 discriminator: profile.discriminator,
-                avatar: profile.avatar,
+                avatar: '/images/no-pfp.jpg',
                 language: profile.locale,
                 email: profile.email,
                 discordId: profile.id,
@@ -40,7 +40,8 @@ const strat = new DiscordStrategy.Strategy({
                 posts: [],
                 likes: [],
                 dislikes: [],
-                followers: []
+                followers: [],
+                bio: ''
             });
     
             return done(null, _user);

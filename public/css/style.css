@@ -19,9 +19,21 @@
     -moz-text-fill-color: rgba(255, 255, 255, 0);
 }
 
+.gradient-bg {
+    background: linear-gradient(45deg, #B24592, #F15F79);
+}
+
 .div-sm {
     border: 3px solid var(--theme-red);
     padding-left: 25px;
     padding-right: 25px;
     border-radius: 5px;
+}
+
+.input-gradient-sm {
+    border: 2px solid var(--theme-red);
+}
+
+.dropdown-toggle::after {
+    display: none !important;
 }
