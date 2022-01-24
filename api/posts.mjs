@@ -37,10 +37,12 @@ router.post('/create', async (req, res, next) => {
         createdAt: new Date().toLocaleString('en-US', {timeZone: 'America/New_York'}),
     });
 
-    User.findOneAndUpdate(
-        {id: req.user.id},
-        { $push: { posts: post } }
-    );
+    User.findOne({ id: req.user.id }, (err, user) => {
+        if(err) return res.json({ error: 'failed to create post, could not find user' });
+        user.posts.push(post);
+        user.markModified('posts');
+        user.save();
+    });
 
     res.redirect('/');
     next();
