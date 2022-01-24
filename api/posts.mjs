@@ -37,74 +37,13 @@ router.post('/create', async (req, res, next) => {
         createdAt: new Date().toLocaleString('en-US', {timeZone: 'America/New_York'}),
     });
 
-    User.findOne({ id: req.user.id }, (err, user) => {
-        if(err) return res.json({ error: 'failed to create post, could not find user' });
-        user.posts.push(post);
-        user.markModified('posts');
-        user.save();
-    });
-
-    res.redirect('/');
-    next();
-});
-
-router.post('/:id/remove', async (req, res, next) => {
-    if(req.isUnauthenticated()) return res.redirect('/');
-
-    if(!req.user.posts.indexOf({ id: req.params.id }) > -1) return res.redirect('/');
-
-    Post.findOneAndRemove({ id: req.params.id }, (err, post) => {
-        if(err) return res.json({ error: 'failed to remove post' })
-    });
-
     User.findOneAndUpdate(
         {id: req.user.id},
-        { $pull: { posts: { id: req.params.id } } }
+        { $push: { posts: post } }
     );
 
     res.redirect('/');
     next();
-});
-
-router.post('/:id/like', async(req, res, next) => {
-    if(req.isUnauthenticated()) return res.redirect('/');
-    const post = await Post.findOne({ id: req.params.id })
-    
-    if(req.user.likes.indexOf({ id: req.params.id }) > -1) return res.json({ error: 'you have already liked this post' });
-
-    Post.findOneAndUpdate(
-        {_id: req.params.id},
-        {$inc: { likes: 1 }}
-    ).catch((err) => {
-        console.log(err);
-        res.redirect('/');
-        next();
-    });
-
-    User.findOneAndUpdate(
-        {id: req.user.id},
-        { $push: { likes: post } }
-    );
-});
-
-router.post('/:id/unlike', async(req, res, next) => {
-    if(req.isUnauthenticated()) return res.redirect('/');
-
-    if(!req.user.likes.indexOf({ id: req.params.id }) > -1) return res.json({ error: 'you have not liked this post' });
-
-    Post.findOneAndUpdate(
-        {_id: req.params.id},
-        {$inc: { likes: -1 }}
-    ).catch((err) => {
-        console.log(err);
-        return res.redirect('/');
-        next();
-    });
-
-    User.findOneAndUpdate(
-        {id: req.user.id},
-        { $pull: { likes: { id: req.params.id } } }
-    );
 });
 
 export default router;

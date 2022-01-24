@@ -4,6 +4,10 @@
     --theme-gradient: linear-gradient(45deg, var(--theme-purple), var(--theme-red));
 }
 
+a {
+    text-decoration: none;
+}
+
 .gradient-text {
     background-color: --theme-red;
 
