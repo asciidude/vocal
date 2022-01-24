@@ -14,34 +14,132 @@
 
             <div class="mt-2"></div>
 
-            <div class="input-group mb-3">
-                <input
-                    class="input-gradient-sm rounded-pill form-control text-white shadow-none"
-                    style="background: rgb(25, 25, 25)"
-                    id="postBox"
-                    placeholder="what's up?"
-                >
-
-                <div class="input-group-append">
-                    <button
-                        class="input-group-text rounded-circle input-gradient-sm text-white ms-2"
-                        id="basic-addon2"
+            <form action="/api/posts/create" method="post">
+                <div class="input-group mb-3">
+                    <input
+                        class="input-gradient-sm rounded-pill form-control text-white shadow-none"
                         style="background: rgb(25, 25, 25)"
+                        name="title"
+                        placeholder="give your post a title"
+                        maxlength="60"
+                        required
                     >
-                        <i class="bi bi-image-fill p-1"></i>
-                    </button>
-                </div>
 
-                <div class="input-group-append">
-                    <button
-                        class="input-group-text rounded-circle input-gradient-sm text-white ms-2"
-                        id="basic-addon2"
+                    <input
+                        class="input-group input-gradient-sm rounded-pill form-control text-white shadow-none ms-2"
                         style="background: rgb(25, 25, 25)"
+                        name="content"
+                        placeholder="...now some content :)"
+                        maxlength="615"
+                        required
                     >
-                        <i class="bi bi-send-fill p-1"></i>
-                    </button>
+
+                    <div class="input-group-append">
+                        <button
+                            class="input-group-text rounded-circle input-gradient-sm text-white ms-2"
+                            style="background: rgb(25, 25, 25)"
+                            id="addImage"
+                            type="button"
+                        >
+                            <i class="bi bi-image-fill p-1 m-0"></i>
+                        </button>
+                    </div>
+
+                    <div class="input-group-append">
+                        <button
+                            class="input-group-text rounded-circle input-gradient-sm text-white ms-2"
+                            style="background: rgb(25, 25, 25)"
+                            type="submit"
+                        >
+                            <i class="bi bi-send-fill p-1 m-0"></i>
+                        </button>
+                    </div>
                 </div>
+            </form>
+
+            <div class="row row-cols-1 row-cols-md-2 g-4" data-masonry="{'percentPosition': true}">
+                <% for(const post of posts) { %>
+                    <div class="col">
+                        <div class="card border-0 shadow-sm" style="background: rgb(25, 25, 25);">
+                            <% if(post.imageUrl) { %>
+                                <img src="<%- post.imageUrl %>" alt="post image" class="postTop card-img-top">
+                            <% } %>
+
+                            <div div class="card-body">
+                                <h5 class="card-title mb-1 d-inline"><%- post.title %></h5>
+                                <p class="card-subtitle mb-1 text-muted d-inline float-end mt-0"><%- post.likes %> likes</p>
+
+                                <p class="card-subtitle mb-1 text-muted">
+                                    <a class="gradient-text" href="/users/<%- post.author.id %>">@<%- post.author.username %></a> ︱ <%- post.createdAt %>
+                                </p>
+
+                                <p class="card-text"><%- post.content %></p>
+
+                                <% if(user.likes.indexOf({id: post.id}) > -1) { %>
+                                    <form action="/api/posts/<%- post.id %>/unlike" method="post" class="d-inline me-1">
+                                        <a
+                                            class="text-white text-muted text-decoration-none"
+                                            style="cursor: pointer;"
+                                            onclick="this.parentNode.submit();"
+                                        >
+                                            <i class="bi bi-heart-fill p-1 text-danger"></i> unlike
+                                        </a>
+                                    </form>
+                                <% } else { %>
+                                    <form action="/api/posts/<%- post.id %>/like" method="post" class="d-inline">
+                                        <a
+                                            class="text-white text-muted text-decoration-none"
+                                            style="cursor: pointer;"
+                                            onclick="this.parentNode.submit();"
+                                        >
+                                            <i class="bi bi-heart-fill p-1"></i> like
+                                        </a>
+                                    </form>
+                                <% } %>
+
+                                <% if(user.id == post.author.id) { %>
+                                    <form action="/api/posts/<%- post.id %>/remove" method="post" class="d-inline">
+                                        <a
+                                            class="text-white text-muted text-decoration-none"
+                                            style="cursor: pointer;"
+                                            onclick="this.parentNode.submit();"
+                                        >
+                                            <i class="bi bi-trash-fill p-1"></i> remove
+                                        </a>
+                                    </form>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
             </div>
         </div>
     </body>
 </html>
+
+<script>
+    $('#pfp').on('error', function () {
+        $(this).attr('src', '/images/no-pfp.jpg');
+    });
+
+    $('.postTop').on('error', function () {
+        $(this).attr('src', '/images/no-pfp.jpg');
+    });
+</script>
+
+<script>
+    var $grid = document.querySelector('.row');
+    var msnry = new Masonry($grid, {
+        itemSelector: '.col',
+        percentPosition: true,
+        transitionDuration: 0
+    });
+
+    var $images = $grid.querySelectorAll('.card img');
+    $images.forEach(function (el) {
+        el.addEventListener('load', function () {
+            console.log("Image is loaded: " + el.getAttribute("src"));
+            msnry.layout();
+        });
+    });
+</script>

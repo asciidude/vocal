@@ -8,7 +8,7 @@
     <body class="bg-dark text-white">
         <div class="container mb-3" style="max-width: 50rem;">
             <%- include('./partials/nav.ejs') %>
-            <img 
+            <img
                 src="<%- profile.avatar %>"
                 width=150
                 height=150
@@ -33,7 +33,7 @@
 
                 <div class="text-center mb-1 mt-0">
                     <p class="fw-light text-muted text-break d-inline"><span class="fw-bold"><%- profile.followers.length %></span> followers</p>
-                    <p class="fw-light text-muted text-break d-inline"><span class="fw-bold">2</span> posts</p>
+                    <p class="fw-light text-muted text-break d-inline"><span class="fw-bold"><%- profile.posts.length %></span> posts</p>
                     <p class="fw-light text-muted text-break d-inline"><span class="fw-bold"><%- profile.following.length %></span> following</p>
                 </div>
             <% } %>
@@ -43,50 +43,66 @@
                     follow <%- profile.username %>
                 </button>
             </div>
-            
-            <div class="div-sm mb-3"></div>
 
-            <div class="row row-cols-1 row-cols-md-2 g-4" data-masonry="{'percentPosition': true}">
-                <div class="col">
-                    <div class="card border-0 shadow-sm" style="background: rgb(25, 25, 25);">
-                        <img src="" class="card-img-top postTop" alt="post top">
+            <% if(profile.posts.length != 0) { %>
+                <div class="div-sm mb-3"></div>
 
-                        <div div class="card-body">
-                            <h5 class="card-title">my new pfp</h5>
-                            <p class="card-text">i have a new pfp, thats really cool, right? thanks for coming to my ted talk, lol</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col">
-                    <div class="card border-0 shadow-sm" style="background: rgb(25, 25, 25);">
-                        <div div class="card-body">
-                            <h5 class="card-title">a text post</h5>
-                            <p class="card-text">yeah idk</p>
-                        </div>
-                    </div>
-                </div>
+                <div class="row row-cols-1 row-cols-md-2 g-4" data-masonry="{'percentPosition': true}">
+                    <% for(const post of profile.posts) { %>
+                        <div class="col">
+                            <div class="card border-0 shadow-sm" style="background: rgb(25, 25, 25);">
+                                <% if(post.imageUrl) { %>
+                                    <img src="<%- post.imageUrl %>" alt="post image" class="postTop card-img-top">
+                                <% } %>
 
-                <div class="col">
-                    <div class="card border-0 shadow-sm" style="background: rgb(25, 25, 25);">
-                        <img src="https://www.thesprucepets.com/thmb/hThcFCxT20ql0opGe4B8WGICbc4=/1851x1851/smart/filters:no_upscale()/cat-talk-eyes-553942-hero-df606397b6ff47b19f3ab98589c3e2ce.jpg" class="card-img-top postTop" alt="post top">
+                                <div div class="card-body">
+                                    <h5 class="card-title mb-1"><%- post.title %></h5>
 
-                        <div div class="card-body">
-                            <h5 class="card-title">dog?</h5>
-                            <p class="card-text">no. we love cats! we love cats! we love cats! we love cats! we love cats! we love cats!</p>
+                                    <p class="card-subtitle mb-1 text-muted">
+                                        <%- new Date().toLocaleString("en-US", {timeZone: "America/New_York"}) %>
+                                    </p>
+
+                                    <p class="card-text"><%- post.content %></p>
+
+                                    <% if(user.likes.indexOf({id: post.id}) > -1) { %>
+                                        <form action="/api/posts/<%- post.id %>/unlike" method="post" class="d-inline me-1">
+                                            <a
+                                                class="text-white text-muted text-decoration-none"
+                                                style="cursor: pointer;"
+                                                onclick="this.parentNode.submit();"
+                                            >
+                                                <i class="bi bi-heart-fill p-1 text-danger"></i> unlike
+                                            </a>
+                                        </form>
+                                    <% } else { %>
+                                        <form action="/api/posts/<%- post.id %>/like" method="post" class="d-inline">
+                                            <a
+                                                class="text-white text-muted text-decoration-none"
+                                                style="cursor: pointer;"
+                                                onclick="this.parentNode.submit();"
+                                            >
+                                                <i class="bi bi-heart-fill p-1"></i> like
+                                            </a>
+                                        </form>
+                                    <% } %>
+
+                                    <% if(user.id == post.author.id) { %>
+                                        <form action="/api/posts/<%- post.id %>/remove" method="post" class="d-inline">
+                                            <a
+                                                class="text-white text-muted text-decoration-none"
+                                                style="cursor: pointer;"
+                                                onclick="this.parentNode.submit();"
+                                            >
+                                                <i class="bi bi-trash-fill p-1"></i> remove
+                                            </a>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    <% } %>
                 </div>
-                
-                <div class="col">
-                    <div class="card border-0 shadow-sm" style="background: rgb(25, 25, 25);">
-                        <div div class="card-body">
-                            <h5 class="card-title">a text post</h5>
-                            <p class="card-text">yeah idk</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <% } %>
         </div>
     </body>
 </html>

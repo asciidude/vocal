@@ -11,16 +11,25 @@
 
     background-size: 100%;
     background-repeat: repeat;
-    
+
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: rgba(255, 255, 255, 0); 
     -moz-background-clip: text;
     -moz-text-fill-color: rgba(255, 255, 255, 0);
+
+	animation: gradient 15s ease infinite;
+}
+
+.bi {
+    vertical-align: middle;
+    margin-left: 1px;
+    margin-right: 1px;
 }
 
 .gradient-bg {
-    background: linear-gradient(45deg, #B24592, #F15F79);
+    background: var(--theme-gradient);
+	animation: gradient 15s ease infinite;
 }
 
 .div-sm {
@@ -36,4 +45,16 @@
 
 .dropdown-toggle::after {
     display: none !important;
+}
+
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
 }

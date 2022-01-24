@@ -11,7 +11,6 @@ const userSchema = new Schema({
     createdAt: String,
     posts: Array,
     likes: Array,
-    dislikes: Array,
     followers: Array,
     following: Array,
     bio: String

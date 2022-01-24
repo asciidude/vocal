@@ -3,7 +3,7 @@ import DiscordStrategy from 'passport-discord';
 import passport from 'passport';
 import refresh from 'passport-oauth2-refresh';
 
-import User from '../../models/User.mjs';
+import User from '../../../models/User.mjs';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -27,7 +27,7 @@ const strat = new DiscordStrategy.Strategy({
     try {
         const user = await User.findOne({discordId: profile.id});
         profile.refreshToken = refreshToken;
-        
+
         if(!user) {
             const _user = await User.create({
                 username: profile.username,
@@ -39,11 +39,10 @@ const strat = new DiscordStrategy.Strategy({
                 createdAt: profile.fetchedAt,
                 posts: [],
                 likes: [],
-                dislikes: [],
                 followers: [],
                 bio: ''
             });
-    
+
             return done(null, _user);
         } else {
             return done(null, user);
