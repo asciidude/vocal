@@ -90,6 +90,7 @@ app.get('/users/:id', async (req, res) => {
     if(req.isUnauthenticated()) return res.redirect('/');
 
     const user = await User.findOne({ id: req.params.id });
+    console.log(user)
     if(!user) return res.redirect('/feed');
 
     res.render('user', { user: req.user, profile: user });

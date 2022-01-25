@@ -48,4 +48,8 @@ router.post('/create', async (req, res, next) => {
     next();
 });
 
+router.post('/:id/like', (req, res) => {
+    res.json({likeAmount: 2})
+});
+
 export default router;

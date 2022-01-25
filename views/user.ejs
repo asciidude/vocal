@@ -57,10 +57,7 @@
 
                                 <div div class="card-body">
                                     <h5 class="card-title mb-1"><%- post.title %></h5>
-
-                                    <p class="card-subtitle mb-1 text-muted">
-                                        <%- new Date().toLocaleString("en-US", {timeZone: "America/New_York"}) %>
-                                    </p>
+                                    <p class="card-subtitle mb-1 text-muted"><%- post.createdAt %></p>
 
                                     <p class="card-text"><%- post.content %></p>
 

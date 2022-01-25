@@ -5,7 +5,7 @@
         <title>🏗️ vocal</title>
         <%- include('./partials/head.ejs') %>
     </head>
-    <body class="bg-dark text-white">
+    <body class="text-white bg-dark">
         <div class="container mb-3" style="max-width: 50rem;">
             <%- include('./partials/nav.ejs') %>
             <p class="mt-2 text-center">
@@ -67,7 +67,7 @@
 
                             <div div class="card-body">
                                 <h5 class="card-title mb-1 d-inline"><%- post.title %></h5>
-                                <p class="card-subtitle mb-1 text-muted d-inline float-end mt-0"><%- post.likes %> likes</p>
+                                <p class="card-subtitle mb-1 text-muted d-inline float-end mt-0" id="likes-<%- post.id %>"><%- post.likes %> likes</p>
 
                                 <p class="card-subtitle mb-1 text-muted">
                                     <a class="gradient-text" href="/users/<%- post.author.id %>">@<%- post.author.username %></a> ︱ <%- post.createdAt %>
@@ -76,25 +76,21 @@
                                 <p class="card-text"><%- post.content %></p>
 
                                 <% if(user.likes.indexOf({id: post.id}) > -1) { %>
-                                    <form action="/api/posts/<%- post.id %>/unlike" method="post" class="d-inline me-1">
-                                        <a
-                                            class="text-white text-muted text-decoration-none"
-                                            style="cursor: pointer;"
-                                            onclick="this.parentNode.submit();"
-                                        >
-                                            <i class="bi bi-heart-fill p-1 text-danger"></i> unlike
-                                        </a>
-                                    </form>
+                                    <a
+                                        class="text-white text-muted text-decoration-none"
+                                        style="cursor: pointer;"
+                                        id="unlikeInput<%- post.id %>"
+                                    >
+                                        <i class="bi bi-heart-fill p-1 text-danger"></i> unlike
+                                    </a>
                                 <% } else { %>
-                                    <form action="/api/posts/<%- post.id %>/like" method="post" class="d-inline">
-                                        <a
-                                            class="text-white text-muted text-decoration-none"
-                                            style="cursor: pointer;"
-                                            onclick="this.parentNode.submit();"
-                                        >
-                                            <i class="bi bi-heart-fill p-1"></i> like
-                                        </a>
-                                    </form>
+                                    <a
+                                        class="text-white text-muted text-decoration-none"
+                                        style="cursor: pointer;"
+                                        id="likeInput-<%- post.id %>"
+                                    >
+                                        <i class="bi bi-heart-fill p-1"></i> like
+                                    </a>
                                 <% } %>
 
                                 <% if(user.id == post.author.id) { %>
@@ -111,6 +107,32 @@
                             </div>
                         </div>
                     </div>
+
+                    <script>
+                        $('#likeInput-<%- post.id %>').on('click', function (e) {
+                            e.preventDefault();
+                            $.ajax({
+                                url: '/api/posts/<%- post.id %>/like',
+                                method: 'post',
+                                data: {},
+                                success: (res) => {
+                                    $('#likes-<%- post.id %>').text(`${res.likeAmount} likes`)
+                                }
+                            })
+                        })
+                        
+                        $('#unlikeInput-<%- post.id %>').on('click', function (e) {
+                            e.preventDefault();
+                            $.ajax({
+                                url: '/api/posts/<%- post.id %>/unlike',
+                                method: 'post',
+                                data: {},
+                                success: (res) => {
+                                    $('#likes-<%- post.id %>').text(`${res.likeAmount} likes`)
+                                }
+                            })
+                        })
+                    </script>
                 <% } %>
             </div>
         </div>
