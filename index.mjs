@@ -89,11 +89,10 @@ app.get('/feed', (req, res) => {
 app.get('/users/:id', async (req, res) => {
     if(req.isUnauthenticated()) return res.redirect('/');
 
-    const user = await User.findOne({ id: req.params.id });
-    console.log(user)
-    if(!user) return res.redirect('/feed');
-
-    res.render('user', { user: req.user, profile: user });
+    User.findOne({ _id: req.params.id }, (err, user) => {
+        if(err) return res.redirect('/feed');
+        res.render('user', { user: req.user, profile: user });
+    })
 });
 
 import authRoute from './api/auth/auth.mjs';

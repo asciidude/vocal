@@ -77,30 +77,30 @@
 
                                 <% if(user.likes.indexOf({id: post.id}) > -1) { %>
                                     <a
-                                        class="text-white text-muted text-decoration-none"
+                                        class="text-white text-muted text-decoration-none bi bi-trash-fill bi bi-heart-fill"
                                         style="cursor: pointer;"
-                                        id="unlikeInput<%- post.id %>"
+                                        id="likeInput<%- post.id %>"
                                     >
-                                        <i class="bi bi-heart-fill p-1 text-danger"></i> unlike
+                                        unlike
                                     </a>
                                 <% } else { %>
                                     <a
-                                        class="text-white text-muted text-decoration-none"
+                                        class="text-white text-muted text-decoration-none bi bi-heart-fill"
                                         style="cursor: pointer;"
                                         id="likeInput-<%- post.id %>"
                                     >
-                                        <i class="bi bi-heart-fill p-1"></i> like
+                                        like
                                     </a>
                                 <% } %>
 
                                 <% if(user.id == post.author.id) { %>
                                     <form action="/api/posts/<%- post.id %>/remove" method="post" class="d-inline">
                                         <a
-                                            class="text-white text-muted text-decoration-none"
+                                            class="text-white text-muted text-decoration-none bi bi-trash-fill"
                                             style="cursor: pointer;"
                                             onclick="this.parentNode.submit();"
                                         >
-                                            <i class="bi bi-trash-fill p-1"></i> remove
+                                            remove
                                         </a>
                                     </form>
                                 <% } %>
@@ -116,19 +116,9 @@
                                 method: 'post',
                                 data: {},
                                 success: (res) => {
-                                    $('#likes-<%- post.id %>').text(`${res.likeAmount} likes`)
-                                }
-                            })
-                        })
-                        
-                        $('#unlikeInput-<%- post.id %>').on('click', function (e) {
-                            e.preventDefault();
-                            $.ajax({
-                                url: '/api/posts/<%- post.id %>/unlike',
-                                method: 'post',
-                                data: {},
-                                success: (res) => {
-                                    $('#likes-<%- post.id %>').text(`${res.likeAmount} likes`)
+                                    $('#likes-<%- post.id %>').text(`${res.likeAmount} likes`);
+                                    $('#likeInput-<%- post.id %>').toggleClass('text-danger');
+                                    $('#likeInput-<%- post.id %>').toggleClass('text-muted');
                                 }
                             })
                         })

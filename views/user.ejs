@@ -25,7 +25,7 @@
 
                 <div class="text-center mb-2 mt-0">
                     <p class="fw-light text-muted text-break d-inline"><span class="fw-bold"><%- profile.followers.length %></span> followers</p>
-                    <p class="fw-light text-muted text-break d-inline"><span class="fw-bold">2</span> posts</p>
+                    <p class="fw-light text-muted text-break d-inline"><span class="fw-bold"><%- profile.posts.length %></span> posts</p>
                     <p class="fw-light text-muted text-break d-inline"><span class="fw-bold"><%- profile.following.length %></span> following</p>
                 </div>
             <% } else { %>
@@ -61,8 +61,8 @@
 
                                     <p class="card-text"><%- post.content %></p>
 
-                                    <% if(user.likes.indexOf({id: post.id}) > -1) { %>
-                                        <form action="/api/posts/<%- post.id %>/unlike" method="post" class="d-inline me-1">
+                                    <% if(user.likes.indexOf({id: post._id}) > -1) { %>
+                                        <form action="/api/posts/<%- post._id %>/unlike" method="post" class="d-inline me-1">
                                             <a
                                                 class="text-white text-muted text-decoration-none"
                                                 style="cursor: pointer;"
@@ -72,7 +72,7 @@
                                             </a>
                                         </form>
                                     <% } else { %>
-                                        <form action="/api/posts/<%- post.id %>/like" method="post" class="d-inline">
+                                        <form action="/api/posts/<%- post._id %>/like" method="post" class="d-inline">
                                             <a
                                                 class="text-white text-muted text-decoration-none"
                                                 style="cursor: pointer;"
@@ -84,7 +84,7 @@
                                     <% } %>
 
                                     <% if(user.id == post.author.id) { %>
-                                        <form action="/api/posts/<%- post.id %>/remove" method="post" class="d-inline">
+                                        <form action="/api/posts/<%- post._id %>/remove" method="post" class="d-inline">
                                             <a
                                                 class="text-white text-muted text-decoration-none"
                                                 style="cursor: pointer;"
