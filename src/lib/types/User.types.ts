@@ -1,5 +1,8 @@
-export type UserModelType = {
-    _id: string;
+export type UserModelType = Partial<{
+    _id?: string;
+    createdAt?: string;
+    updatedAt?: string;
+}> & {
     discordId: string;
 
     avatarUrl: string;
@@ -9,14 +12,12 @@ export type UserModelType = {
     bio: string;
     followers: Array<FollowObjectType>;
     following: Array<FollowObjectType>;
-
-    createdAt: string;
-    updatedAt: string;
 }
 
 export type FollowObjectType = {
     _id: string;
     username: string;
+    displayName: string;
     avatarUrl: string;
     discordId: string;
 }
