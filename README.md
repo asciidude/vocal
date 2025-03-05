@@ -1,3 +1,3 @@
 # Vocal
 
-Vocal is a social media website.
+Vocal is a blazingly fast social media website.
