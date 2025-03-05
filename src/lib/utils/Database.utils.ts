@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { type ConnectOptions } from "mongoose";
 import { MONGO_URI, NODE_ENV } from '$env/static/private';
 
 /**
@@ -31,7 +31,10 @@ export const connect = async () => {
         await mongoose.disconnect(); // Disconnect if not already connected
     }
 
-    await mongoose.connect(MONGO_URI);
+    await mongoose.connect(MONGO_URI, {
+        dbName: NODE_ENV === 'production' ? 'production' : 'development'
+    } as ConnectOptions);
+    
     mongoConnection.connection_code = 1;
     console.log('A connection has been established to MongoDB.');
 }
