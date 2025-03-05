@@ -45,4 +45,8 @@ export const GET = async() => {
             }
         ]
     }] as Array<UserModelType>);
+
+    return json({
+        message: 'The database has been seeded.'
+    })
 }
