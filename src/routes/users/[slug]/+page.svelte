@@ -1,6 +1,5 @@
 <script lang="ts">
     import type { UserModelType } from "$lib/types/User.types";
-    import type { PageServerData } from "./$types";
 
     export let data: { user: UserModelType };
     let user = data.user;

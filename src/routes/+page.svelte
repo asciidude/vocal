@@ -1,5 +1,5 @@
 <script lang="ts">
-    import TriangleAlert from "lucide-svelte/icons/triangle-alert";
+    import { LogIn, TriangleAlert } from "lucide-svelte";
     import * as Alert from "$lib/components/ui/alert";
     import { Button } from "$lib/components/ui/button";
 </script>
@@ -11,9 +11,14 @@
         <img src="images/vocal-icon-circle.png" alt="Vocal Icon" class="w-40">
         <p class="mt-5 text-xl italic">Welcome to <span class="text-vocal font-bold">Vocal</span></p>
         
-        <Button class="bg-black hover:bg-gray-800 w-40 mt-5" href='/api/auth/discord'>Login with Discord</Button>
+        <Button class="bg-black/55 hover:bg-gray-800/55 w-40 mt-5" href='/api/auth/discord'>
+            <span>Login with Discord</span>
+            <span><LogIn class="ml-2 inline-block size-5" color="#fff" /></span>
+        </Button>
 
-        <Alert.Root class="mt-5 bg-black border-none text-white max-[392px]:w-40">
+        <!-- TODO: Come up with a system better than this. User roles might come in handy -->
+         
+        <Alert.Root class="mt-5 bg-black/55 border-none text-white max-[392px]:w-40">
             <TriangleAlert class="h-4 w-4" color="#fff" />
             <Alert.Title>You are required to have the beta tester role.</Alert.Title>
             <Alert.Description class="italic">
@@ -22,6 +27,8 @@
         </Alert.Root>
 
         <p class="mt-5 italic underline text-vocal"><a href="#">Join our Discord</a></p>
+
+        <!-- TODO: Add footer with privacy policy and terms of service -->
     </div>
 </main>
 

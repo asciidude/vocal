@@ -1,7 +1,7 @@
 import { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, NODE_ENV, PORT, JWT_SECRET } from "$env/static/private";
 import { UserModel } from "$lib/models/User.model";
 import type { UserModelType } from "$lib/types/User.types";
-import { error, json, type Cookies } from "@sveltejs/kit";
+import { error, json, redirect, type Cookies } from "@sveltejs/kit";
 import jwt from 'jsonwebtoken';
 
 export const GET = async({ url, cookies }: { url: URL, cookies: Cookies }) => {
@@ -53,5 +53,5 @@ export const GET = async({ url, cookies }: { url: URL, cookies: Cookies }) => {
         maxAge: ((60 * 60) * 24) * 7 // 1w
     });
 
-    return json({ user });
+    throw redirect(302, '/posts')
 }
