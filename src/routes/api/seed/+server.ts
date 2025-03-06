@@ -1,8 +1,11 @@
-import { json } from "@sveltejs/kit";
+import { error, json } from "@sveltejs/kit";
 import { UserModel } from "$lib/models/User.model";
 import type { UserModelType } from "$lib/types/User.types";
+import { NODE_ENV } from "$env/static/private";
 
 export const GET = async() => {
+    if(NODE_ENV === 'production') throw error(403, 'Forbidden');
+
     await UserModel.deleteMany();
     await UserModel.insertMany([{
         discordId: '735281668566286417',
