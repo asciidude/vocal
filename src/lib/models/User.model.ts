@@ -1,5 +1,5 @@
 import { Model, model, Schema } from "mongoose";
-import type { UserModelType, FollowObjectType } from "$lib/types/User.types";
+import type { UserModelType } from "$lib/types/User.types";
 
 const UserSchema = new Schema({
     discordId: String,
@@ -9,8 +9,7 @@ const UserSchema = new Schema({
     displayName: String,
 
     bio: String,
-    followers: Array<FollowObjectType>,
-    following: Array<FollowObjectType>
+    roles: []
 }, { timestamps: true })
 
 export const UserModel: Model<UserModelType> = model<UserModelType>('User', UserSchema);

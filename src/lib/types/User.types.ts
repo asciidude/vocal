@@ -10,16 +10,12 @@ export type UserModelType = Partial<{
     displayName?: string | null;
 
     bio: string;
-    followers: Array<FollowObjectType>;
-    following: Array<FollowObjectType>;
-
-    roles: Array<String>; // beta, mod, admin, superadmin
+    roles: Array<UserRoles>
 }
 
-export type FollowObjectType = {
-    _id: string;
-    username: string;
-    displayName: string;
-    avatarUrl: string;
-    discordId: string;
+export enum UserRoles {
+    Beta = 'beta',
+    Mod = 'moderator',
+    Admin = 'administrator',
+    SuperAdmin = 'superadmin'
 }
