@@ -11,7 +11,7 @@
         <img src="images/vocal-icon-circle.png" alt="Vocal Icon" class="w-40">
         <p class="mt-5 text-xl italic">Welcome to <span class="text-vocal font-bold">Vocal</span></p>
         
-        <Button class="bg-black hover:bg-gray-800 w-40 mt-5" href="/login">Login with Discord</Button>
+        <Button class="bg-black hover:bg-gray-800 w-40 mt-5" href='/api/auth/discord'>Login with Discord</Button>
 
         <Alert.Root class="mt-5 bg-black border-none text-white max-[392px]:w-40">
             <TriangleAlert class="h-4 w-4" color="#fff" />

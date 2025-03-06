@@ -7,11 +7,13 @@ export type UserModelType = Partial<{
 
     avatarUrl: string;
     username: string;
-    displayName: string;
+    displayName?: string | null;
 
     bio: string;
     followers: Array<FollowObjectType>;
     following: Array<FollowObjectType>;
+
+    roles: Array<String>; // beta, mod, admin, superadmin
 }
 
 export type FollowObjectType = {
