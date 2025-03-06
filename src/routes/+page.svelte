@@ -17,9 +17,11 @@
             <TriangleAlert class="h-4 w-4" color="#fff" />
             <Alert.Title>You are required to have the beta tester role.</Alert.Title>
             <Alert.Description class="italic">
-                Don't have one? Ask a friend who does and see if they have any spare keys!
+                Don't have a role? Ask a friend who does and see if they have any spare keys!
             </Alert.Description>
         </Alert.Root>
+
+        <p class="mt-5 italic underline text-vocal"><a href="#">Join our Discord</a></p>
     </div>
 </main>
 
