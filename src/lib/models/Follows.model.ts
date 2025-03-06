@@ -1,9 +1,9 @@
 import { Model, model, Schema } from "mongoose";
-import type { FollowsModelType } from "$lib/types/Follows.type";
+import type { FollowsType } from "$lib/types/Follows.type";
 
 const UserSchema = new Schema({
     followerId: String,
     followingId: String
 }, { timestamps: true })
 
-export const UserModel: Model<FollowsModelType> = model<FollowsModelType>('Follows', UserSchema);
+export const UserModel: Model<FollowsType> = model<FollowsType>('Follows', UserSchema);

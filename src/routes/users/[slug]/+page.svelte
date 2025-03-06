@@ -1,7 +1,7 @@
 <script lang="ts">
-    import type { UserModelType } from "$lib/types/User.types";
+    import type { UserType } from "$lib/types/User.types";
 
-    export let data: { user: UserModelType };
+    export let data: { user: UserType };
     let user = data.user;
 </script>
 

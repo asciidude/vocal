@@ -1,6 +1,6 @@
 import { error, json } from "@sveltejs/kit";
 import { UserModel } from "$lib/models/User.model";
-import { UserRoles, type UserModelType } from "$lib/types/User.types";
+import { UserRoles, type UserType } from "$lib/types/User.types";
 import { NODE_ENV } from "$env/static/private";
 
 export const GET = async() => {
@@ -17,7 +17,7 @@ export const GET = async() => {
 
         bio: 'fartstream69',
         roles: [UserRoles.Beta]
-    } as UserModelType,
+    } as UserType,
     {
 
         discordId: '1045326923775103027',
@@ -29,7 +29,7 @@ export const GET = async() => {
 
         bio: 'epic fartstreams69',
         roles: [UserRoles.Beta]
-    } as UserModelType]);
+    } as UserType]);
 
     return json({
         message: 'The database has been seeded.'

@@ -1,6 +1,6 @@
 import { error, type Load } from '@sveltejs/kit';
 import { UserModel } from '$lib/models/User.model';
-import type { UserModelType } from '$lib/types/User.types';
+import type { UserType } from '$lib/types/User.types';
 
 export const load: Load = async({ params }) => {
     const userId = params.slug;
@@ -13,6 +13,6 @@ export const load: Load = async({ params }) => {
         user: {
             ...user.toObject(),
             _id: user._id.toString()
-        } as UserModelType
+        } as UserType
     }
 }

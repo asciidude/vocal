@@ -1,6 +1,6 @@
 import { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, NODE_ENV, PORT, JWT_SECRET } from "$env/static/private";
 import { UserModel } from "$lib/models/User.model";
-import type { UserModelType } from "$lib/types/User.types";
+import type { UserType } from "$lib/types/User.types";
 import { error, json, redirect, type Cookies } from "@sveltejs/kit";
 import jwt from 'jsonwebtoken';
 
@@ -37,7 +37,7 @@ export const GET = async({ url, cookies }: { url: URL, cookies: Cookies }) => {
             avatarUrl: userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/1.png?size=4096',
             username: userData.username,
             displayName: userData.global_name
-        } as UserModelType,
+        } as UserType,
         { upsert: true }
     );
 
