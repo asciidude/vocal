@@ -1,6 +1,6 @@
 import type { Schema } from "mongoose"
 
-export type FollowsModelType = {
+export type FollowsType = {
     followerId: Schema.Types.ObjectId,
     followingId: Schema.Types.ObjectId
 }

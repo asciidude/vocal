@@ -1,5 +1,8 @@
 import type { Schema } from "mongoose"
+import type { AttachmentType } from "./Attachment.type"
 
-export type PostModelType = {
-    author: Schema.Types.ObjectId
+export type PostType = {
+    author: Schema.Types.ObjectId,
+    content: String,
+    attachments: AttachmentType
 }

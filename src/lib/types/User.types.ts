@@ -1,4 +1,4 @@
-export type UserModelType = Partial<{
+export type UserType = Partial<{
     _id?: string;
     createdAt?: string;
     updatedAt?: string;
