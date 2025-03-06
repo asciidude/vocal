@@ -30,7 +30,7 @@ export const GET = async({ url, cookies }: { url: URL, cookies: Cookies }) => {
 
     const userData = await userResponse.json();
 
-    const user = await UserModel.updateOne(
+    await UserModel.updateOne(
         { discordId: userData.id },
         {
             discordId: userData.id,
