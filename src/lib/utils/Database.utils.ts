@@ -31,7 +31,7 @@ export const connect = async () => {
         await mongoose.disconnect(); // Disconnect if not already connected
     }
 
-    await mongoose.connect(MONGO_URI, {
+    await mongoose.connect(encodeURI(MONGO_URI), {
         dbName: NODE_ENV === 'production' ? 'production' : 'development'
     } as ConnectOptions);
     
