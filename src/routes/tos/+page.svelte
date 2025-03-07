@@ -29,7 +29,7 @@
     <div class="vocal-tos max-w-4xl mx-auto bg-black/40 backdrop-blur-sm border border-vocal_strong/50 rounded-lg p-6 md:p-8 shadow-lg shadow-[#4D3882]/20">
       <section class="mb-8 border-l-4 border-vocal_lightest pl-4">
         <p class="text-lg">
-          Welcome to Vocal! By using our platform, you agree to follow these terms and conditions. Violation of these terms may result in account restrictions or termination.
+          Welcome to Vocal! By using our platform, you agree to follow these terms and conditions. Violation of these terms may result in disciplinary action being taken.
         </p>
       </section>
 
@@ -136,9 +136,21 @@
       
       <section class="mb-8">
         <h2 class="text-2xl font-bold text-vocal_lightest border-b border-vocal_strong pb-2 mb-4">
+          Contact
+        </h2>
+        <p>You may contact the site owner through the following means:</p>
+        <ul class="list-disc pl-5 space-y-2 mt-2">
+          <li>Discord: @asciidude <span class="font-bold">OR</span> the <a href="https://discord.gg/4Rwr2pu2bW" class="text-vocal_light">Vocal Discord server</a></li>
+          <li>Email: <a href="mailto:asciidude0@gmail.com" class="text-vocal_light">asciidude0@gmail.com</a></li>
+        </ul>
+      </section>
+      
+      <section class="mb-8">
+        <h2 class="text-2xl font-bold text-vocal_lightest border-b border-vocal_strong pb-2 mb-4">
           Terms Updates
         </h2>
         <p>These terms may be updated periodically. Continued use of Vocal after changes constitutes acceptance of the updated terms.</p>
+        <p class="text-gray-500 mt-2 italic">Last Updated: 03-07-2025</p>
       </section>
       
       <div class="retro-decoration my-8"></div>
@@ -172,8 +184,8 @@
       45deg,
       transparent,
       transparent 10px,
-      #7056AE20 10px,
-      #7056AE20 20px
+      #c3aaff20 10px,
+      #c3aaff20 20px
     );
   }
   
