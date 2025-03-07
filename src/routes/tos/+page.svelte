@@ -17,6 +17,8 @@
     });
 </script>
   
+<title>Vocal - Terms of Service</title>
+
 <div class="min-h-screen bg-black text-gray-200 font-mono">
   <div class="main-tos container mx-auto py-12 px-4 md:px-6">
     <header class="text-center mb-12 relative">
@@ -88,6 +90,7 @@
                 </ul>
               </li>
               <li>No impersonation or misrepresentation of yourself or others.</li>
+              <li>To review our privacy policy, please <a href="/privacy" class="text-vocal_light">click here</a>.</li>
             </ul>
           </div>
           
