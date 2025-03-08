@@ -19,8 +19,8 @@ export const load: Load = async({ params }) => {
     const followers = await FollowModel.countDocuments({ followingId: user._id });
     const following = await FollowModel.countDocuments({ followerId: user._id });
 
-    const posts = await PostModel.find({ author: user._id }, { _id: true });
-    const userReplies = await ReplyModel.find({ author: user._id }, { _id: true });
+    const posts = await PostModel.find({ author: user._id });
+    const userReplies = await ReplyModel.find({ author: user._id });
 
     let postLikes = [];
     const likePromises = posts.map(post => LikeModel.find({ parent_post: post._id }));

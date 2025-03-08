@@ -106,7 +106,7 @@
         </div>
 
         <div class="posts-section">
-            <h2>Posts/Replies</h2>
+            <h2>Posts</h2>
             
             {#if posts && (posts.posts.length > 0 || posts.userReplies.length > 0)}
                 {#each posts.posts as post}
