@@ -6,6 +6,8 @@ export type UserType = Partial<{
     discordId: string;
 
     avatarUrl: string;
+    bannerUrl: string;
+
     username: string;
     displayName?: string | null;
 
@@ -14,8 +16,7 @@ export type UserType = Partial<{
 }
 
 export enum UserRoles {
-    Beta = 'beta',
-    Mod = 'moderator',
-    Admin = 'administrator',
-    SuperAdmin = 'superadmin'
+    Beta = 'beta',            // Beta Testers
+    Admin = 'administrator',  // Site Admin
+    SuperAdmin = 'superadmin' // Site Owner
 }

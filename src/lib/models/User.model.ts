@@ -8,6 +8,8 @@ const UserSchema = new Schema({
     },
 
     avatarUrl: String,
+    bannerUrl: String, // url or "none"
+    
     username: {
         type: String,
         required: true
