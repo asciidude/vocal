@@ -21,6 +21,7 @@
             </Alert.Description>
         </Alert.Root>
 
+        <!-- svelte-ignore a11y_invalid_attribute -->
         <p class="mt-5 italic underline text-vocal"><a href="#">Join our Discord</a></p>
     </div>
 </main>

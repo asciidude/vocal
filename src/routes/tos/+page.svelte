@@ -29,7 +29,7 @@
     <div class="vocal-tos max-w-4xl mx-auto bg-black/40 backdrop-blur-sm border border-[#7056AE]/50 rounded-lg p-6 md:p-8 shadow-lg shadow-[#4D3882]/20">
       <section class="mb-8 border-l-4 border-[#A481F6] pl-4">
         <p class="text-lg">
-          Welcome to Vocal! By using our platform, you agree to follow these terms and conditions. Violation of these terms may result in account restrictions or termination.
+          Welcome to <b>Vocal!</b> By using our platform, you agree to follow these terms and conditions. Violation of these terms may result in account restrictions or termination.
         </p>
       </section>
 
@@ -91,7 +91,7 @@
           <div class="rule-item bg-[#4D3882]/10 border-l-2 border-[#9F7DEF] p-4 rounded">
             <h3 class="text-xl font-semibold text-[#9F7DEF] mb-2">Platform Security</h3>
             <ul class="list-disc pl-5 space-y-2">
-              <li>Report any and all bugs, vulnerabilities, or exploits to the Vocal development team</li>
+              <li>Report any and all bugs, vulnerabilities, or exploits to the <b>Vocal</b> development team</li>
             </ul>
           </div>
         </div>
