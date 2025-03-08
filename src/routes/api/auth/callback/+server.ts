@@ -1,7 +1,7 @@
 import { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, NODE_ENV, PORT, JWT_SECRET } from "$env/static/private";
 import { UserModel } from "$lib/models/User.model";
-import type { UserType } from "$lib/types/User.types";
-import { error, json, redirect, type Cookies } from "@sveltejs/kit";
+import { UserRoles, type UserType } from "$lib/types/User.types";
+import { error, redirect, type Cookies } from "@sveltejs/kit";
 import jwt from 'jsonwebtoken';
 
 export const GET = async({ url, cookies }: { url: URL, cookies: Cookies }) => {
@@ -36,10 +36,17 @@ export const GET = async({ url, cookies }: { url: URL, cookies: Cookies }) => {
             discordId: userData.id,
             avatarUrl: userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/1.png?size=4096',
             username: userData.username,
-            displayName: userData.global_name
+            displayName: userData.global_name,
+            bio: '',
+            roles: []
         } as UserType,
         { upsert: true }
     );
+
+    // BETA ONLY FEATURE //
+    const user = await UserModel.findOne({ discordId: userData.id });
+    if(!user!.roles.includes(UserRoles.Beta)) throw error(403, 'Your account does not have beta access yet.');
+    // BETA ONLY FEATURE //
 
     const jwtToken = jwt.sign({
         id: userData.id,
