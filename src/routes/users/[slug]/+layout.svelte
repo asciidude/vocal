@@ -18,7 +18,7 @@
     </style>
 </svelte:head>
   
-<div class="flex min-h-screen bg-[#36393f]">
+<div class="flex min-h-screen bg-[#1a1a1a]">
     <LeftSideBar />
     
     <main class="flex-1 overflow-y-auto">
