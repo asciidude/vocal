@@ -20,7 +20,7 @@
     ];
 </script>
   
-<aside class="w-64 h-screen bg-[#1a1a1a] border-r border-[#202225] p-4 flex flex-col overflow-y-auto font-['Press_Start_2P', 'VT323', 'Minecraft', monospace] text-sm">
+<aside class="w-64 h-screen bg-vocal_darkest border-r border-[#202225] p-4 flex flex-col overflow-y-auto font-['Press_Start_2P', 'VT323', 'Minecraft', monospace] text-sm">
     <!-- Search Bar -->
     <div class="mb-6">
       <div class="relative">

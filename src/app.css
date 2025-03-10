@@ -1,7 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+@font-face {
+  font-family: 'Minecraft';
+  src: url('https://cdnjs.cloudflare.com/ajax/libs/minecraft-font/1.0.0/minecraft.ttf') format('truetype');
+}
+
+body {
+  font-family: 'Press Start 2P', 'VT323', 'Minecraft', monospace;
+  image-rendering: pixelated;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
     --background: 0 0% 100%;

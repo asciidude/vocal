@@ -43,7 +43,7 @@ export const GET = async({ url, cookies }: { url: URL, cookies: Cookies }) => {
             bio: user?.bio || '',
             roles: user?.roles || []
         } as UserType,
-        { upsert: true }
+        { new: true, upsert: true }
     );
 
     // BETA ONLY FEATURE //
@@ -62,5 +62,5 @@ export const GET = async({ url, cookies }: { url: URL, cookies: Cookies }) => {
         maxAge: ((60 * 60) * 24) * 7 // 1w
     });
 
-    throw redirect(302, '/posts')
+    throw redirect(302, '/posts');
 }

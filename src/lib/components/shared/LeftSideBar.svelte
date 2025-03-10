@@ -27,7 +27,7 @@
     const isActive = (href: string) => currentPath === href;
 </script>
   
-<aside class="w-64 h-screen bg-[#1a1a1a] border-l border-[#202225] p-4 flex flex-col font-['Press_Start_2P', 'VT323', 'Minecraft', monospace] text-sm">
+<aside class="w-64 h-screen bg-[#110b13] border-l border-[#202225] p-4 flex flex-col text-sm">
     <div class="mb-6">
       <h2 class="text-lg font-bold text-white tracking-wider">VOCAL</h2>
       <p class="text-xs text-purple-300 mt-2">Connect with your community</p>

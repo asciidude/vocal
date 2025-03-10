@@ -20,6 +20,7 @@ const config: Config = {
 				vocal_medium: '#9072d7',
 				vocal_strong: '#7056ae',
 				vocal_strongest: '#7056ae',
+				vocal_darkest: '#110b13', // use for bg
 
 				border: "hsl(var(--border) / <alpha-value>)",
 				input: "hsl(var(--input) / <alpha-value>)",

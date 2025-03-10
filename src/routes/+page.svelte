@@ -9,22 +9,22 @@
 <main class="background">
     <div class="h-screen flex flex-col items-center justify-center text-center text-white w-96 mx-auto">
         <img src="images/vocal-icon-circle.png" alt="Vocal Icon" class="w-40">
-        <p class="mt-5 text-xl italic">Welcome to <span class="text-vocal_light font-bold">Vocal</span></p>
+        <p class="mt-5 text-xl">Welcome to <span class="text-vocal_light font-bold">Vocal</span></p>
         
-        <Button class="bg-black/55 hover:bg-gray-800/55 w-40 mt-5" href='/api/auth/discord'>
-            <span>Login with Discord</span>
+        <Button class="bg-black/55 hover:bg-gray-800/55 w-50 mt-5" href='/api/auth/discord'>
+            <span class="text-[10px]">Login with Discord</span>
             <span><LogIn class="ml-2 inline-block size-5" color="#fff" /></span>
         </Button>
          
         <Alert.Root class="mt-5 bg-black/55 border-none text-white max-[392px]:w-40">
             <TriangleAlert class="h-4 w-4" color="#fff" />
-            <Alert.Title>Account approval required</Alert.Title>
-            <Alert.Description class="italic">
+            <Alert.Title class="text-[12px] font-bold">Account approval required</Alert.Title>
+            <Alert.Description class="italic text-[10px]">
                 As Vocal is still in beta, your account must be approved by a superadmin. Ask through Discord!
             </Alert.Description>
         </Alert.Root>
 
-        <p class="mt-5 italic underline text-vocal"><a href="https://discord.gg/4Rwr2pu2bW">Join our Discord</a></p>
+        <p class="mt-5 italic underline text-vocal_light text-[10px]"><a href="https://discord.gg/4Rwr2pu2bW">Join our Discord</a></p>
 
         <!-- TODO: Add footer with privacy policy and terms of service -->
     </div>

@@ -4,7 +4,14 @@
     import * as Tooltip from "$lib/components/ui/tooltip/index.js";
     import * as Tabs from "$lib/components/ui/tabs";
     import { UserRoles } from "$lib/types/User.types";
-    import { Ellipsis, HardHat, Heart, Shield, Sparkle, MessageCircle } from "lucide-svelte";
+    import {
+        Ellipsis,
+        HardHat,
+        Heart,
+        Shield,
+        Sparkle,
+        MessageCircle,
+    } from "lucide-svelte";
     import * as Avatar from "$lib/components/ui/avatar";
 
     export let data: PageData;
@@ -12,54 +19,65 @@
     let posts = data.posts;
     let follow = {
         ing: data.following,
-        ers: data.followers
+        ers: data.followers,
     };
 
-    let activeTab = "posts";
+    let activeTab: string = "posts";
 
     const roleData = {
         [UserRoles.SuperAdmin]: {
             icon: Sparkle,
-            description: 'This user is a site owner'
+            description: "This user is a site owner",
+            priority: 3
         },
         [UserRoles.Admin]: {
             icon: Shield,
-            description: 'This user is a site admin'
+            description: "This user is a site admin",
+            priority: 2
         },
         [UserRoles.Beta]: {
             icon: HardHat,
-            description: 'This user is a beta tester'
-        }
+            description: "This user is a beta tester",
+            priority: 1
+        },
     };
 
     function getInitials(name: string) {
         if (!name) return "?";
-        return name.split(' ').map(word => word[0]).join('').toUpperCase();
+        return name
+            .split(" ")
+            .map((word) => word[0])
+            .join("")
+            .toUpperCase();
     }
 
     onMount(() => {
-        if(
-            user.bannerUrl
-            && user.bannerUrl !== 'none'
-        ) {
-            const header = document.getElementById('profileHeader');
+        if (user.bannerUrl && user.bannerUrl !== "none") {
+            const header = document.getElementById("profileHeader");
 
             header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${user.bannerUrl})`;
-            header!.style.backgroundRepeat = 'no-repeat';
-            header!.style.backgroundPosition = 'center';
-            header!.style.backgroundSize = 'cover';
+            header!.style.backgroundRepeat = "no-repeat";
+            header!.style.backgroundPosition = "center";
+            header!.style.backgroundSize = "cover";
         }
     });
 </script>
 
 <title>Vocal - {user.displayName || user.username}</title>
 
-<div class="profile-container mt-5">
-    <div class="profile-header mt-5 rounded-t-lg" style="background-color: #7056AE;" id="profileHeader">
+<div class="profile-container m-5">
+    <div
+        class="profile-header mt-5 rounded-t-lg bg-[#7056AE]"
+        id="profileHeader"
+    >
         <div class="profile-header-content">
             <div class="avatar-container">
                 {#if user.avatarUrl}
-                    <img src={user.avatarUrl} alt="{user.displayName || user.username}'s avatar" class="avatar" />
+                    <img
+                        src={user.avatarUrl}
+                        alt="{user.displayName || user.username}'s avatar"
+                        class="avatar"
+                    />
                 {:else}
                     <div class="avatar-fallback">
                         {getInitials(user.displayName || user.username)}
@@ -70,11 +88,14 @@
                 <div class="name-and-badges">
                     <h1>{user.displayName || user.username}</h1>
                     <div class="badges">
-                        {#each user.roles as role}
+                        {#each user.roles.sort((a, b) => roleData[a].priority - roleData[b].priority) as role}
                             {#if roleData[role]}
                                 <Tooltip.Root>
                                     <Tooltip.Trigger>
-                                        <svelte:component this={roleData[role].icon} class="w-4 h-4 mr-1" />
+                                        <svelte:component
+                                            this={roleData[role].icon}
+                                            class="w-5 h-5 mr-1 mt-1"
+                                        />
                                     </Tooltip.Trigger>
                                     <Tooltip.Content>
                                         <p>{roleData[role].description}</p>
@@ -85,17 +106,23 @@
                     </div>
                 </div>
                 <p class="username">@{user.username}</p>
-                
+
                 {#if user.bio}
                     <p class="bio">{user.bio}</p>
                 {/if}
-                
+
                 <div class="follow-stats">
-                    <a href="/users/{user.discordId}/following" class="follow-stat">
+                    <a
+                        href="/users/{user.discordId}/following"
+                        class="follow-stat"
+                    >
                         <span class="follow-count">{follow.ing}</span>
                         <span class="follow-label">Following</span>
                     </a>
-                    <a href="/users/{user.discordId}/followers" class="follow-stat">
+                    <a
+                        href="/users/{user.discordId}/followers"
+                        class="follow-stat"
+                    >
                         <span class="follow-count">{follow.ers}</span>
                         <span class="follow-label">Followers</span>
                     </a>
@@ -103,30 +130,57 @@
             </div>
         </div>
     </div>
-    
-    <div class="profile-content">
-        <Tabs.Root value={activeTab} onValueChange={(value) => activeTab = value} class="w-full">
-            <Tabs.List class="profile-tabs">
-                <Tabs.Trigger value="posts" class="tab-trigger">Posts</Tabs.Trigger>
-                <Tabs.Trigger value="replies" class="tab-trigger">Replies</Tabs.Trigger>
-                <Tabs.Trigger value="media" class="tab-trigger">Media</Tabs.Trigger>
-                <Tabs.Trigger value="likes" class="tab-trigger">Likes</Tabs.Trigger>
+
+    <div class="profile-content pb-5">
+        <Tabs.Root
+            value={activeTab}
+            onValueChange={(value) => (activeTab = value!.toString())}
+            class="w-full"
+        >
+            <Tabs.List class="flex justify-center items-center bg-transparent p-5 pt-7">
+                <Tabs.Trigger value="posts" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white">
+                    Posts
+                </Tabs.Trigger>
+                <Tabs.Trigger value="replies" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white">
+                    Replies
+                </Tabs.Trigger>
+                <Tabs.Trigger value="media" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white">
+                    Media
+                </Tabs.Trigger>
+                <Tabs.Trigger value="likes" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white">
+                    Likes
+                </Tabs.Trigger>
             </Tabs.List>
-            
+
             <Tabs.Content value="posts" class="tab-content">
                 {#if posts && posts.posts.length > 0}
                     {#each posts.posts as post}
                         <div class="post">
                             <div class="post-header">
                                 <div class="left-section">
-                                    <a href="/users/{user._id}" class="flex items-center gap-2">
+                                    <a
+                                        href="/users/{user._id}"
+                                        class="flex items-center gap-2"
+                                    >
                                         <Avatar.Root>
-                                            <Avatar.Image src="{user.avatarUrl}" alt="@{user.username}" />
-                                            <Avatar.Fallback>{getInitials(user.displayName || user.username)}</Avatar.Fallback>
+                                            <Avatar.Image
+                                                src={user.avatarUrl}
+                                                alt="@{user.username}"
+                                            />
+                                            <Avatar.Fallback
+                                                >{getInitials(
+                                                    user.displayName ||
+                                                        user.username,
+                                                )}</Avatar.Fallback
+                                            >
                                         </Avatar.Root>
                                         <div class="username">
-                                            <p class="leading-none">{user.displayName}</p>
-                                            <p class="text-sm text-gray-400">@{user.username}</p>
+                                            <p class="leading-none">
+                                                {user.displayName}
+                                            </p>
+                                            <p class="text-sm text-gray-400">
+                                                @{user.username}
+                                            </p>
                                         </div>
                                     </a>
                                 </div>
@@ -135,14 +189,30 @@
                             <div class="post-content">
                                 <p>{post.content}</p>
                             </div>
-                            <div class="post-bottom flex items-center gap-5 mt-2">
-                                <a class="flex items-center gap-2 mt-2" href="/posts/{post._id}">
+                            <div
+                                class="post-bottom flex items-center gap-5 mt-2"
+                            >
+                                <a
+                                    class="flex items-center gap-2 mt-2"
+                                    href="/posts/{post._id}"
+                                >
                                     <MessageCircle class="size-4" />
-                                    <p class="size-5">{posts.postReplies.filter(p => p.parent_post === post._id).length}</p>
+                                    <p class="size-5">
+                                        {posts.postReplies.filter(
+                                            (p) => p.parent_post === post._id,
+                                        ).length}
+                                    </p>
                                 </a>
-                                <a class="flex items-center gap-2 mt-2" href="/api/like/{post._id}">
+                                <a
+                                    class="flex items-center gap-2 mt-2"
+                                    href="/api/like/{post._id}"
+                                >
                                     <Heart class="size-4" />
-                                    <p class="size-5">{posts.likes.filter(p => p.parent_post === post._id).length}</p>
+                                    <p class="size-5">
+                                        {posts.likes.filter(
+                                            (p) => p.parent_post === post._id,
+                                        ).length}
+                                    </p>
                                 </a>
                             </div>
                         </div>
@@ -151,21 +221,36 @@
                     <p class="empty">No posts yet.</p>
                 {/if}
             </Tabs.Content>
-            
+
             <Tabs.Content value="replies" class="tab-content">
                 {#if posts && posts.userReplies.length > 0}
                     {#each posts.userReplies as reply}
                         <div class="post">
                             <div class="post-header">
                                 <div class="left-section">
-                                    <a href="/users/{user._id}" class="flex items-center gap-2">
+                                    <a
+                                        href="/users/{user._id}"
+                                        class="flex items-center gap-2"
+                                    >
                                         <Avatar.Root>
-                                            <Avatar.Image src="{user.avatarUrl}" alt="@{user.username}" />
-                                            <Avatar.Fallback>{getInitials(user.displayName || user.username)}</Avatar.Fallback>
+                                            <Avatar.Image
+                                                src={user.avatarUrl}
+                                                alt="@{user.username}"
+                                            />
+                                            <Avatar.Fallback
+                                                >{getInitials(
+                                                    user.displayName ||
+                                                        user.username,
+                                                )}</Avatar.Fallback
+                                            >
                                         </Avatar.Root>
                                         <div class="username">
-                                            <p class="leading-none">{user.displayName}</p>
-                                            <p class="text-sm text-gray-400">@{user.username}</p>
+                                            <p class="leading-none">
+                                                {user.displayName}
+                                            </p>
+                                            <p class="text-sm text-gray-400">
+                                                @{user.username}
+                                            </p>
                                         </div>
                                     </a>
                                 </div>
@@ -174,8 +259,13 @@
                             <div class="post-content">
                                 <p>{reply.content}</p>
                             </div>
-                            <div class="post-bottom flex items-center gap-5 mt-2">
-                                <a class="flex items-center gap-2 mt-2" href="/posts/{reply.parent_post}">
+                            <div
+                                class="post-bottom flex items-center gap-5 mt-2"
+                            >
+                                <a
+                                    class="flex items-center gap-2 mt-2"
+                                    href="/posts/{reply.parent_post}"
+                                >
                                     <MessageCircle class="size-4" />
                                     <p class="size-5">View Thread</p>
                                 </a>
@@ -186,11 +276,11 @@
                     <p class="empty">No replies yet.</p>
                 {/if}
             </Tabs.Content>
-            
+
             <Tabs.Content value="media" class="tab-content">
                 <p class="empty">Media posts will be displayed here.</p>
             </Tabs.Content>
-            
+
             <Tabs.Content value="likes" class="tab-content">
                 <p class="empty">Liked posts will be displayed here.</p>
             </Tabs.Content>
@@ -200,43 +290,42 @@
 
 <style>
     .profile-container {
-        max-width: 800px;
+        max-width: 70rem;
         margin: 0 auto;
-        background-color: #1a1a1a;
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
     }
-    
+
     .profile-header {
         padding: 2rem;
         position: relative;
     }
-    
+
     .profile-header-content {
         display: flex;
         align-items: flex-start;
         gap: 1.5rem;
     }
-    
+
     .avatar-container {
         flex-shrink: 0;
     }
-    
+
     .avatar {
         width: 120px;
         height: 120px;
         border-radius: 50%;
-        border: 4px solid #A481F6;
+        border: 4px solid #a481f6;
         object-fit: cover;
     }
-    
+
     .avatar-fallback {
         width: 120px;
         height: 120px;
         border-radius: 50%;
-        border: 4px solid #A481F6;
-        background-color: #4D3882;
+        border: 4px solid #a481f6;
+        background-color: #4d3882;
         color: white;
         display: flex;
         align-items: center;
@@ -244,47 +333,46 @@
         font-size: 2.5rem;
         font-weight: bold;
     }
-    
+
     .user-info {
         color: white;
         flex-grow: 1;
     }
-    
+
     .name-and-badges {
         display: flex;
         align-items: center;
         gap: 0.5rem;
         margin-bottom: 0.25rem;
     }
-    
+
     .user-info h1 {
         font-size: 2rem;
         margin: 0;
         font-weight: 700;
     }
-    
+
     .badges {
         display: flex;
         align-items: center;
     }
-    
+
     .username {
-        color: #A481F6;
+        color: #a481f6;
         font-size: 1.1rem;
         margin-bottom: 1rem;
     }
-    
+
     .bio {
-        margin-bottom: 1rem;
-        line-height: 1.4;
+        line-height: 1;
     }
-    
+
     .follow-stats {
         display: flex;
         gap: 1.5rem;
         margin-top: 1rem;
     }
-    
+
     .follow-stat {
         display: flex;
         align-items: center;
@@ -292,127 +380,97 @@
         color: white;
         text-decoration: none;
     }
-    
+
     .follow-count {
         font-weight: 600;
     }
-    
+
     .follow-label {
         color: rgba(255, 255, 255, 0.7);
     }
-    
+
     .profile-content {
-        background-color: #242424;
+        background-color: rgb(23, 21, 29);
         color: white;
     }
-    
-    .profile-tabs {
-        display: flex;
-        background-color: #2a2a2a;
-        border-bottom: 1px solid #3a3a3a;
-    }
-    
-    .tab-trigger {
-        padding: 1rem 1.5rem;
-        font-weight: 500;
-        color: #ccc;
-        background: transparent;
-        border: none;
-        border-bottom: 2px solid transparent;
-        cursor: pointer;
-        position: relative;
-    }
-    
-    .tab-trigger[data-state="active"] {
-        color: #A481F6;
-        border-bottom: 2px solid #A481F6;
-    }
-    
-    .tab-content {
-        padding: 1.5rem;
-    }
-    
+
     .post {
-        margin-bottom: 1.5rem;
-        background-color: #2a2a2a;
+        background-color: rgb(19, 15, 27);
         border-radius: 8px;
         padding: 1.25rem;
-        border: 1px solid #3a3a3a;
+        border: 1px solid rgb(45, 34, 73);
         transition: border-color 0.2s;
+        margin-right: 2rem;
+        margin-left: 2rem;
     }
-    
+
     .post:hover {
-        border-color: #9072D7;
+        border-color: #9072d7;
     }
-    
+
     .post-content {
         text-align: left;
         margin: 0.75rem 0;
     }
-    
+
     .post-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
         width: 100%;
     }
-    
+
     .post-header .left-section {
         display: flex;
         align-items: center;
         gap: 10px;
     }
-    
+
     .post-header .username {
         margin-bottom: 0;
     }
-    
+
     .post-bottom {
         border-top: 1px solid #3a3a3a;
         padding-top: 0.75rem;
     }
-    
+
     .post-bottom a {
         color: #ccc;
         text-decoration: none;
         transition: color 0.2s;
     }
-    
+
     .post-bottom a:hover {
-        color: #A481F6;
+        color: #a481f6;
     }
-    
+
     .empty {
         color: #888;
         font-style: italic;
         padding: 2rem 0;
         text-align: center;
     }
-    
+
     @media (max-width: 600px) {
         .profile-header-content {
             flex-direction: column;
             align-items: center;
             text-align: center;
         }
-        
+
         .avatar-container {
             margin-bottom: 1rem;
         }
-        
+
         .user-info {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        
+
         .follow-stats {
             justify-content: center;
-        }
-        
-        .tab-trigger {
-            padding: 0.75rem;
-            font-size: 0.9rem;
         }
     }
 </style>
