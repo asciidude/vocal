@@ -263,11 +263,11 @@
                                 class="post-bottom flex items-center gap-5 mt-2"
                             >
                                 <a
-                                    class="flex items-center gap-2 mt-2"
+                                    class="flex items-center gap-3 mt-2"
                                     href="/posts/{reply.parent_post}"
                                 >
                                     <MessageCircle class="size-4" />
-                                    <p class="size-5">View Thread</p>
+                                    <p class="size-5 text-sm whitespace-nowrap">View Thread</p>
                                 </a>
                             </div>
                         </div>
