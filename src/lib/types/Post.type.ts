@@ -1,7 +1,7 @@
 import type { Schema } from "mongoose"
 import type { AttachmentType } from "./Attachment.type"
 
-export type PostType = {
+export interface PostType {
     _id: Schema.Types.ObjectId,
     author: Schema.Types.ObjectId,
     content: String,

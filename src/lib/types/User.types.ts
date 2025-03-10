@@ -1,8 +1,8 @@
-export type UserType = Partial<{
+export interface UserType {
     _id?: string;
     createdAt?: string;
     updatedAt?: string;
-}> & {
+
     discordId: string;
 
     avatarUrl: string;

@@ -1,4 +1,4 @@
-export type AttachmentType = {
+export interface AttachmentType {
     url: string;
     type: AttachmentTypes;
     name?: string;

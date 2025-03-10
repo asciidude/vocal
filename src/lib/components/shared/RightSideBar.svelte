@@ -1,7 +1,8 @@
 <script lang="ts">
     import { Search, TrendingUp, Users } from 'lucide-svelte';
     import { Input } from "$lib/components/ui/input";
-    
+    import { twemojify } from 'svelte-twemojify';
+
     // Sample trending hashtags data
     const trendingHashtags = [
       { id: 1, tag: '#svelte', count: 2543 },
@@ -13,10 +14,10 @@
     
     // Sample followers data
     const followers = [
-      { id: 1, name: 'Jane Cooper', username: '@jane_cooper', avatar: '/api/placeholder/30/30' },
-      { id: 2, name: 'Alex Morgan', username: '@alex_m', avatar: '/api/placeholder/30/30' },
-      { id: 3, name: 'Devon Lane', username: '@devonlane', avatar: '/api/placeholder/30/30' },
-      { id: 4, name: 'Robert Fox', username: '@robfox', avatar: '/api/placeholder/30/30' }
+      { id: 1, name: 'Jane Cooper', username: '@jane_cooper', avatar: '/images/stock/woman-1.jpg' },
+      { id: 2, name: 'Alex Morgan', username: '@alex_m', avatar: '/images/stock/random-1.jpg' },
+      { id: 3, name: 'Devon Lane', username: '@devonlane', avatar: '/images/stock/man-1.jpg' },
+      { id: 4, name: 'Robert Fox', username: '@robfox', avatar: '/images/stock/man-2.jpg' }
     ];
 </script>
   
@@ -61,7 +62,7 @@
             <a href={`/profile/${follower.username}`} class="flex items-center gap-3">
               <img src={follower.avatar} alt={follower.name} class="h-8 w-8 rounded-sm ring-2 ring-purple-600" />
               <div>
-                <p class="font-medium text-white">{follower.name}</p>
+                <p class="font-medium text-white" use:twemojify>{follower.name}</p>
                 <p class="text-xs text-purple-300">{follower.username}</p>
               </div>
             </a>

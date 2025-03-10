@@ -10,6 +10,7 @@
       TrendingUp, 
       LogOut 
     } from 'lucide-svelte';
+    import { twemojify } from 'svelte-twemojify';
    
     const navItems = [
       { icon: Home, label: 'Home', href: '/' },
@@ -23,7 +24,8 @@
     ];
   
     let currentPath = '/';
-  
+    export let user: { displayName: string, username: string, avatarUrl: string } | null = null;
+
     const isActive = (href: string) => currentPath === href;
 </script>
   
@@ -49,10 +51,10 @@
  
     <div class="mt-auto pt-4 border-t border-[#202225]">
       <div class="flex items-center gap-3 p-3">
-        <img src="/api/placeholder/40/40" alt="User Profile" class="h-10 w-10 rounded-sm ring-2 ring-purple-500" />
+        <img src="{user?.avatarUrl}" alt="AV" class="h-10 w-10 rounded-sm ring-2 ring-purple-500" />
         <div>
-          <p class="font-medium text-white">Your Name</p>
-          <p class="text-xs text-purple-300">@username</p>
+          <p class="font-medium text-white" use:twemojify>{user?.displayName || ''}</p>
+          <p class="text-xs text-purple-300">@{user?.username || null}</p>
         </div>
       </div>
 

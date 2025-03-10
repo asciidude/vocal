@@ -1,6 +1,6 @@
 import type { Schema } from "mongoose"
 
-export type FollowType = {
+export interface FollowType {
     followerId: Schema.Types.ObjectId,
     followingId: Schema.Types.ObjectId
 }
