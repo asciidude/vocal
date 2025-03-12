@@ -30,6 +30,7 @@
     "vite": "^6.0.0"
   },
   "dependencies": {
+    "@icons-pack/svelte-simple-icons": "^5.0.0",
     "@tailwindcss/vite": "^4.0.9",
     "@types/jsonwebtoken": "^9.0.9",
     "jsonwebtoken": "^9.0.2",

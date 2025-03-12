@@ -14,11 +14,10 @@
     };
   
     const friendsList = [
-      { id: 0, name: 'Sarah Johnson', status: 'online', lastSeen: 'now', avatar: null, unread: 3 },
-      { id: 1, name: 'Michael Chen', status: 'online', lastSeen: 'now', avatar: null, unread: 0 },
-      { id: 2, name: 'Priya Patel', status: 'offline', lastSeen: '3h ago', avatar: null, unread: 0 },
-      { id: 3, name: 'James Wilson', status: 'offline', lastSeen: '1d ago', avatar: null, unread: 5 },
-      { id: 4, name: 'Olivia Martinez', status: 'offline', lastSeen: '2d ago', avatar: null, unread: 0 }
+      { id: 0, name: 'Jane Cooper', status: 'online', lastSeen: 'now', avatar: '/images/stock/woman-1.jpg', unread: 3 },
+      { id: 1, name: 'Alex Morgan', status: 'online', lastSeen: 'now', avatar: '/images/stock/random-1.jpg', unread: 0 },
+      { id: 2, name: 'Devon Lane', status: 'offline', lastSeen: '3h ago', avatar: '/images/stock/man-1.jpg', unread: 0 },
+      { id: 3, name: 'Robert Fox', status: 'offline', lastSeen: '1d ago', avatar: '/images/stock/man-2.jpg', unread: 5 }
     ];
   
     const messages = [
@@ -42,11 +41,17 @@
         handleSendMessage();
       }
     }
+
+    const currentFriend = () => {
+      return friendsList[activeChat];
+    }
 </script>
   
-<div class="flex h-screen bg-[#110b13] text-gray-800">
+<title>Vocal - Messages</title>
+
+<div class="flex h-screen bg-vocal_darkest text-gray-800">
     <!-- Sidebar - Friends List -->
-    <div class="w-1/4 border-r border-gray-200 flex flex-col" style="background-color: #110b13;">
+    <div class="w-1/4 border-none flex flex-col bg-vocal_darkest">
       <div class="p-4" style="background-color: {retro.purple.main}">
         <h1 class="text-xl font-bold text-white flex items-center gap-2">
           <MessageSquare size={20} />
@@ -59,9 +64,9 @@
           <input 
             type="text" 
             placeholder="Search conversations..." 
-            class="w-full p-2 pl-8 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-300"
+            class="w-full p-2 pl-8 rounded-lg border focus:outline-none focus:ring-2 border-vocal_strong focus:ring-vocal_strongest placeholder-gray-500 text-black"
           />
-          <Search size={18} class="absolute left-2 top-3 text-gray-400" />
+          <Search size={18} class="absolute left-2 top-3 text-gray-500" />
         </div>
       </div>
       
@@ -70,7 +75,7 @@
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <div 
-            class="flex items-center p-3 cursor-pointer hover:bg-gray-100 relative {activeChat === friend.id ? 'bg-purple-50 border-l-4 border-purple-500' : ''}"
+            class="flex items-center p-3 cursor-pointer hover:bg-vocal_lightest relative {activeChat === friend.id ? 'bg-vocal_lightest border-l-4 border-purple-500' : ''}"
             on:click={() => activeChat = friend.id}
           >
             <div class="relative mr-3">
@@ -84,13 +89,13 @@
               <div class="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white {friend.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}"></div>
             </div>
             <div class="flex-grow">
-              <h3 class="font-semibold">{friend.name}</h3>
-              <p class="text-sm text-gray-500">
+              <h3 class="font-semibold text-white">{friend.name}</h3>
+              <p class="text-sm text-gray-300">
                 {friend.status === 'online' ? 'Online' : `Last seen ${friend.lastSeen}`}
               </p>
             </div>
             {#if friend.unread > 0}
-              <div class="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs">
+              <div class="w-5 h-5 rounded-full bg-red-500 p-2 flex items-center justify-center text-white text-[8px]">
                 {friend.unread}
               </div>
             {/if}
@@ -101,17 +106,21 @@
     
     <!-- Main Chat Area -->
     <div class="flex-grow flex flex-col">
-      <div class="p-4 border-b border-gray-200 flex items-center justify-between shadow-sm">
+      <div class="p-4 border-vocal_strongest flex items-center justify-between shadow-sm">
         <div class="flex items-center">
           <div class="relative mr-3">
-            <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: {retro.purple.light}">
-              <User size={20} class="text-white" />
-            </div>
-            <div class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white bg-green-500"></div>
+            {#if currentFriend().avatar}
+              <img src={currentFriend().avatar} alt={currentFriend().avatar} class="w-12 h-12 rounded-full" />
+            {:else}
+              <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: {retro.purple.light}">
+                <User size={20} class="text-white" />
+              </div>
+            {/if}
+            <div class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white {currentFriend()?.status === 'online' ? 'bg-green-500' : 'bg-gray-400' }"></div>
           </div>
           <div>
-            <h2 class="font-bold">{friendsList[activeChat]?.name || 'Select a chat'}</h2>
-            <p class="text-xs text-gray-500">{friendsList[activeChat]?.status === 'online' ? 'Online' : `Last seen ${friendsList[activeChat]?.lastSeen}`}</p>
+            <h2 class="font-bold text-white">{currentFriend()?.name || 'Select a chat'}</h2>
+            <p class="text-xs text-gray-300">{currentFriend()?.status === 'online' ? 'Online' : `Last seen ${currentFriend()?.lastSeen}`}</p>
           </div>
         </div>
         <div class="flex items-center space-x-3">
@@ -127,7 +136,7 @@
         </div>
       </div>
       
-      <div class="flex-grow p-4 overflow-y-auto bg-gradient-to-b from-purple-50 to-white">
+      <div class="flex-grow p-4 overflow-y-auto bg-vocal_darkest">
         <div class="space-y-3">
           {#each messages as msg}
             <div 
@@ -149,22 +158,22 @@
         </div>
       </div>
       
-      <div class="p-3 border-t border-gray-200">
-        <div class="flex items-center bg-[#110b13] rounded-lg border border-gray-300 overflow-hidden">
+      <div class="p-3">
+        <div class="flex items-center bg-vocal_darkest rounded-lg overflow-hidden">
           <input
             type="text"
             bind:value={message}
             placeholder="Type a message..."
-            class="flex-grow p-3 focus:outline-none"
+            class="flex-grow p-3 focus:outline-none placeholder-gray-500"
             on:keypress={handleKeyPress}
           />
           <button 
             on:click={handleSendMessage}
-            class="p-3 text-white rounded-r-lg"
+            class="p-3 text-white rounded-r-lg cursor-pointer"
             style="background-color: {retro.purple.main}"
             disabled={!message.trim()}
           >
-            <Send size={20} />
+            <Send size={25} />
           </button>
         </div>
       </div>
