@@ -9,6 +9,10 @@ import type { ReplyType } from '$lib/types/Reply.type';
 import { LikeModel } from '$lib/models/Like.model';
 import type { LikeType } from '$lib/types/Like.type';
 
+const parseAndStringify = (data: any) => {
+    return JSON.parse(JSON.stringify(data));
+}
+
 export const load: Load = async({ params }) => {
     const userId = params.slug;
     if(!userId) throw error(400, 'Bad Request');
@@ -43,10 +47,10 @@ export const load: Load = async({ params }) => {
         } as UserType,
         followers, following,
         posts: {
-            posts: JSON.parse(JSON.stringify(posts)) as Array<PostType>,
-            postReplies: JSON.parse(JSON.stringify(postReplies)) as Array<ReplyType>,
-            userReplies: JSON.parse(JSON.stringify(userReplies)) as Array<ReplyType>,
-            likes: JSON.parse(JSON.stringify(postLikes)) as Array<LikeType>
+            posts: parseAndStringify(posts) as Array<PostType>,
+            postReplies: parseAndStringify(postReplies) as Array<ReplyType>,
+            userReplies: parseAndStringify(userReplies) as Array<ReplyType>,
+            likes: parseAndStringify(postLikes) as Array<LikeType>
         }
     }
 }

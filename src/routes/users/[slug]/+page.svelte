@@ -13,18 +13,17 @@
         MessageCircle,
     } from "lucide-svelte";
     import * as Avatar from "$lib/components/ui/avatar";
-    import Router, { navigate } from '../../lib/components/shared/Router.svelte';
-
+  
     export let data: PageData;
-    let user = data.user;
-    let posts = data.posts;
-    let follow = {
-        ing: data.following,
-        ers: data.followers,
+  
+    $: user = data?.user;
+    $: posts = data?.posts;
+    $: follow = {
+        ing: data?.following || 0,
+        ers: data?.followers || 0,
     };
-
     let activeTab: string = "posts";
-
+  
     const roleData = {
         [UserRoles.SuperAdmin]: {
             icon: Sparkle,
@@ -42,7 +41,7 @@
             priority: 1
         },
     };
-
+  
     function getInitials(name: string) {
         if (!name) return "?";
         return name
@@ -51,11 +50,10 @@
             .join("")
             .toUpperCase();
     }
-
+  
     onMount(() => {
         if (user.bannerUrl && user.bannerUrl !== "none") {
             const header = document.getElementById("profileHeader");
-
             header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${user.bannerUrl})`;
             header!.style.backgroundRepeat = "no-repeat";
             header!.style.backgroundPosition = "center";
@@ -63,9 +61,8 @@
         }
     });
 </script>
-
+  
 <title>Vocal - {user.displayName || user.username}</title>
-<Router />
 
 <div class="profile-container m-5">
     <div

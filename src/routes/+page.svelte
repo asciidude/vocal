@@ -2,18 +2,14 @@
   import { 
     Users, Shield, Lock, Globe,
     Server, MessageCircle, Share2, Code,
-    RefreshCw, Network, Bell, ListChecks,
-    Key, UserPlus, Zap
+    RefreshCw, Bell, ListChecks,
+    Key, UserPlus
   } from 'lucide-svelte';
 
-  import {
-    SiDiscord, SiX, SiGithub
-  } from '@icons-pack/svelte-simple-icons';
-  import Router, { navigate } from '../../lib/components/shared/Router.svelte';
+  import { SiDiscord, SiGithub, SiBluesky } from '@icons-pack/svelte-simple-icons';
 </script>
   
 <title>Vocal - Home</title>
-<Router />
 
 <div class="min-h-screen bg-black text-white">
   <header class="py-8 border-b border-purple-600 bg-black relative overflow-hidden">
@@ -295,14 +291,14 @@
               A decentralized social platform built for privacy and meaningful connections.
             </p>
             <div class="flex space-x-4">
-              <a href="https://x.com/" class="text-gray-400 hover:text-purple-400">
-                <SiX />
+              <a href="https://bsky.app/" class="text-gray-400 hover:text-purple-400">
+                <SiBluesky title="Bluesky" />
               </a>
-              <a href="https://github.com/" class="text-gray-400 hover:text-purple-400">
-                <SiGithub />
+              <a href="https://github.com/asciidude/vocal" class="text-gray-400 hover:text-purple-400">
+                <SiGithub title="GitHub" />
               </a>
               <a href="https://discord.gg/2KtnzEGpSt" class="text-gray-400 hover:text-purple-400">
-                <SiDiscord />
+                <SiDiscord title="Discord" />
               </a>
             </div>
           </div>

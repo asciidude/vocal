@@ -1,3 +1,8 @@
 <script lang="ts">
-    export let user: { displayName: string, username: string, avatarUrl: string } | null = null;
+    import type { PostType } from "$lib/types/Post.type";
+    import type { UserType } from "$lib/types/User.types";
+
+    export let post: PostType | null = null;
+    export let postAuthor: UserType | null = null;
 </script>
+

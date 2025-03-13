@@ -141,10 +141,10 @@
         <h2 class="text-2xl font-bold text-vocal_lightest border-b border-vocal_strong pb-2 mb-4">
           Contact
         </h2>
-        <p>You may contact the site owner through the following means:</p>
+        <p>You may contact the site owner(s) through the following means:</p>
         <ul class="list-disc pl-5 space-y-2 mt-2">
-          <li>Discord: @asciidude <span class="font-bold">OR</span> the <a href="https://discord.gg/4Rwr2pu2bW" class="text-vocal_light">Vocal Discord server</a></li>
-          <li>Email: <a href="mailto:asciidude0@gmail.com" class="text-vocal_light">asciidude0@gmail.com</a></li>
+          <li>Discord: the <a href="https://discord.gg/4Rwr2pu2bW" class="text-vocal_light">Vocal Discord server</a></li>
+          <li>Email: <a href="mailto:vocalcommunications@gmail.com" class="text-vocal_light">vocalcommunications@gmail.com</a></li>
         </ul>
       </section>
       
