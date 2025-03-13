@@ -11,6 +11,8 @@
     TrendingUp, 
     LogOut 
   } from 'lucide-svelte';
+    import { getImage } from 'src/lib/utils/Cache.util';
+    import { onMount } from 'svelte';
   import { twemojify } from 'svelte-twemojify';
   import { derived } from 'svelte/store';
 
@@ -27,12 +29,17 @@
 
   export let user: { displayName: string, username: string, avatarUrl: string } | null = null;
 
-  // Use derived store to get the current path
   const currentPath = derived(page, $page => $page.url.pathname);
 
   const isActive = (href: string) => {
-    return $currentPath === href; // Use the derived store here
+    return $currentPath === href;
   };
+
+  let avatarSrc = '';
+
+  onMount(async () => {
+      avatarSrc = await getImage(user?.avatarUrl);
+  });
 </script>
 
 <aside class="w-72 h-screen bg-[#110b13] border-l border-[#202225] p-4 flex flex-col text-sm">
@@ -57,7 +64,7 @@
 
   <div class="mt-auto pt-4 border-t border-[#202225]">
     <div class="flex items-center gap-3 p-3">
-      <img src="{user?.avatarUrl}" alt="AV" class="h-10 w-10 rounded-sm ring-2 ring-purple-500" />
+      <img src="{avatarSrc}" alt="AV" class="h-10 w-10 rounded-sm ring-2 ring-purple-500" />
       <div>
         <p class="font-medium text-white" use:twemojify>{user?.displayName || ''}</p>
         <p class="text-xs text-purple-300">@{user?.username || null}</p>

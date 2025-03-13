@@ -340,58 +340,7 @@
         background-color: rgb(23, 21, 29);
         color: white;
     }
-
-    .post {
-        background-color: rgb(19, 15, 27);
-        border-radius: 8px;
-        padding: 1.25rem;
-        border: 1px solid rgb(45, 34, 73);
-        transition: border-color 0.2s;
-        margin-right: 2rem;
-        margin-left: 2rem;
-    }
-
-    .post:hover {
-        border-color: #9072d7;
-    }
-
-    .post-content {
-        text-align: left;
-        margin: 0.75rem 0;
-    }
-
-    .post-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-    }
-
-    .post-header .left-section {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .post-header .username {
-        margin-bottom: 0;
-    }
-
-    .post-bottom {
-        border-top: 1px solid #3a3a3a;
-        padding-top: 0.75rem;
-    }
-
-    .post-bottom a {
-        color: #ccc;
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-
-    .post-bottom a:hover {
-        color: #a481f6;
-    }
-
+    
     .empty {
         color: #888;
         font-style: italic;
