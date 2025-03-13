@@ -20,6 +20,7 @@
     export let post: PostType | null = null;
     export let postAuthor: UserType | null = null;
     export let postLikes: Number = 0;
+    export let postReplies: Number = 0;
 
     let avatarSrc = '';
 
@@ -59,7 +60,7 @@
         <a class="flex items-center gap-2 mt-2" href="/posts/{post?._id}">
             <MessageCircle class="size-4" />
             <p class="size-5">
-                {postLikes}
+                {postReplies}
             </p>
         </a>
         <a class="flex items-center gap-2 mt-2" href="/api/like/{post?._id}">
