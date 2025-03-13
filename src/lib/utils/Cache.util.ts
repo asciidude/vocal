@@ -1,4 +1,8 @@
 export async function getImageFromIndexedDB(url: string): Promise<string | null> {
+    if (typeof window === 'undefined') {
+        return null; // Return null if running server-side
+    }
+
     return new Promise((resolve, reject) => {
         const request = indexedDB.open('ImageCache', 1);
 
@@ -33,6 +37,10 @@ export async function getImageFromIndexedDB(url: string): Promise<string | null>
 }
 
 export async function saveImageToIndexedDB(url: string, base64Image: string): Promise<void> {
+    if (typeof window === 'undefined') {
+        return; // Skip if running server-side
+    }
+
     return new Promise((resolve, reject) => {
         const request = indexedDB.open('ImageCache', 1);
 
@@ -63,6 +71,10 @@ export async function saveImageToIndexedDB(url: string, base64Image: string): Pr
 }
 
 export async function getImage(url: string): Promise<string> {
+    if (typeof window === 'undefined') {
+        return '';
+    }
+
     const cachedImage = await getImageFromIndexedDB(url);
 
     if (cachedImage) {
@@ -82,4 +94,4 @@ export async function getImage(url: string): Promise<string> {
             reader.readAsDataURL(blob);
         });
     }
-}  
+}

@@ -13,7 +13,10 @@
         MessageCircle,
     } from "lucide-svelte";
     import * as Avatar from "$lib/components/ui/avatar";
-    import { getImage } from "src/lib/utils/Cache.util";
+    import { getImage } from "$lib/utils/Cache.util";
+
+    import Post from "$lib/components/shared/Post.svelte";
+    import Reply from "$lib/components/shared/Reply.svelte";
   
     export let data: PageData;
   
@@ -59,13 +62,11 @@
         avatarSrc = await getImage(data.user.avatarUrl);
         bannerSrc = await getImage(data.user.bannerUrl);
 
-        if (user.bannerUrl && user.bannerUrl !== "none") {
-            const header = document.getElementById("profileHeader");
-            header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${bannerSrc})`;
-            header!.style.backgroundRepeat = "no-repeat";
-            header!.style.backgroundPosition = "center";
-            header!.style.backgroundSize = "cover";
-        }
+        const header = document.getElementById("profileHeader");
+        header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${bannerSrc})`;
+        header!.style.backgroundRepeat = "no-repeat";
+        header!.style.backgroundPosition = "center";
+        header!.style.backgroundSize = "cover";
     });
 </script>
   
@@ -161,67 +162,7 @@
             <Tabs.Content value="posts" class="tab-content">
                 {#if posts && posts.posts.length > 0}
                     {#each posts.posts as post}
-                        <div class="post">
-                            <div class="post-header">
-                                <div class="left-section">
-                                    <a
-                                        href="/users/{user._id}"
-                                        class="flex items-center gap-2"
-                                    >
-                                        <Avatar.Root>
-                                            <Avatar.Image
-                                                src={user.avatarUrl}
-                                                alt="@{user.username}"
-                                            />
-                                            <Avatar.Fallback
-                                                >{getInitials(
-                                                    user.displayName ||
-                                                        user.username,
-                                                )}</Avatar.Fallback
-                                            >
-                                        </Avatar.Root>
-                                        <div class="username">
-                                            <p class="leading-none">
-                                                {user.displayName}
-                                            </p>
-                                            <p class="text-sm text-gray-400">
-                                                @{user.username}
-                                            </p>
-                                        </div>
-                                    </a>
-                                </div>
-                                <Ellipsis class="size-5" />
-                            </div>
-                            <div class="post-content">
-                                <p>{post.content}</p>
-                            </div>
-                            <div
-                                class="post-bottom flex items-center gap-5 mt-2"
-                            >
-                                <a
-                                    class="flex items-center gap-2 mt-2"
-                                    href="/posts/{post._id}"
-                                >
-                                    <MessageCircle class="size-4" />
-                                    <p class="size-5">
-                                        {posts.postReplies.filter(
-                                            (p) => p.parent_post === post._id,
-                                        ).length}
-                                    </p>
-                                </a>
-                                <a
-                                    class="flex items-center gap-2 mt-2"
-                                    href="/api/like/{post._id}"
-                                >
-                                    <Heart class="size-4" />
-                                    <p class="size-5">
-                                        {posts.likes.filter(
-                                            (p) => p.parent_post === post._id,
-                                        ).length}
-                                    </p>
-                                </a>
-                            </div>
-                        </div>
+                        <Post {post} postAuthor={user} postLikes={posts.postReplies.filter((p) => p.parent_post === post._id).length} />
                     {/each}
                 {:else}
                     <p class="empty">No posts yet.</p>
