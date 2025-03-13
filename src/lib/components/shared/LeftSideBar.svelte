@@ -15,7 +15,7 @@
   import { derived } from 'svelte/store';
 
   const navItems = [
-    { icon: Home, label: 'Home', href: '/' },
+    { icon: Home, label: 'Home', href: '/home' },
     { icon: User, label: 'Profile', href: '/profile' },
     { icon: MessageSquare, label: 'Messages', href: '/messages' },
     { icon: Bell, label: 'Notifications', href: '/notifications' },

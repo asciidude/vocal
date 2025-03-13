@@ -1,20 +1,22 @@
 <script>
-    import { 
-      Users, Shield, Lock, Globe,
-      Server, MessageCircle, Share2, Code,
-      RefreshCw, Network, Bell, ListChecks,
-      Key, UserPlus, Zap
-      } from 'lucide-svelte';
+  import { 
+    Users, Shield, Lock, Globe,
+    Server, MessageCircle, Share2, Code,
+    RefreshCw, Network, Bell, ListChecks,
+    Key, UserPlus, Zap
+  } from 'lucide-svelte';
 
-      import {
-        SiDiscord, SiX, SiGithub
-      } from '@icons-pack/svelte-simple-icons';
+  import {
+    SiDiscord, SiX, SiGithub
+  } from '@icons-pack/svelte-simple-icons';
+  import Router, { navigate } from '../../lib/components/shared/Router.svelte';
 </script>
   
 <title>Vocal - Home</title>
+<Router />
 
-  <div class="min-h-screen bg-black text-white">
-    <header class="py-8 border-b border-purple-600 bg-black relative overflow-hidden">
+<div class="min-h-screen bg-black text-white">
+  <header class="py-8 border-b border-purple-600 bg-black relative overflow-hidden">
       <div class="absolute top-0 left-0 right-0 h-1 bg-purple-600 shadow-[0_0_15px_5px_rgba(168,85,247,0.5)]"></div>
       <div class="absolute -top-20 left-1/2 transform -translate-x-1/2 w-64 h-64 bg-purple-600 rounded-full opacity-10 blur-3xl"></div>
       
@@ -34,9 +36,9 @@
           </nav>
         </div>
       </div>
-    </header>
+  </header>
   
-    <section class="py-20 relative overflow-hidden">
+  <section class="py-20 relative overflow-hidden">
       <div class="absolute -top-40 -right-40 w-96 h-96 bg-purple-600 rounded-full opacity-20 blur-3xl"></div>
       <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-800 rounded-full opacity-20 blur-3xl"></div>
       
@@ -51,9 +53,9 @@
           </div>
         </div>
       </div>
-    </section>
+  </section>
   
-    <section class="py-16 bg-gray-900">
+  <section class="py-16 bg-gray-900">
       <div class="container mx-auto px-4">
         <div class="grid md:grid-cols-2 gap-16 items-center">
           <div class="p-8 rounded-xl border border-purple-800/50 shadow-lg shadow-purple-900/30 bg-black/80">
@@ -107,7 +109,7 @@
       </div>
   </section>
   
-    <section class="py-20">
+  <section class="py-20">
       <div class="container mx-auto px-4">
         <h3 class="text-3xl font-bold text-center mb-16 text-purple-400">Core Features</h3>
         
@@ -173,9 +175,9 @@
           </div>
         </div>
       </div>
-    </section>
+  </section>
 
-    <section class="py-16 bg-gray-900/50">
+  <section class="py-16 bg-gray-900/50">
       <div class="container mx-auto px-4">
         <h3 class="text-3xl font-bold text-center mb-12 text-purple-400">Privacy-Focused Features</h3>
         
@@ -213,9 +215,9 @@
           </div>
         </div>
       </div>
-    </section>
+  </section>
   
-    <section class="py-20 bg-gradient-to-b from-black to-purple-950">
+  <section class="py-20 bg-gradient-to-b from-black to-purple-950">
       <div class="container mx-auto px-4">
         <div class="max-w-3xl mx-auto bg-black/30 p-8 rounded-xl border border-purple-800/40 backdrop-blur-sm shadow-xl">
           <h3 class="text-3xl font-bold mb-6 text-purple-400 text-center">Our Vision</h3>
@@ -230,9 +232,9 @@
           </p>
         </div>
       </div>
-    </section>
+  </section>
   
-    <section class="py-16 bg-black">
+  <section class="py-16 bg-black">
       <div class="container mx-auto px-4">
         <h3 class="text-2xl font-bold text-center mb-12 text-purple-400">Vocal By The Numbers</h3>
         
@@ -258,9 +260,9 @@
           </div>
         </div>
       </div>
-    </section>
+  </section>
   
-    <section class="py-16 bg-gray-900">
+  <section class="py-16 bg-gray-900">
       <div class="container mx-auto px-4">
         <div class="max-w-3xl mx-auto text-center p-8 bg-black/50 rounded-xl border border-purple-800/40 shadow-xl">
           <h3 class="text-3xl font-bold mb-6 text-purple-400">Ready to Join?</h3>
@@ -280,9 +282,9 @@
           </div>
         </div>
       </div>
-    </section>
+  </section>
   
-    <footer class="py-12 border-t border-purple-900 relative">
+  <footer class="py-12 border-t border-purple-900 relative">
       <div class="absolute top-0 left-0 right-0 h-px bg-purple-600 shadow-[0_0_10px_2px_rgba(168,85,247,0.3)]"></div>
       
       <div class="container mx-auto px-4">
@@ -321,7 +323,7 @@
           <p>© 2025 Vocal. The social network that respects you.</p>
         </div>
       </div>
-    </footer>
+  </footer>
 </div>
 
 <style>

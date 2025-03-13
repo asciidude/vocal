@@ -13,6 +13,7 @@
         MessageCircle,
     } from "lucide-svelte";
     import * as Avatar from "$lib/components/ui/avatar";
+    import Router, { navigate } from '../../lib/components/shared/Router.svelte';
 
     export let data: PageData;
     let user = data.user;
@@ -64,6 +65,7 @@
 </script>
 
 <title>Vocal - {user.displayName || user.username}</title>
+<Router />
 
 <div class="profile-container m-5">
     <div

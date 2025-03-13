@@ -1,6 +1,7 @@
 <script lang="ts">
     import { MessageSquare, Send, Phone, Video, Search, MoreHorizontal, User } from 'lucide-svelte';
-  
+    import Router, { navigate } from '../../lib/components/shared/Router.svelte';
+
     let message = '';
     let activeChat = 0;
   
@@ -48,6 +49,7 @@
 </script>
   
 <title>Vocal - Messages</title>
+<Router />
 
 <div class="flex h-screen bg-vocal_darkest text-gray-800">
     <!-- Sidebar - Friends List -->

@@ -23,6 +23,7 @@
       Info,
       Lock
     } from "lucide-svelte";
+    import Router, { navigate } from '../../lib/components/shared/Router.svelte';
   
     let activeSection: string = "account";
     
@@ -32,7 +33,9 @@
       darkMode = !darkMode;
     }
 </script>
-  
+
+<Router />
+
 <div class="min-h-screen {darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}">
     <div class="max-w-6xl mx-auto px-4 py-8">
       <h1 class="text-3xl font-bold text-purple-600 mb-8">Settings</h1>
