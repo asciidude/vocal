@@ -15,7 +15,13 @@ const config: Config = {
 		},
 		extend: {
 			colors: {
-				vocal: '#9c80ea',
+				vocal_lightest: '#a481f6',
+				vocal_light: '#9f7def',
+				vocal_medium: '#9072d7',
+				vocal_strong: '#7056ae',
+				vocal_strongest: '#7056ae',
+				vocal_darkest: '#110b13', // use for bg
+
 				border: "hsl(var(--border) / <alpha-value>)",
 				input: "hsl(var(--input) / <alpha-value>)",
 				ring: "hsl(var(--ring) / <alpha-value>)",
