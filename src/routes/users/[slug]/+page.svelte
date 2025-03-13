@@ -120,7 +120,7 @@
 
                 <div class="follow-stats">
                     <a
-                        href="/users/{user.discordId}/following"
+                        href="/users/{userpost.discordId}/following"
                         class="follow-stat"
                     >
                         <span class="follow-count">{follow.ing}</span>
@@ -305,7 +305,7 @@
         background-color: rgb(23, 21, 29);
         color: white;
     }
-
+  
     .empty {
         color: #888;
         font-style: italic;
