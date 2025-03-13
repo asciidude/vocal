@@ -13,6 +13,10 @@
         MessageCircle,
     } from "lucide-svelte";
     import * as Avatar from "$lib/components/ui/avatar";
+    import { getImage } from "$lib/utils/Cache.util";
+
+    import Post from "$lib/components/shared/Post.svelte";
+    import Reply from "$lib/components/shared/Reply.svelte";
   
     export let data: PageData;
   
@@ -50,15 +54,19 @@
             .join("")
             .toUpperCase();
     }
-  
-    onMount(() => {
-        if (user.bannerUrl && user.bannerUrl !== "none") {
-            const header = document.getElementById("profileHeader");
-            header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${user.bannerUrl})`;
-            header!.style.backgroundRepeat = "no-repeat";
-            header!.style.backgroundPosition = "center";
-            header!.style.backgroundSize = "cover";
-        }
+
+    let avatarSrc = '';
+    let bannerSrc = '';
+
+    onMount(async () => {
+        avatarSrc = await getImage(data.user.avatarUrl);
+        bannerSrc = await getImage(data.user.bannerUrl);
+
+        const header = document.getElementById("profileHeader");
+        header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${bannerSrc})`;
+        header!.style.backgroundRepeat = "no-repeat";
+        header!.style.backgroundPosition = "center";
+        header!.style.backgroundSize = "cover";
     });
 </script>
   
@@ -73,7 +81,7 @@
             <div class="avatar-container">
                 {#if user.avatarUrl}
                     <img
-                        src={user.avatarUrl}
+                        src={avatarSrc}
                         alt="{user.displayName || user.username}'s avatar"
                         class="avatar"
                     />
@@ -154,67 +162,7 @@
             <Tabs.Content value="posts" class="tab-content">
                 {#if posts && posts.posts.length > 0}
                     {#each posts.posts as post}
-                        <div class="post">
-                            <div class="post-header">
-                                <div class="left-section">
-                                    <a
-                                        href="/users/{user._id}"
-                                        class="flex items-center gap-2"
-                                    >
-                                        <Avatar.Root>
-                                            <Avatar.Image
-                                                src={user.avatarUrl}
-                                                alt="@{user.username}"
-                                            />
-                                            <Avatar.Fallback
-                                                >{getInitials(
-                                                    user.displayName ||
-                                                        user.username,
-                                                )}</Avatar.Fallback
-                                            >
-                                        </Avatar.Root>
-                                        <div class="username">
-                                            <p class="leading-none">
-                                                {user.displayName}
-                                            </p>
-                                            <p class="text-sm text-gray-400">
-                                                @{user.username}
-                                            </p>
-                                        </div>
-                                    </a>
-                                </div>
-                                <Ellipsis class="size-5" />
-                            </div>
-                            <div class="post-content">
-                                <p>{post.content}</p>
-                            </div>
-                            <div
-                                class="post-bottom flex items-center gap-5 mt-2"
-                            >
-                                <a
-                                    class="flex items-center gap-2 mt-2"
-                                    href="/posts/{post._id}"
-                                >
-                                    <MessageCircle class="size-4" />
-                                    <p class="size-5">
-                                        {posts.postReplies.filter(
-                                            (p) => p.parent_post === post._id,
-                                        ).length}
-                                    </p>
-                                </a>
-                                <a
-                                    class="flex items-center gap-2 mt-2"
-                                    href="/api/like/{post._id}"
-                                >
-                                    <Heart class="size-4" />
-                                    <p class="size-5">
-                                        {posts.likes.filter(
-                                            (p) => p.parent_post === post._id,
-                                        ).length}
-                                    </p>
-                                </a>
-                            </div>
-                        </div>
+                        <Post {post} postAuthor={user} postLikes={posts.postReplies.filter((p) => p.parent_post === post._id).length} />
                     {/each}
                 {:else}
                     <p class="empty">No posts yet.</p>
@@ -392,58 +340,7 @@
         background-color: rgb(23, 21, 29);
         color: white;
     }
-
-    .post {
-        background-color: rgb(19, 15, 27);
-        border-radius: 8px;
-        padding: 1.25rem;
-        border: 1px solid rgb(45, 34, 73);
-        transition: border-color 0.2s;
-        margin-right: 2rem;
-        margin-left: 2rem;
-    }
-
-    .post:hover {
-        border-color: #9072d7;
-    }
-
-    .post-content {
-        text-align: left;
-        margin: 0.75rem 0;
-    }
-
-    .post-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-    }
-
-    .post-header .left-section {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .post-header .username {
-        margin-bottom: 0;
-    }
-
-    .post-bottom {
-        border-top: 1px solid #3a3a3a;
-        padding-top: 0.75rem;
-    }
-
-    .post-bottom a {
-        color: #ccc;
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-
-    .post-bottom a:hover {
-        color: #a481f6;
-    }
-
+    
     .empty {
         color: #888;
         font-style: italic;

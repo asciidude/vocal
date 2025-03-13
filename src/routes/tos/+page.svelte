@@ -1,8 +1,4 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-  
-    let isLoaded = false;
-  
     const accountStatuses = [
         { level: 0, name: "Good Standing", description: "No issues" },
         { level: 1, name: "Warning", description: "User has received one or multiple warnings" },
@@ -11,10 +7,6 @@
         { level: 4, name: "Banned", description: "User has been permanently banned" },
         { level: 5, name: "Under Review", description: "User's account is under investigation" }
     ];
-  
-    onMount(() => {
-        isLoaded = true;
-    });
 </script>
   
 <title>Vocal - Terms of Service</title>
