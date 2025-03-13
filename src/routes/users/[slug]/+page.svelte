@@ -120,7 +120,7 @@
 
                 <div class="follow-stats">
                     <a
-                        href="/users/{user.discordId}/following"
+                        href="/users/{userpost.discordId}/following"
                         class="follow-stat"
                     >
                         <span class="follow-count">{follow.ing}</span>
@@ -162,7 +162,12 @@
             <Tabs.Content value="posts" class="tab-content">
                 {#if posts && posts.posts.length > 0}
                     {#each posts.posts as post}
-                        <Post {post} postAuthor={user} postLikes={posts.postReplies.filter((p) => p.parent_post === post._id).length} />
+                        <Post 
+                            {post}
+                            postAuthor={user}
+                            postLikes={posts.likes.filter((p) => p.parent_post === post._id).length}
+                            postReplies={posts.postReplies.filter((p) => p.parent_post === post._id).length}
+                        />
                     {/each}
                 {:else}
                     <p class="empty">No posts yet.</p>
@@ -172,52 +177,12 @@
             <Tabs.Content value="replies" class="tab-content">
                 {#if posts && posts.userReplies.length > 0}
                     {#each posts.userReplies as reply}
-                        <div class="post">
-                            <div class="post-header">
-                                <div class="left-section">
-                                    <a
-                                        href="/users/{user._id}"
-                                        class="flex items-center gap-2"
-                                    >
-                                        <Avatar.Root>
-                                            <Avatar.Image
-                                                src={user.avatarUrl}
-                                                alt="@{user.username}"
-                                            />
-                                            <Avatar.Fallback
-                                                >{getInitials(
-                                                    user.displayName ||
-                                                        user.username,
-                                                )}</Avatar.Fallback
-                                            >
-                                        </Avatar.Root>
-                                        <div class="username">
-                                            <p class="leading-none">
-                                                {user.displayName}
-                                            </p>
-                                            <p class="text-sm text-gray-400">
-                                                @{user.username}
-                                            </p>
-                                        </div>
-                                    </a>
-                                </div>
-                                <Ellipsis class="size-5" />
-                            </div>
-                            <div class="post-content">
-                                <p>{reply.content}</p>
-                            </div>
-                            <div
-                                class="post-bottom flex items-center gap-5 mt-2"
-                            >
-                                <a
-                                    class="flex items-center gap-3 mt-2"
-                                    href="/posts/{reply.parent_post}"
-                                >
-                                    <MessageCircle class="size-4" />
-                                    <p class="size-5 text-sm whitespace-nowrap">View Thread</p>
-                                </a>
-                            </div>
-                        </div>
+                        <Reply 
+                            {reply}
+                            replyAuthor={user}
+                            replyLikes={posts.likes.filter((p) => p.parent_post === reply._id).length}
+                            replyReplies={posts.userReplies.filter((p) => p.parent_post === reply._id).length}
+                        />
                     {/each}
                 {:else}
                     <p class="empty">No replies yet.</p>
@@ -340,7 +305,7 @@
         background-color: rgb(23, 21, 29);
         color: white;
     }
-    
+  
     .empty {
         color: #888;
         font-style: italic;
