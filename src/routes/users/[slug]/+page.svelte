@@ -13,6 +13,7 @@
         MessageCircle,
     } from "lucide-svelte";
     import * as Avatar from "$lib/components/ui/avatar";
+    import { getImage } from "src/lib/utils/Cache.util";
   
     export let data: PageData;
   
@@ -50,11 +51,17 @@
             .join("")
             .toUpperCase();
     }
-  
-    onMount(() => {
+
+    let avatarSrc = '';
+    let bannerSrc = '';
+
+    onMount(async () => {
+        avatarSrc = await getImage(data.user.avatarUrl);
+        bannerSrc = await getImage(data.user.bannerUrl);
+
         if (user.bannerUrl && user.bannerUrl !== "none") {
             const header = document.getElementById("profileHeader");
-            header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${user.bannerUrl})`;
+            header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${bannerSrc})`;
             header!.style.backgroundRepeat = "no-repeat";
             header!.style.backgroundPosition = "center";
             header!.style.backgroundSize = "cover";
@@ -73,7 +80,7 @@
             <div class="avatar-container">
                 {#if user.avatarUrl}
                     <img
-                        src={user.avatarUrl}
+                        src={avatarSrc}
                         alt="{user.displayName || user.username}'s avatar"
                         class="avatar"
                     />
