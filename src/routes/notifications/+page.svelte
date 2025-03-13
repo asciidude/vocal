@@ -1,7 +1,4 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import Router, { navigate } from '../../lib/components/shared/Router.svelte';
-    
     type NotificationType = 'like' | 'comment' | 'follow' | 'mention' | 'repost';
     
     interface Notification {
@@ -99,7 +96,6 @@
     ];
     
     let filter: 'all' | 'unread' = 'all';
-    let isLoading = true;
     
     function formatTimestamp(date: Date): string {
       const now = new Date();
@@ -160,15 +156,7 @@
     function markAllAsRead() {
       notifications = notifications.map(notification => ({ ...notification, isRead: true }));
     }
-    
-    onMount(() => {
-      setTimeout(() => {
-        isLoading = false;
-      }, 1000);
-    });
 </script>
-
-<Router />
 
 <div class="min-h-screen bg-vocal_darkest text-white">
     <div class="container max-w-2xl mx-auto p-4">
@@ -200,11 +188,7 @@
       </header>
       
       <div class="space-y-4">
-        {#if isLoading}
-          <div class="flex justify-center items-center h-64">
-            <div class="w-8 h-8 border-4 border-vocal_medium border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        {:else if filteredNotifications.length === 0}
+        {#if filteredNotifications.length === 0}
           <div class="flex flex-col items-center justify-center h-64 text-center">
             <svg class="w-16 h-16 mb-4 text-vocal_medium" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>

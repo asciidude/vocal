@@ -56,13 +56,13 @@
         <p>{post?.content}</p>
     </div>
     <div class="post-bottom flex items-center gap-5 mt-2">
-        <a class="flex items-center gap-2 mt-2" href="/posts/{post._id}">
+        <a class="flex items-center gap-2 mt-2" href="/posts/{post?._id}">
             <MessageCircle class="size-4" />
             <p class="size-5">
                 {postLikes}
             </p>
         </a>
-        <a class="flex items-center gap-2 mt-2" href="/api/like/{post._id}">
+        <a class="flex items-center gap-2 mt-2" href="/api/like/{post?._id}">
             <Heart class="size-4" />
             <p class="size-5">
                 {postLikes}
