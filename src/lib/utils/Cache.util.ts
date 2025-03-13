@@ -1,6 +1,6 @@
 export async function getImageFromIndexedDB(url: string): Promise<string | null> {
     if (typeof window === 'undefined') {
-        return null; // Return null if running server-side
+        return null;
     }
 
     return new Promise((resolve, reject) => {
@@ -38,7 +38,7 @@ export async function getImageFromIndexedDB(url: string): Promise<string | null>
 
 export async function saveImageToIndexedDB(url: string, base64Image: string): Promise<void> {
     if (typeof window === 'undefined') {
-        return; // Skip if running server-side
+        return;
     }
 
     return new Promise((resolve, reject) => {
@@ -70,24 +70,24 @@ export async function saveImageToIndexedDB(url: string, base64Image: string): Pr
     });
 }
 
-export async function getImage(url: string): Promise<string> {
-    if (typeof window === 'undefined') {
+export async function getImage(url: string | undefined): Promise<string> {
+    if (typeof window === 'undefined' || url === 'undefined') {
         return '';
     }
 
-    const cachedImage = await getImageFromIndexedDB(url);
+    const cachedImage = await getImageFromIndexedDB(url as string);
 
     if (cachedImage) {
         return cachedImage;
     } else {
-        const response = await fetch(url);
+        const response = await fetch(url as string);
         const blob = await response.blob();
         const reader = new FileReader();
 
         return new Promise((resolve) => {
             reader.onloadend = async () => {
                 const base64Image = reader.result as string;
-                await saveImageToIndexedDB(url, base64Image);
+                await saveImageToIndexedDB(url as string, base64Image);
                 resolve(base64Image);
             };
 

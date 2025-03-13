@@ -5,6 +5,9 @@
     import * as Avatar from "$lib/components/ui/avatar";
     import { Ellipsis, Heart, MessageCircle } from "lucide-svelte";
 
+    import { onMount } from "svelte";
+    import { getImage } from "$lib/utils/Cache.util";
+
     function getInitials(name: string | undefined) {
         if (!name) return "?";
         return name
@@ -17,6 +20,20 @@
     export let post: PostType | null = null;
     export let postAuthor: UserType | null = null;
     export let postLikes: Number = 0;
+
+    let avatarSrc = '';
+    let bannerSrc = '';
+
+    onMount(async () => {
+        avatarSrc = await getImage(postAuthor?.avatarUrl);
+        bannerSrc = await getImage(postAuthor?.bannerUrl);
+
+        const header = document.getElementById("profileHeader");
+        header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${bannerSrc})`;
+        header!.style.backgroundRepeat = "no-repeat";
+        header!.style.backgroundPosition = "center";
+        header!.style.backgroundSize = "cover";
+    });
 </script>
 
 <div class="post">
