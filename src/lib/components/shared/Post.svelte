@@ -22,17 +22,9 @@
     export let postLikes: Number = 0;
 
     let avatarSrc = '';
-    let bannerSrc = '';
 
     onMount(async () => {
         avatarSrc = await getImage(postAuthor?.avatarUrl);
-        bannerSrc = await getImage(postAuthor?.bannerUrl);
-
-        const header = document.getElementById("profileHeader");
-        header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${bannerSrc})`;
-        header!.style.backgroundRepeat = "no-repeat";
-        header!.style.backgroundPosition = "center";
-        header!.style.backgroundSize = "cover";
     });
 </script>
 
@@ -41,7 +33,7 @@
         <div class="left-section">
             <a href="/users/{post?.author}" class="flex items-center gap-2">
                 <Avatar.Root>
-                    <Avatar.Image src={postAuthor?.avatarUrl} alt="@{postAuthor?.username}" />
+                    <Avatar.Image src={avatarSrc} alt="@{postAuthor?.username}" />
                     <Avatar.Fallback
                         >{getInitials(
                             postAuthor?.displayName || postAuthor?.username,
