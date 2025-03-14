@@ -45,7 +45,7 @@
 <div class="flex flex-col min-h-screen bg-[#0a080f]">
     <header class="sticky top-0 z-10 bg-[#130f1b] border-b border-[#2d2249] p-4">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-white">Vocal</h1>
+            <h1 class="text-2xl font-bold text-white">HOME</h1>
             {#if data.currentUser}
                 <div class="flex items-center gap-2">
                     <Avatar.Root>
@@ -115,10 +115,6 @@
             {/if}
         </div>
     </main>
-
-    <footer class="bg-[#130f1b] border-t border-[#2d2249] p-4 text-center text-gray-400">
-        <p>© 2025 Vocal - Connect with the world</p>
-    </footer>
 </div>
 
 <style>
