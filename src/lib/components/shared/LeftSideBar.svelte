@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores'; // Use '$app/stores' instead of '$app/state'
+  import { page } from '$app/stores';
   import { 
     Home, 
     User, 
@@ -11,14 +11,24 @@
     TrendingUp, 
     LogOut
   } from 'lucide-svelte';
-    import { getImage } from '$lib/utils/Cache.util';
-    import { onMount } from 'svelte';
+  import { getImage } from '$lib/utils/Cache.util';
+  import { onMount } from 'svelte';
   import { twemojify } from 'svelte-twemojify';
   import { derived } from 'svelte/store';
 
+  export let userId: string;
+
+  let userData: any = null;
+  
+  onMount(async () => {
+    const { UserModel } = await import('$lib/models/User.model');
+    userData = await UserModel.findOne({ discordId: userId });
+    avatarSrc = await getImage(userData?.avatarUrl);
+  });
+
   const navItems = [
     { icon: Home, label: 'Home', href: '/home' },
-    { icon: User, label: 'Profile', href: '/profile' },
+    { icon: User, label: 'Profile', href: `/user/${userId}` },
     { icon: MessageSquare, label: 'Messages', href: '/messages' },
     { icon: Bell, label: 'Notifications', href: '/notifications' },
     { icon: Bookmark, label: 'Bookmarks', href: '/bookmarks' },
@@ -36,13 +46,9 @@
   };
 
   let avatarSrc = '';
-
-  onMount(async () => {
-      avatarSrc = await getImage(user?.avatarUrl);
-  });
 </script>
 
-<aside class="w-72 h-screen bg-[#110b13] border-l border-[#202225] p-4 flex flex-col text-sm">
+<aside class="w-76 h-screen bg-[#110b13] border-l border-[#202225] p-4 flex flex-col text-sm">
   <div class="mb-6">
     <h2 class="text-lg font-bold text-white tracking-wider">VOCAL</h2>
     <p class="text-xs text-purple-300 mt-2">Connect with your community</p>
