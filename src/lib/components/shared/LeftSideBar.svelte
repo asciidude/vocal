@@ -9,9 +9,9 @@
     Bookmark, 
     Heart, 
     TrendingUp, 
-    LogOut 
+    LogOut
   } from 'lucide-svelte';
-    import { getImage } from 'src/lib/utils/Cache.util';
+    import { getImage } from '$lib/utils/Cache.util';
     import { onMount } from 'svelte';
   import { twemojify } from 'svelte-twemojify';
   import { derived } from 'svelte/store';

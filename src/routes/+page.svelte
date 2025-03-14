@@ -9,7 +9,7 @@
   import { SiDiscord, SiGithub, SiBluesky } from '@icons-pack/svelte-simple-icons';
 </script>
   
-<title>Vocal - Home</title>
+<title>Vocal - Welcome!</title>
 
 <div class="min-h-screen bg-black text-white">
   <header class="py-8 border-b border-purple-600 bg-black relative overflow-hidden">
