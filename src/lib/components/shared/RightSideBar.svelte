@@ -59,7 +59,7 @@
       <ul class="space-y-3">
         {#each followers as follower}
           <li class="hover:bg-[#32353b] p-2 rounded-md transition-colors">
-            <a href={`/profile/${follower.username}`} class="flex items-center gap-3">
+            <a href={`/users/${follower.username}`} class="flex items-center gap-3">
               <img src={follower.avatar} alt={follower.name} class="h-8 w-8 rounded-sm ring-2 ring-purple-600" />
               <div>
                 <p class="font-medium text-white" use:twemojify>{follower.name}</p>
