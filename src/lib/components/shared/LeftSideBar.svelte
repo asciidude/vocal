@@ -16,13 +16,11 @@
   import { twemojify } from 'svelte-twemojify';
   import { derived } from 'svelte/store';
 
-  export let userId: string;
-
-  let userData: any = null;
+  export let user: { displayName: string, username: string, avatarUrl: string, discordId: string } | null = null;
 
   const navItems = [
     { icon: Home, label: 'Home', href: '/home' },
-    { icon: User, label: 'Profile', href: `/user/${userId}` },
+    { icon: User, label: 'Profile', href: `/users/${user?.discordId}` },
     { icon: MessageSquare, label: 'Messages', href: '/messages' },
     { icon: Bell, label: 'Notifications', href: '/notifications' },
     { icon: Bookmark, label: 'Bookmarks', href: '/bookmarks' },
@@ -30,8 +28,6 @@
     { icon: TrendingUp, label: 'Explore', href: '/explore' },
     { icon: Settings, label: 'Settings', href: '/settings' }
   ];
-
-  export let user: { displayName: string, username: string, avatarUrl: string } | null = null;
   
   onMount(async () => {
     avatarSrc = await getImage(user?.avatarUrl);
