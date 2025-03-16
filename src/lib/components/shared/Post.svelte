@@ -29,10 +29,10 @@
     });
 </script>
 
-<div class="post">
+<div class="post text-white">
     <div class="post-header">
         <div class="left-section">
-            <a href="/users/{post?.author}" class="flex items-center gap-2">
+            <a href="/users/{postAuthor?.discordId}" class="flex items-center gap-2">
                 <Avatar.Root>
                     <Avatar.Image src={avatarSrc} alt="@{postAuthor?.username}" />
                     <Avatar.Fallback

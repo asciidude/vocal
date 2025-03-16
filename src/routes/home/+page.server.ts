@@ -5,11 +5,15 @@ import { UserModel } from '$lib/models/User.model';
 import mongoose from 'mongoose';
 import type { PostType } from '$lib/types/Post.type';
 import type { UserType } from '$lib/types/User.types';
+import { LikeModel } from 'src/lib/models/Like.model';
+import { ReplyModel } from 'src/lib/models/Reply.model';
+
+const parseAndStringify = (data: any) => {
+    return JSON.parse(JSON.stringify(data));
+};
 
 export const load: PageServerLoad = async ({ locals }) => {
     try {
-        const currentUser = locals.user as UserType | null;
-
         const posts = await PostModel.find()
             .sort({ createdAt: -1 })
             .limit(30)
@@ -18,39 +22,30 @@ export const load: PageServerLoad = async ({ locals }) => {
         if (!posts) {
             return {
                 posts: [],
-                usersMap: {},
                 likesCountMap: {},
-                repliesCountMap: {},
-                currentUser
+                repliesCountMap: {}
             };
         }
         
-        const authorIds = [...new Set(posts.map(post => post.author))];
+        const postsWithAuthors = await Promise.all(posts.map(async (post) => {
+            const author = await UserModel.findOne({ _id: post.author }).lean();
+            return { ...post, author };
+        }));
         
-        const users = await UserModel.find({
-            _id: { $in: authorIds }
-        }).lean();
-        
-        const usersMap: Record<string, UserType> = {};
-        users.forEach(user => {
-            usersMap[user._id.toString()] = user;
-        });
-        
-        const likesCountMap: Record<string, number> = {};
-        const repliesCountMap: Record<string, number> = {};
-        
-        for (const post of posts) {
-            const postId = post._id.toString();
-            likesCountMap[postId] = Math.floor(Math.random() * 50);
-            repliesCountMap[postId] = Math.floor(Math.random() * 20);
-        }
+        let postLikes = [];
+        const likePromises = posts.map(post => LikeModel.find({ parent_post: post._id }));
+        postLikes = await Promise.all(likePromises);
+        postLikes = postLikes.flat();
+
+        let postReplies = [];
+        const replyPromises = posts.map(post => ReplyModel.find({ parent_post: post._id }));
+        postReplies = await Promise.all(replyPromises);
+        postReplies = postReplies.flat();
         
         return {
-            posts,
-            usersMap,
-            likesCountMap,
-            repliesCountMap,
-            currentUser
+            posts: parseAndStringify(postsWithAuthors),
+            likes: parseAndStringify(postLikes),
+            replies: parseAndStringify(postReplies)
         };
     } catch (err) {
         console.error('Error loading home page:', err);
