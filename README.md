@@ -14,6 +14,11 @@ Vocal is a blazingly fast **decentralized** and **privacy-focused** social media
 
 - Community Standards: We have strict community standards that ensure a safe and inclusive environment for all users.
 
+## Community
+
+[Discord](https://discord.gg/2KtnzEGpSt)
+[BlueSky](https://bsky.app/)
+
 ## Stack
 
 - Svelte/SvelteKit
