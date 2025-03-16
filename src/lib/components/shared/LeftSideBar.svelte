@@ -19,12 +19,6 @@
   export let userId: string;
 
   let userData: any = null;
-  
-  onMount(async () => {
-    const { UserModel } = await import('$lib/models/User.model');
-    userData = await UserModel.findOne({ discordId: userId });
-    avatarSrc = await getImage(userData?.avatarUrl);
-  });
 
   const navItems = [
     { icon: Home, label: 'Home', href: '/home' },
@@ -38,6 +32,10 @@
   ];
 
   export let user: { displayName: string, username: string, avatarUrl: string } | null = null;
+  
+  onMount(async () => {
+    avatarSrc = await getImage(user?.avatarUrl);
+  });
 
   const currentPath = derived(page, $page => $page.url.pathname);
 
