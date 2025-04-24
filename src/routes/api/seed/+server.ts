@@ -1,4 +1,4 @@
-import { error, json } from "@sveltejs/kit";
+import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { UserModel } from "$lib/models/User.model";
 import { UserRoles, type UserType } from "$lib/types/User.types";
 import { NODE_ENV } from "$env/static/private";
@@ -8,7 +8,7 @@ import type { AttachmentType } from "$lib/types/Attachment.type";
 import { FollowModel } from "$lib/models/Follow.model";
 import { LikeModel } from "$lib/models/Like.model";
 
-export const GET = async() => {
+export const GET: RequestHandler = async() => {
     if(NODE_ENV === 'production') throw error(403, 'Unable to seed database in production envrionment');
 
     await UserModel.deleteMany();
