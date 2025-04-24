@@ -7,3 +7,8 @@ export interface PostType {
     content: String,
     attachments: Array<AttachmentType>
 }
+
+export enum PostContext {
+    Reply = 0,
+    Post = 1
+}
