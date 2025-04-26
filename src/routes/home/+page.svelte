@@ -12,35 +12,6 @@
     
     let newPostContent = '';
     let isSubmitting = false;
-    
-    async function handleSubmitPost() {
-        if (!newPostContent.trim()) return;
-        
-        isSubmitting = true;
-        
-        try {
-            const response = await fetch('/api/posts/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    content: newPostContent
-                })
-            });
-            
-            if (response.ok) {
-                newPostContent = '';
-                window.location.reload();
-            } else {
-                console.error('Failed to create post');
-            }
-        } catch (error) {
-            console.error('Error creating post:', error);
-        } finally {
-            isSubmitting = false;
-        }
-    }
 
     let avatars = new Map();
     let currentUserAv = '';
