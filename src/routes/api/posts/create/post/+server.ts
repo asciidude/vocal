@@ -1,9 +1,8 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { PostModel } from "src/lib/models/Post.model";
-import type { UserType } from "src/lib/types/User.types";
 
 export const POST: RequestHandler = async({ request, locals }) => {
-    const user = locals.user;
+    const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
 
     if(!user) {
         throw error(401, 'Unauthorized');
@@ -18,7 +17,7 @@ export const POST: RequestHandler = async({ request, locals }) => {
         }
         
         const post = await PostModel.create({
-            author: (user as UserType)._id,
+            author: user._id,
             content: content,
             attachments: [] // later
         });
