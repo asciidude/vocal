@@ -19,7 +19,7 @@
         isSubmitting = true;
         
         try {
-            const response = await fetch('/api/posts', {
+            const response = await fetch('/api/posts/create', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -90,24 +90,25 @@
                             {data.user.displayName || data.user.username}
                         </Avatar.Fallback>
                     </Avatar.Root>
-                    <div class="flex-grow">
+                    <form action="/api/posts/create/post" method="post" id="postSubmission" class="flex-grow">
                         <textarea
-                            class="w-full bg-transparent border border-[#2d2249] rounded-lg p-3 focus:border-[#9072d7] focus:outline-none resize-none text-white placeholder-gray-500"
+                            class="w-full bg-transparent border border-[#2d2249] rounded-lg p-3 focus:border-vocal_medium focus:outline-none resize-none text-white placeholder-gray-500"
                             rows="3"
                             placeholder="What's on your mind?"
                             bind:value={newPostContent}
+                            name="content" id="content"
                         ></textarea>
                         <div class="flex justify-end mt-2">
                             <button
-                                class="bg-[#9072d7] hover:bg-[#a481f6] text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors"
-                                on:click={handleSubmitPost}
+                                class="bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors cursor-pointer"
+                                on:click={document.forms['postSubmission'].submit()}
                                 disabled={isSubmitting || !newPostContent.trim()}
                             >
                                 <Plus class="size-4" />
                                 <span>Post</span>
                             </button>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
         {/if}
@@ -117,7 +118,7 @@
                 {#each data.posts as post}
                     <Post 
                         {post} 
-                        postAuthor={post.author} 
+                        postAuthor={post.authorObj} 
                         postLikes={data.likes.filter((p: LikeType) => p.parent_post === post._id).length}
                         postReplies={data.replies.filter((p: ReplyType) => p.parent_post === post._id).length}
                     />

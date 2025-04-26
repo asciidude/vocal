@@ -28,8 +28,8 @@ export const load: PageServerLoad = async ({ locals }) => {
         }
         
         const postsWithAuthors = await Promise.all(posts.map(async (post) => {
-            const author = await UserModel.findOne({ _id: post.author }).lean();
-            return { ...post, author };
+            const authorObj = await UserModel.findOne({ _id: post.author }).lean();
+            return { ...post, authorObj };
         }));
         
         let postLikes = [];
