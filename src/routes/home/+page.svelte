@@ -7,6 +7,7 @@
     import { onMount } from 'svelte';
     import type { ReplyType } from '$lib/types/Reply.type';
     import type { LikeType } from '$lib/types/Like.type';
+    import { enhance } from '$app/forms';
 
     export let data: PageData;
     
@@ -16,12 +17,27 @@
     let avatars = new Map();
     let currentUserAv = '';
 
+    let posts: typeof data.posts = [];
+    $: posts;
+
+    function handleFormEnhance() {
+        return async ({ result }) => {
+            isSubmitting = false;
+            if (result.status === 200) {
+                posts = [{ ...result.post, authorObj: data.user }, ...posts];
+                newPostContent = '';
+            }
+        }
+    }
+
     onMount(async () => {
+        posts = data.posts; 
         currentUserAv = await getImage(data.user?.avatarUrl);
 
-        for(let post of data.posts) {
-            if(avatars.get(post.author._id)) return;
-            avatars.set(post.author._id, post.author.avatarUrl)
+        for (let post of data.posts) {
+            if (!avatars.get(post.author._id)) {
+                avatars.set(post.author._id, post.author.avatarUrl);
+            }
         }
     });
 </script>
@@ -61,7 +77,13 @@
                             {data.user.displayName || data.user.username}
                         </Avatar.Fallback>
                     </Avatar.Root>
-                    <form action="/api/posts/create/post" method="post" id="postSubmission" class="flex-grow">
+                    <form
+                        action="/api/posts/create/post" method="post"
+                        use:enhance={handleFormEnhance}
+                        id="postSubmission"
+                        class="flex-grow"
+                        on:submit|preventDefault={() => isSubmitting = true}
+                    >
                         <textarea
                             class="w-full bg-transparent border border-[#2d2249] rounded-lg p-3 focus:border-vocal_medium focus:outline-none resize-none text-white placeholder-gray-500"
                             rows="3"
@@ -71,9 +93,9 @@
                         ></textarea>
                         <div class="flex justify-end mt-2">
                             <button
-                                class="bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors cursor-pointer"
-                                on:click={document.forms['postSubmission'].submit()}
+                                class="bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default"
                                 disabled={isSubmitting || !newPostContent.trim()}
+                                type="submit"
                             >
                                 <Plus class="size-4" />
                                 <span>Post</span>
@@ -84,9 +106,9 @@
             </div>
         {/if}
 
-        <div class="space-y-4">
-            {#if data.posts && data.posts.length > 0}
-                {#each data.posts as post}
+        <div class="space-y-4" id="postArea">
+            {#if posts && posts.length > 0}
+                {#each posts as post}
                     <Post 
                         {post} 
                         postAuthor={post.authorObj} 
