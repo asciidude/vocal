@@ -62,5 +62,5 @@ export const GET = async({ url, cookies }: { url: URL, cookies: Cookies }) => {
         maxAge: ((60 * 60) * 24) * 7 // 1w
     });
 
-    throw redirect(302, '/home');
+    return redirect(302, '/home');
 }
