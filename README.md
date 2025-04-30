@@ -4,7 +4,6 @@ Vocal is a social media platform for friendly, open-minded conversations.
 
 Far too often have we seen an increase in hostility, anger, division, and general hatefulness online. We want to offer something different—a community of people to form a genuine connection with.
 
-### Join us on other communities
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/2KtnzEGpSt)
 [![BlueSky](https://img.shields.io/badge/Bluesky-0285FF?logo=bluesky&logoColor=fff&style=for-the-badge)](https://bsky.app/profile/vocalcomms.bsky.social)
 
