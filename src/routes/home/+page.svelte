@@ -14,12 +14,11 @@
     let newPostContent = '';
     let isSubmitting = false;
 
-    let avatars = new Map();
     let currentUserAv = '';
 
     let posts: typeof data.posts = [];
     $: posts;
-
+    
     function handleFormEnhance() {
         return async ({ result }) => {
             isSubmitting = false;
@@ -33,12 +32,6 @@
     onMount(async () => {
         posts = data.posts; 
         currentUserAv = await getImage(data.user?.avatarUrl);
-
-        for (let post of data.posts) {
-            if (!avatars.get(post.author._id)) {
-                avatars.set(post.author._id, post.author.avatarUrl);
-            }
-        }
     });
 </script>
 
@@ -108,7 +101,7 @@
 
         <div class="space-y-4" id="postArea">
             {#if posts && posts.length > 0}
-                {#each posts as post}
+                {#each posts as post (post._id)}
                     <Post 
                         {post} 
                         postAuthor={post.authorObj} 
