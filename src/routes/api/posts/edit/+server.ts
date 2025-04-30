@@ -6,13 +6,16 @@ import { ReplyModel } from "src/lib/models/Reply.model";
 export const PATCH: RequestHandler = async({ request, locals }) => {
     const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
 
-    if(!user) {
+    const formData = await request.formData();
+    const posterId = formData.get('posterId');
+
+    if(!user || user._id !== posterId) {
         throw error(401, 'Unauthorized');
     }
 
     try {
-        const formData = await request.formData();
         const postType = formData.get('postType');
+        const postId = formData.get('postId');
         const content = formData.get('content');
 
         if(!content) {
@@ -20,30 +23,21 @@ export const PATCH: RequestHandler = async({ request, locals }) => {
         }
 
         if(postType === 'reply') {
-            const replyParent = formData.get('replyParent');
-
-            if(!replyParent || !isValidObjectId(replyParent)) {
-                throw error(422, 'Unprocessable Content');
-            }
-        
-            const post = await ReplyModel.create({
-                parent_post: replyParent,
-                author: user._id,
-                content: content,
-                attachments: [] // later
-            });
-
+            const post = await ReplyModel.updateOne(
+                { _id: postId },
+                { content: content }
+            );
+    
             return json({
                 status: 200,
                 message: 'Success',
                 user, post
             });
         } else if(postType === 'reply') {
-            const post = await PostModel.create({
-                author: user._id,
-                content: content,
-                attachments: [] // later
-            });
+            const post = await PostModel.updateOne(
+                { _id: postId },
+                { content: content }
+            );
     
             return json({
                 status: 200,

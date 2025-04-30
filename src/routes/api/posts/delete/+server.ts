@@ -1,55 +1,38 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
-import { isValidObjectId } from "mongoose";
 import { PostModel } from "src/lib/models/Post.model";
 import { ReplyModel } from "src/lib/models/Reply.model";
-import type { UserType } from "src/lib/types/User.types";
 
 export const DELETE: RequestHandler = async({ request, locals }) => {
     const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
 
-    if(!user) {
+    const formData = await request.formData();
+    const posterId = formData.get('posterId');
+
+    if(!user || user._id !== posterId) {
         throw error(401, 'Unauthorized');
     }
 
     try {
-        const formData = await request.formData();
         const postType = formData.get('postType');
-        const content = formData.get('content');
+        const postId = formData.get('postId');
 
-        if(!content) {
+        if(!postId) {
             throw error(422, 'Unprocessable Content');
         }
 
         if(postType === 'reply') {
-            const replyParent = formData.get('replyParent');
-
-            if(!replyParent || !isValidObjectId(replyParent)) {
-                throw error(422, 'Unprocessable Content');
-            }
-        
-            const post = await ReplyModel.create({
-                parent_post: replyParent,
-                author: (user as UserType)._id,
-                content: content,
-                attachments: [] // later
-            });
+            await ReplyModel.deleteOne({ _id: postId });
 
             return json({
                 status: 200,
-                message: 'Success',
-                user, post
+                message: 'Success'
             });
-        } else if(postType === 'reply') {
-            const post = await PostModel.create({
-                author: user._id,
-                content: content,
-                attachments: [] // later
-            });
+        } else if(postType === 'post') {
+            await PostModel.deleteOne({ _id: postId });
     
             return json({
                 status: 200,
-                message: 'Success',
-                user, post
+                message: 'Success'
             });
         } else {
             throw error(401, 'Invalid Request')

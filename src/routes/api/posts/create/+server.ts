@@ -39,7 +39,7 @@ export const POST: RequestHandler = async({ request, locals }) => {
                 message: 'Success',
                 user, post
             });
-        } else if(postType === 'reply') {
+        } else if(postType === 'post') {
             const post = await PostModel.create({
                 author: user._id,
                 content: content,

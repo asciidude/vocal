@@ -77,6 +77,7 @@
                         class="flex-grow"
                         on:submit|preventDefault={() => isSubmitting = true}
                     >
+                        <input type="hidden" name="postType" value="post">
                         <textarea
                             class="w-full bg-transparent border border-[#2d2249] rounded-lg p-3 focus:border-vocal_medium focus:outline-none resize-none text-white placeholder-gray-500"
                             rows="3"

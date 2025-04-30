@@ -1,5 +1,27 @@
 # Vocal
 
+Vocal is a social media platform for friendly, open-minded conversations.
+
+Far too often have we seen an increase in hostility, anger, division, and general hatefulness online. We want to offer something different—a community of people to form a genuine connection with.
+
+We offer:
+- Groups, which can be...
+    - **Public:** Anyone can join
+    - **Admin Approval:** Anyone can join as long as they're approved by the admin
+    - **Private Approval:** Only selected people by the group operator can join, sort of like a shared account
+- Strict community standards which our moderation team upholds to their best extent to keep the environment safe, inclusive, and welcoming
+- 
+
+## Community
+
+[Discord](https://discord.gg/2KtnzEGpSt)
+[BlueSky](https://bsky.app/vocalcomms)
+
+
+
+
+
+
 Vocal is a blazingly fast **decentralized** and **privacy-focused** social media website. We prioritize user autonomy, privacy, and control over your data. Our mission is to create a safe and inclusive platform for all users.
 
 ## Features
@@ -14,10 +36,7 @@ Vocal is a blazingly fast **decentralized** and **privacy-focused** social media
 
 - Community Standards: We have strict community standards that ensure a safe and inclusive environment for all users.
 
-## Community
 
-[Discord](https://discord.gg/2KtnzEGpSt)
-[BlueSky](https://bsky.app/)
 
 ## Stack
 
@@ -28,8 +47,7 @@ Vocal is a blazingly fast **decentralized** and **privacy-focused** social media
 - Docker
 - TailwindCSS/PostCSS
 - TypeScript
-- Redis (beta)
-- Drizzle ORM (beta)
+- Redis (work in progress)
 
 ## Contributing
 
