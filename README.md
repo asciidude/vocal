@@ -22,4 +22,4 @@ Far too often have we seen an increase in hostility, anger, division, and genera
 
 This project is licensed under the CC BY-NC License - see the [LICENSE](LICENSE) file for details.
 
-<sub>Copyright (c) asciidude, all rights reserved.</sub>
+<sub>© asciidude, all rights reserved.</sub>
