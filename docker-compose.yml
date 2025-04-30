@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  vocal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: vocal-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=mongodb://mongodb:27017/vocal
+      - SESSION_SECRET=
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    networks:
+      - vocal-network
+    volumes:
+      - ./uploads:/app/uploads
+      - ./env:/app/.env:ro
+
+  mongodb:
+    image: mongo:latest
+    container_name: vocal-mongodb
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_DATABASE=vocal
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - vocal-network
+
+networks:
+  vocal-network:
+    driver: bridge
+
+volumes:
+  mongodb-data:
+    driver: local

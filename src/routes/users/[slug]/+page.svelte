@@ -120,7 +120,7 @@
 
                 <div class="follow-stats">
                     <a
-                        href="/users/{userpost.discordId}/following"
+                        href="/users/{user.discordId}/following"
                         class="follow-stat"
                     >
                         <span class="follow-count">{follow.ing}</span>

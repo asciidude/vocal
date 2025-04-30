@@ -9,7 +9,7 @@
   import { SiDiscord, SiGithub, SiBluesky } from '@icons-pack/svelte-simple-icons';
 </script>
   
-<title>Vocal - Home</title>
+<title>Vocal - Welcome!</title>
 
 <div class="min-h-screen bg-black text-white">
   <header class="py-8 border-b border-purple-600 bg-black relative overflow-hidden">
@@ -34,7 +34,7 @@
       </div>
   </header>
   
-  <section class="py-20 relative overflow-hidden">
+  <section class="py-20 relative overflow-hidden background">
       <div class="absolute -top-40 -right-40 w-96 h-96 bg-purple-600 rounded-full opacity-20 blur-3xl"></div>
       <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-800 rounded-full opacity-20 blur-3xl"></div>
       
@@ -266,15 +266,9 @@
             Experience social media that respects your privacy and amplifies your voice.
           </p>
           <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <button class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition shadow-lg shadow-purple-900/30">
-              Create Account
-            </button>
-            <button class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-8 rounded-lg transition shadow-lg">
-              Explore Instances
-            </button>
-            <button class="border border-purple-600 hover:bg-purple-900 text-white font-bold py-3 px-8 rounded-lg transition shadow-lg shadow-purple-900/20">
-              Learn More
-            </button>
+            <a href="/api/auth/discord" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition shadow-lg shadow-purple-900/50">
+              Join with Discord
+            </a>
           </div>
         </div>
       </div>
@@ -324,7 +318,7 @@
 
 <style>
   .background {
-      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/images/login-background.gif');
+      background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('/images/login-background.gif');
       background-position: center;
       background-repeat: no-repeat;
       background-size: cover;

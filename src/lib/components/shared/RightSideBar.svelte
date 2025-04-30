@@ -21,7 +21,7 @@
     ];
 </script>
   
-<aside class="w-64 h-screen bg-vocal_darkest border-r border-[#202225] p-4 flex flex-col overflow-y-auto font-['Press_Start_2P', 'VT323', 'Minecraft', monospace] text-sm">
+<aside class="w-78 h-screen bg-vocal_darkest border-r border-[#202225] p-4 flex flex-col overflow-y-auto font-['Press_Start_2P', 'VT323', 'Minecraft', monospace] text-sm">
     <!-- Search Bar -->
     <div class="mb-6">
       <div class="relative">
@@ -59,7 +59,7 @@
       <ul class="space-y-3">
         {#each followers as follower}
           <li class="hover:bg-[#32353b] p-2 rounded-md transition-colors">
-            <a href={`/profile/${follower.username}`} class="flex items-center gap-3">
+            <a href={`/users/${follower.username}`} class="flex items-center gap-3">
               <img src={follower.avatar} alt={follower.name} class="h-8 w-8 rounded-sm ring-2 ring-purple-600" />
               <div>
                 <p class="font-medium text-white" use:twemojify>{follower.name}</p>
