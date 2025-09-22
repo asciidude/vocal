@@ -36,13 +36,13 @@
     "@icons-pack/svelte-simple-icons": "^5.0.0",
     "@tailwindcss/vite": "^4.0.9",
     "@types/jsonwebtoken": "^9.0.9",
+    "caniuse-lite": "^1.0.30001733",
     "dotenv": "^16.4.7",
     "jsonwebtoken": "^9.0.2",
     "libsignal-protocol": "^1.3.15",
     "lucide-svelte": "^0.477.0",
     "mongoose": "^8.12.1",
     "pg": "^8.14.0",
-    "svelte-twemojify": "^2.1.1",
-    "tailwindcss": "^4.0.9"
+    "svelte-twemojify": "^2.1.1"
   }
 }

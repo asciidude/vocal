@@ -22,7 +22,7 @@
             <h1 class="text-3xl font-bold text-purple-500 text-shadow-sm shadow-purple-600">
               Vocal
             </h1>
-            <span class="ml-2 bg-purple-600 text-xs px-2 py-1 rounded-full">BETA</span>
+            <span class="ml-2 bg-purple-600 text-xs px-2 py-1 rounded-full">PUBLIC ALPHA</span>
           </div>
           <nav>
             <ul class="flex space-x-8">
@@ -40,8 +40,8 @@
       
       <div class="container mx-auto px-4 relative z-10">
         <div class="max-w-3xl mx-auto p-8 bg-gray-900/50 rounded-2xl border border-purple-900/60 backdrop-blur-sm shadow-xl">
-          <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-purple-600 text-transparent bg-clip-text text-center">Your Voice. Your Control.</h2>
-          <p class="text-xl text-gray-300 mb-10 text-center">Vocal is a decentralized social platform that puts privacy and user autonomy at the center of your social experience.</p>
+          <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-purple-600 text-transparent bg-clip-text text-center">Welcome to Vocal.</h2>
+          <p class="text-xl text-gray-300 mb-10 text-center">Vocal is a social media platform designed for friendly, open-minded conversations.</p>
           <div class="flex justify-center gap-4">
             <a href="/api/auth/discord" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition shadow-lg shadow-purple-900/50">
               Join with Discord
