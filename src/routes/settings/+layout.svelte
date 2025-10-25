@@ -4,6 +4,7 @@
 </script>
   
 <div class="flex min-h-screen bg-[#110b13]">
+    
     <LeftSideBar user={data.user} />
     
     <main class="flex-1 overflow-y-auto">

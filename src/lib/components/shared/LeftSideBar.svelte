@@ -44,9 +44,9 @@
   let avatarSrc = '';
 </script>
 
-<aside class="w-76 h-screen bg-[#110b13] border-l border-[#202225] p-4 flex flex-col text-sm">
+<aside class="w-72 h-screen bg-[#110b13] border-l border-[#202225] p-4 flex flex-col text-sm overflow-y-auto">
   <div class="mb-6">
-    <h2 class="text-lg font-bold text-white tracking-wider">VOCAL</h2>
+    <h2 class="text-lg font-bold text-white tracking-wider">Vocal</h2>
     <p class="text-xs text-purple-300 mt-2">Connect with your community</p>
   </div>
 

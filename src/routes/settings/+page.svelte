@@ -23,85 +23,53 @@
       Info,
       Lock
     } from "lucide-svelte";
-  
-    let activeSection: string = "account";
-    
-    let darkMode: boolean = false;
 
-    function toggleDarkMode() {
-      darkMode = !darkMode;
+    const navItems = [
+      { icon: User, label: 'Account', section: 'account' },
+      { icon: Shield, label: 'Privacy', section: 'privacy' },
+      { icon: Bell, label: 'Notifications', section: 'notifications' },
+      { icon: Globe, label: 'Content Preferences', section: 'content' },
+      { icon: Layout, label: 'Appearance', section: 'appearance' },
+      { icon: Info, label: 'Support', section: 'help' }
+    ];
+
+    let activeSection: string = "account";
+
+    function isActive(section) {
+      return activeSection === section;
     }
 </script>
 
-<div class="min-h-screen {darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}">
+<title>Vocal - Settings</title>
+
+<div class="min-h-screen">
     <div class="max-w-6xl mx-auto px-4 py-8">
       <h1 class="text-3xl font-bold text-purple-600 mb-8">Settings</h1>
       
       <div class="flex flex-col md:flex-row gap-8">
         <div class="w-full md:w-1/4">
-          <nav class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+          <nav class="bg-[#130f1b] text-white rounded-lg shadow-md p-4">
             <ul class="space-y-2">
-              <li>
-                <button 
-                  class="w-full text-left px-4 py-2 rounded-md flex items-center gap-3 {activeSection === 'account' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}"
-                  on:click={() => activeSection = 'account'}
-                >
-                  <User size={18} />
-                  <span>Account</span>
-                </button>
-              </li>
-              <li>
-                <button 
-                  class="w-full text-left px-4 py-2 rounded-md flex items-center gap-3 {activeSection === 'privacy' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}"
-                  on:click={() => activeSection = 'privacy'}
-                >
-                  <Shield size={18} />
-                  <span>Privacy & Security</span>
-                </button>
-              </li>
-              <li>
-                <button 
-                  class="w-full text-left px-4 py-2 rounded-md flex items-center gap-3 {activeSection === 'notifications' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}"
-                  on:click={() => activeSection = 'notifications'}
-                >
-                  <Bell size={18} />
-                  <span>Notifications</span>
-                </button>
-              </li>
-              <li>
-                <button 
-                  class="w-full text-left px-4 py-2 rounded-md flex items-center gap-3 {activeSection === 'content' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}"
-                  on:click={() => activeSection = 'content'}
-                >
-                  <Globe size={18} />
-                  <span>Content Preferences</span>
-                </button>
-              </li>
-              <li>
-                <button 
-                  class="w-full text-left px-4 py-2 rounded-md flex items-center gap-3 {activeSection === 'appearance' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}"
-                  on:click={() => activeSection = 'appearance'}
-                >
-                  <Layout size={18} />
-                  <span>Appearance</span>
-                </button>
-              </li>
-              <li>
-                <button 
-                  class="w-full text-left px-4 py-2 rounded-md flex items-center gap-3 {activeSection === 'help' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}"
-                  on:click={() => activeSection = 'help'}
-                >
-                  <HelpCircle size={18} />
-                  <span>Help & Support</span>
-                </button>
-              </li>
+              {#each navItems as item}
+                <li>
+                  <button 
+                    class="w-full text-left px-4 py-2 rounded-md flex items-center gap-3 {isActive(item.section) ? 
+                          'bg-purple-900 text-purple-200' : 
+                          'text-gray-300 hover:bg-[#32353b] hover:text-purple-300'}"
+                    on:click={() => activeSection = item.section}
+                  >
+                    <svelte:component this={item.icon} size={18} />
+                    <span>{item.label}</span>
+                  </button>
+                </li>
+              {/each}
             </ul>
           </nav>
         </div>
         
         <!-- Settings Content Area -->
         <div class="w-full md:w-3/4">
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+          <div class="bg-[#130f1b] text-white rounded-lg shadow-md p-6">
             
             {#if activeSection === 'account'}
               <h2 class="text-2xl font-bold text-purple-600 mb-6">Account Settings</h2>
