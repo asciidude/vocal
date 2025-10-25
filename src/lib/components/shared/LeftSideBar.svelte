@@ -4,11 +4,9 @@
     Home, 
     User, 
     Settings, 
-    MessageSquare, 
     Bell, 
     Bookmark, 
-    Heart, 
-    TrendingUp, 
+    Heart,
     LogOut,
     Search
   } from 'lucide-svelte';
@@ -22,11 +20,9 @@
   const navItems = [
     { icon: Home, label: 'Home', href: '/home' },
     { icon: User, label: 'Profile', href: `/users/${user?.discordId}` },
-    { icon: MessageSquare, label: 'Messages', href: '/messages' },
     { icon: Bell, label: 'Notifications', href: '/notifications' },
     { icon: Bookmark, label: 'Bookmarks', href: '/bookmarks' },
     { icon: Heart, label: 'Likes', href: '/likes' },
-    { icon: TrendingUp, label: 'Explore', href: '/explore' },
     { icon: Settings, label: 'Settings', href: '/settings' },
     { icon: Search, label: 'Search', href: '/search' }
   ];
@@ -44,7 +40,7 @@
   let avatarSrc = '';
 </script>
 
-<aside class="w-72 h-screen bg-[#110b13] border-l border-[#202225] p-4 flex flex-col text-sm overflow-y-auto">
+<div class="w-72 h-screen bg-[#110b13] border-l border-[#202225] p-4 flex flex-col text-sm overflow-y-auto">
   <div class="mb-6">
     <h2 class="text-lg font-bold text-white tracking-wider">Vocal</h2>
     <p class="text-xs text-purple-300 mt-2">Connect with your community</p>
@@ -78,4 +74,4 @@
       <a href="/logout" class="tracking-wide">Logout</a>
     </button>
   </div>
-</aside>
+</div>
