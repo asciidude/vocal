@@ -9,7 +9,8 @@
     Bookmark, 
     Heart, 
     TrendingUp, 
-    LogOut
+    LogOut,
+    Search
   } from 'lucide-svelte';
   import { getImage } from '$lib/utils/Cache.util';
   import { onMount } from 'svelte';
@@ -26,7 +27,8 @@
     { icon: Bookmark, label: 'Bookmarks', href: '/bookmarks' },
     { icon: Heart, label: 'Likes', href: '/likes' },
     { icon: TrendingUp, label: 'Explore', href: '/explore' },
-    { icon: Settings, label: 'Settings', href: '/settings' }
+    { icon: Settings, label: 'Settings', href: '/settings' },
+    { icon: Search, label: 'Search', href: '/search' }
   ];
   
   onMount(async () => {
