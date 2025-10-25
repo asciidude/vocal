@@ -1,6 +1,5 @@
 <script lang="ts">
     import LeftSideBar from '$lib/components/shared/LeftSideBar.svelte';
-    import RightSideBar from '$lib/components/shared/RightSideBar.svelte';
     export let data: { user: typeof user | null };
 </script>
   
