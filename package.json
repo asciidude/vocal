@@ -36,7 +36,7 @@
     "@icons-pack/svelte-simple-icons": "^5.0.0",
     "@tailwindcss/vite": "^4.0.9",
     "@types/jsonwebtoken": "^9.0.9",
-    "caniuse-lite": "^1.0.30001733",
+    "caniuse-lite": "^1.0.30001751",
     "dotenv": "^16.4.7",
     "jsonwebtoken": "^9.0.2",
     "libsignal-protocol": "^1.3.15",
