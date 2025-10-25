@@ -16,7 +16,7 @@ export const GET = async({ url, cookies }: { url: URL, cookies: Cookies }) => {
             client_secret: DISCORD_CLIENT_SECRET,
             grant_type: 'authorization_code',
             code,
-            redirect_uri: NODE_ENV === 'production' ? DISCORD_REDIRECT_URI : `http://localhost:${PORT}/api/auth/callback`
+            redirect_uri: NODE_ENV === 'production' ? DISCORD_REDIRECT_URI : `http://localhost:${PORT}/api/auth/discord/callback`
         })
     });
 
@@ -47,7 +47,7 @@ export const GET = async({ url, cookies }: { url: URL, cookies: Cookies }) => {
     );
 
     // BETA ONLY FEATURE //
-    if(!user!.roles.includes(UserRoles.Beta)) throw error(403, 'Your account does not have beta access yet.');
+    if(!user!.roles.includes(UserRoles.Beta)) throw error(403, 'Your account does not have beta access, please apply on our Discord.');
     // BETA ONLY FEATURE //
 
     const jwtToken = jwt.sign({
