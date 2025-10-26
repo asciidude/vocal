@@ -26,6 +26,14 @@
           Welcome to Vocal! By using our platform, you agree to follow these terms and conditions. Violation of these terms may result in disciplinary action being taken.
         </p>
       </section>
+      
+      <section class="mb-8 border-l-4 border-vocal_lightest pl-4">
+        <p class="text-lg">
+          <span class="font-bold">By using our services, you represent and warrant that you are at least 13 years of age.</span>
+            Accounts created by persons under the age of 13 are strictly prohibited and will be terminated immediately
+            upon discovery, in accordance with the Childrens Online Privacy Protection Act. We do not knowingly collect personal information from children under the age of 13.
+        </p>
+      </section>
 
       <section class="mb-8">
         <h2 class="text-2xl font-bold text-vocal_lightest border-b border-vocal_strong pb-2 mb-4">

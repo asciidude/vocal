@@ -80,8 +80,6 @@
         padding: 1.25rem;
         border: 1px solid rgb(45, 34, 73);
         transition: border-color 0.2s;
-        margin-right: 2rem;
-        margin-left: 2rem;
     }
 
     .post:hover {
