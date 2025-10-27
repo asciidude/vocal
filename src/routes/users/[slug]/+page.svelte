@@ -1,8 +1,11 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import type { PageData } from "./$types";
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
     import * as Tooltip from "$lib/components/ui/tooltip/index.js";
     import * as Tabs from "$lib/components/ui/tabs";
+    import { Button } from "$lib/components/ui/button/index.js";
+    
     import { UserRoles } from "$lib/types/User.types";
     import {
         Ellipsis,
@@ -11,6 +14,8 @@
         Shield,
         Sparkle,
         MessageCircle,
+        UserPlus,
+        UserMinus
     } from "lucide-svelte";
     import * as Avatar from "$lib/components/ui/avatar";
     import { getImage } from "$lib/utils/Cache.util";
@@ -19,13 +24,18 @@
     import Reply from "$lib/components/shared/Reply.svelte";
   
     export let data: PageData;
-  
+
     $: user = data?.user;
-    $: posts = data?.posts;
+    $: currentUser = data?.currentUser;
+    $: isFollowing = data?.isFollowing;
+
     $: follow = {
-        ing: data?.following || 0,
-        ers: data?.followers || 0,
+        ing: data?.followingCount || 0,
+        ers: data?.followersCount || 0,
+        ersData: data?.followers || [],
+        ingData: data?.following || []
     };
+
     let activeTab: string = "posts";
   
     const roleData = {
@@ -84,30 +94,59 @@
         <div class="container mx-auto flex flex-col text-center">
             <Avatar.Root class="w-20 h-20 rounded-full object-cover mx-auto block mb-5">
                 <Avatar.Image 
-                    src={data.user.avatarUrl} 
-                    alt="@{data.user.username}"
+                    src={user.avatarUrl} 
+                    alt="@{user.username}"
                 />
                 <Avatar.Fallback>
-                    {data.user.displayName || data.user.username}
+                    {user.displayName || user.username}
                 </Avatar.Fallback>
             </Avatar.Root>
             <h1 class="text-2xl font-bold text-white">{user.displayName || user.username}</h1>
             <p class="text-1xl font-normal text-white">{user.bio}</p>
             <div class="text-white flex align-middle justify-center text-center gap-5 mt-2">
-                    <a
-                        href="/users/{user.discordId}/following"
-                        class="follow-stat"
-                    >
-                        <span class="follow-count">{follow.ing}</span>
-                        <span class="follow-label">Following</span>
-                    </a>
-                    <a
-                        href="/users/{user.discordId}/followers"
-                        class="follow-stat"
-                    >
-                        <span class="follow-count">{follow.ers}</span>
-                        <span class="follow-label">Followers</span>
-                    </a>
+                    <Dialog.Root>
+                        <Dialog.Trigger>
+                            <span class="opacity-60">{follow.ing}</span>
+                            <span class="opacity-30">Following</span>
+                        </Dialog.Trigger>
+                        <Dialog.Content class="bg-vocal_darkest text-white">
+                            <Dialog.Header>
+                                <Dialog.Title>{user.displayName || user.username}'s following</Dialog.Title>
+                                <Dialog.Description>
+                                    {#each follow.ingData as f}
+                                        <Dialog.Close>
+                                            <a href="/users/{f.discordId}" class="flex items-center gap-2 mt-3">
+                                                <img src={f.avatarUrl} alt={f.username} class="w-6 h-6 rounded-full" />
+                                                <span>{f.displayName || f.username}</span>
+                                            </a>
+                                        </Dialog.Close>
+                                    {/each}
+                                </Dialog.Description>
+                            </Dialog.Header>
+                        </Dialog.Content>
+                    </Dialog.Root>
+
+                    <Dialog.Root>
+                        <Dialog.Trigger>
+                            <span class="opacity-60">{follow.ers}</span>
+                            <span class="opacity-30">Followers</span>
+                        </Dialog.Trigger>
+                        <Dialog.Content class="bg-vocal_darkest text-white">
+                            <Dialog.Header>
+                                <Dialog.Title>{user.displayName || user.username}'s followers</Dialog.Title>
+                                <Dialog.Description>
+                                    {#each follow.ersData as f}
+                                        <Dialog.Close>
+                                            <a href="/users/{f.discordId}" class="flex items-center gap-2 mt-3">
+                                                <img src={f.avatarUrl} alt={f.username} class="w-6 h-6 rounded-full" />
+                                                <span>{f.displayName || f.username}</span>
+                                            </a>
+                                        </Dialog.Close>
+                                    {/each}
+                                </Dialog.Description>
+                            </Dialog.Header>
+                        </Dialog.Content>
+                    </Dialog.Root>
                 </div>
             <div class="flex flex-row gap-3 justify-center mt-3 text-white">
                 {#each user.roles.sort((a, b) => roleData[a].priority - roleData[b].priority) as role}
@@ -128,46 +167,25 @@
                     {/if}
                 {/each}
             </div>
-            <!--{#if data.user}
-                <div class="flex items-center gap-2">
+
+            {#if currentUser?._id && user._id !== currentUser._id}
+                <div class="mt-5 mx-auto">
+                    <button class="bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default" type="submit">
+                        {#if isFollowing == null}
+                            <UserPlus size={16} />
+                            <span class="text-xs">Follow</span>
+                        {:else}
+                            <UserMinus size={16} />
+                            <span class="text-xs">Unfollow</span>
+                        {/if}
+                    </button>
                 </div>
-            {/if}-->
+            {/if}
         </div>
     </header>
 </div>
 
 <!--
-<div class="profile-container m-5">
-    <div
-        class="profile-header mt-5 rounded-t-lg bg-[#7056AE]"
-        id="profileHeader"
-    >
-        <div class="profile-header-content">
-            <div class="avatar-container">
-                {#if user.avatarUrl}
-                    <img
-                        src={avatarSrc}
-                        alt="{user.displayName || user.username}'s avatar"
-                        class="avatar"
-                    />
-                {:else}
-                    <div class="avatar-fallback">
-                        {getInitials(user.displayName || user.username)}
-                    </div>
-                {/if}
-            </div>
-            
-                <p class="username">@{user.username}</p>
-
-                {#if user.bio}
-                    <p class="bio">{user.bio}</p>
-                {/if}
-
-                
-            </div>
-        </div>
-    </div>
-
     <div class="profile-content pb-5">
         <Tabs.Root
             value={activeTab}
@@ -235,63 +253,5 @@
     .profile-header {
         padding: 2rem;
         position: relative;
-    }
-
-    .avatar-container {
-        flex-shrink: 0;
-    }
-
-    .avatar {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        border: 4px solid #a481f6;
-        object-fit: cover;
-    }
-
-    .avatar-fallback {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        border: 4px solid #a481f6;
-        background-color: #4d3882;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.5rem;
-        font-weight: bold;
-    }
-
-    .user-info h1 {
-        font-size: 2rem;
-        margin: 0;
-        font-weight: 700;
-    }
-
-    .username {
-        color: #a481f6;
-        font-size: 1.1rem;
-        margin-bottom: 1rem;
-    }
-
-    .bio {
-        line-height: 1;
-    }
-
-    .follow-label {
-        color: rgba(255, 255, 255, 0.5);
-    }
-
-    .profile-content {
-        background-color: rgb(23, 21, 29);
-        color: white;
-    }
-  
-    .empty {
-        color: #888;
-        font-style: italic;
-        padding: 2rem 0;
-        text-align: center;
     }
 </style>
