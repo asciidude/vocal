@@ -68,7 +68,7 @@
         class:bg-purple-900={isActive(item.href)}
         class:text-purple-200={isActive(item.href)}
       >
-        <svelte:component this={item.icon} class="h-5 w-5 ml-0.5" />
+        <svelte:component this={item.icon} class="h-5 w-5 { screenLarge ? 'ml-0.5' : 'mr-3' }" />
         {#if !screenLarge}
           <span class="tracking-wide">{item.label}</span>
         {/if}
