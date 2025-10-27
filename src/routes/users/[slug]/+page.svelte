@@ -60,7 +60,7 @@
     let mounted = false;
 
     onMount(() => {
-    mounted = true;
+        mounted = true;
     });
 
     $: if (mounted && user?.avatarUrl) {
@@ -93,6 +93,22 @@
             </Avatar.Root>
             <h1 class="text-2xl font-bold text-white">{user.displayName || user.username}</h1>
             <p class="text-1xl font-normal text-white">{user.bio}</p>
+            <div class="text-white flex align-middle justify-center text-center gap-5 mt-2">
+                    <a
+                        href="/users/{user.discordId}/following"
+                        class="follow-stat"
+                    >
+                        <span class="follow-count">{follow.ing}</span>
+                        <span class="follow-label">Following</span>
+                    </a>
+                    <a
+                        href="/users/{user.discordId}/followers"
+                        class="follow-stat"
+                    >
+                        <span class="follow-count">{follow.ers}</span>
+                        <span class="follow-label">Followers</span>
+                    </a>
+                </div>
             <div class="flex flex-row gap-3 justify-center mt-3 text-white">
                 {#each user.roles.sort((a, b) => roleData[a].priority - roleData[b].priority) as role}
                     {#if roleData[role]}
@@ -147,22 +163,7 @@
                     <p class="bio">{user.bio}</p>
                 {/if}
 
-                <div class="follow-stats">
-                    <a
-                        href="/users/{user.discordId}/following"
-                        class="follow-stat"
-                    >
-                        <span class="follow-count">{follow.ing}</span>
-                        <span class="follow-label">Following</span>
-                    </a>
-                    <a
-                        href="/users/{user.discordId}/followers"
-                        class="follow-stat"
-                    >
-                        <span class="follow-count">{follow.ers}</span>
-                        <span class="follow-label">Followers</span>
-                    </a>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -278,26 +279,8 @@
         line-height: 1;
     }
 
-    .follow-stats {
-        display: flex;
-        gap: 1.5rem;
-        margin-top: 1rem;
-    }
-
-    .follow-stat {
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-        color: white;
-        text-decoration: none;
-    }
-
-    .follow-count {
-        font-weight: 600;
-    }
-
     .follow-label {
-        color: rgba(255, 255, 255, 0.7);
+        color: rgba(255, 255, 255, 0.5);
     }
 
     .profile-content {
@@ -310,27 +293,5 @@
         font-style: italic;
         padding: 2rem 0;
         text-align: center;
-    }
-
-    @media (max-width: 600px) {
-        .profile-header-content {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .avatar-container {
-            margin-bottom: 1rem;
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .follow-stats {
-            justify-content: center;
-        }
     }
 </style>
