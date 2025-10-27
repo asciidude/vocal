@@ -64,7 +64,7 @@
     {#each navItems as item}
       <a 
         href={item.href} 
-        class="flex items-center p-3 rounded-md transition-colors text-gray-300 hover:bg-[#32353b] hover:text-purple-300"
+        class="flex items-center p-3 rounded-md transition-colors text-gray-300 { isActive(item.href) ? '' : 'hover:bg-[#32353b] hover:text-purple-300' }"
         class:bg-purple-900={isActive(item.href)}
         class:text-purple-200={isActive(item.href)}
       >
