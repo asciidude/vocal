@@ -32,19 +32,23 @@ export const GET = async({ url, cookies }: { url: URL, cookies: Cookies }) => {
 
     const user = await UserModel.findOne({ discordId: userData.id });
 
-    await UserModel.updateOne(
-        { discordId: userData.id },
-        {
-            discordId: userData.id,
-            avatarUrl: userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=512` : 'https://cdn.discordapp.com/embed/avatars/1.png?size=4096',
-            bannerUrl: userData.banner ? `https://cdn.discordapp.com/banners/${userData.id}/${userData.banner}.png?size=1024` : 'none',
-            username: userData.username,
-            displayName: userData.global_name,
-            bio: user?.bio || '',
-            roles: user?.roles || []
-        } as UserType,
-        { new: true, upsert: true }
-    );
+    if(!user) {
+        // Just create the account, updates can be made in profile editor
+
+        await UserModel.updateOne(
+            { discordId: userData.id },
+            {
+                discordId: userData.id,
+                avatarUrl: userData.avatar ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=512` : 'https://cdn.discordapp.com/embed/avatars/1.png?size=4096',
+                bannerUrl: userData.banner ? `https://cdn.discordapp.com/banners/${userData.id}/${userData.banner}.png?size=1024` : 'none',
+                username: userData.username,
+                displayName: userData.global_name,
+                bio: '',
+                roles: []
+            } as UserType,
+            { new: true, upsert: true }
+        );
+    }
 
     // BETA ONLY FEATURE //
     if(!user!.roles.includes(UserRoles.Beta)) throw error(403, 'Your account does not have beta access, please apply on our Discord.');

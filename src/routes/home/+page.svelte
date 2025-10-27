@@ -43,15 +43,17 @@
             <h1 class="text-2xl font-bold text-white">Home</h1>
             {#if data.user}
                 <div class="flex items-center gap-2">
-                    <Avatar.Root>
-                        <Avatar.Image 
-                            src={data.user.avatarUrl} 
-                            alt="@{data.user.username}" 
-                        />
-                        <Avatar.Fallback>
-                            {data.user.displayName || data.user.username}
-                        </Avatar.Fallback>
-                    </Avatar.Root>
+                    <a href="/users/{data.user.discordId}">
+                        <Avatar.Root>
+                            <Avatar.Image 
+                                src={data.user.avatarUrl} 
+                                alt="@{data.user.username}" 
+                            />
+                            <Avatar.Fallback>
+                                {data.user.displayName || data.user.username}
+                            </Avatar.Fallback>
+                        </Avatar.Root>
+                    </a>
                 </div>
             {/if}
         </div>
@@ -61,15 +63,17 @@
         {#if data.user}
             <div class="post mb-6">
                 <div class="flex gap-3">
-                    <Avatar.Root class="flex-shrink-0">
-                        <Avatar.Image 
-                            src={currentUserAv} 
-                            alt="@{data.user.username}" 
-                        />
-                        <Avatar.Fallback>
-                            {data.user.displayName || data.user.username}
-                        </Avatar.Fallback>
-                    </Avatar.Root>
+                    <a href="/users/{data.user.discordId}">
+                        <Avatar.Root class="flex-shrink-0">
+                            <Avatar.Image 
+                                src={currentUserAv} 
+                                alt="@{data.user.username}" 
+                            />
+                            <Avatar.Fallback>
+                                {data.user.displayName || data.user.username}
+                            </Avatar.Fallback>
+                        </Avatar.Root>
+                    </a>
                     <form
                         action="/api/posts/create/post" method="post"
                         use:enhance={handleFormEnhance}
@@ -108,6 +112,7 @@
                         postAuthor={post.authorObj} 
                         postLikes={data.likes.filter((p: LikeType) => p.parent_post === post._id).length}
                         postReplies={data.replies.filter((p: ReplyType) => p.parent_post === post._id).length}
+                        user={data.user}
                     />
                 {/each}
             {:else}

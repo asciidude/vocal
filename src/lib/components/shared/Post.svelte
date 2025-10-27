@@ -2,6 +2,7 @@
     import type { PostType } from "$lib/types/Post.type";
     import type { UserType } from "$lib/types/User.types";
 
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import * as Avatar from "$lib/components/ui/avatar";
     import { Ellipsis, Heart, MessageCircle } from "lucide-svelte";
 
@@ -19,6 +20,7 @@
 
     export let post: PostType | null = null;
     export let postAuthor: UserType | null = null;
+    export let user: UserType | null = null;
     export let postLikes: Number = 0;
     export let postReplies: Number = 0;
 
@@ -51,7 +53,19 @@
                 </div>
             </a>
         </div>
-        <Ellipsis class="size-5" />
+            
+        <!-- work on form for this, or sm -->
+        <DropdownMenu.Root>
+            <DropdownMenu.Trigger><Ellipsis class="size-5" /> </DropdownMenu.Trigger>
+            <DropdownMenu.Content class="text-white !bg-vocal_darkest border border-[#9072d7]">
+                <DropdownMenu.Group>
+                    {#if user._id === postAuthor._id}
+                        <DropdownMenu.Item class="cursor-pointer text-xs font-light">Delete</DropdownMenu.Item>
+                    {/if}
+                    <DropdownMenu.Item class="text-red-400 cursor-pointer text-xs font-light">Report</DropdownMenu.Item>
+                </DropdownMenu.Group>
+            </DropdownMenu.Content>
+        </DropdownMenu.Root>
     </div>
     <div class="post-content">
         <p>{post?.content}</p>

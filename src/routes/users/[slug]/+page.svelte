@@ -57,21 +57,70 @@
 
     let avatarSrc = '';
     let bannerSrc = '';
+    let mounted = false;
 
-    onMount(async () => {
-        avatarSrc = await getImage(data.user.avatarUrl);
-        bannerSrc = await getImage(data.user.bannerUrl);
-
-        const header = document.getElementById("profileHeader");
-        header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${bannerSrc})`;
-        header!.style.backgroundRepeat = "no-repeat";
-        header!.style.backgroundPosition = "center";
-        header!.style.backgroundSize = "cover";
+    onMount(() => {
+    mounted = true;
     });
+
+    $: if (mounted && user?.avatarUrl) {
+        (async () => {
+            avatarSrc = await getImage(data.user.avatarUrl);
+            bannerSrc = await getImage(data.user.bannerUrl);
+
+            const header = document.getElementById("profileHeader");
+            header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${bannerSrc})`;
+            header!.style.backgroundRepeat = "no-repeat";
+            header!.style.backgroundPosition = "center";
+            header!.style.backgroundSize = "cover";
+        })();
+    }
 </script>
   
 <title>Vocal - {user.displayName || user.username}</title>
 
+<div class="flex flex-col min-h-screen">
+    <header class="sticky top-0 z-10 bg-[#130f1b] border-b border-[#2d2249] p-4 profile-header" id="profileHeader">
+        <div class="container mx-auto flex flex-col text-center">
+            <Avatar.Root class="w-20 h-20 rounded-full object-cover mx-auto block mb-5">
+                <Avatar.Image 
+                    src={data.user.avatarUrl} 
+                    alt="@{data.user.username}"
+                />
+                <Avatar.Fallback>
+                    {data.user.displayName || data.user.username}
+                </Avatar.Fallback>
+            </Avatar.Root>
+            <h1 class="text-2xl font-bold text-white">{user.displayName || user.username}</h1>
+            <p class="text-1xl font-normal text-white">{user.bio}</p>
+            <div class="flex flex-row gap-3 justify-center mt-3 text-white">
+                {#each user.roles.sort((a, b) => roleData[a].priority - roleData[b].priority) as role}
+                    {#if roleData[role]}
+                        <Tooltip.Provider>
+                            <Tooltip.Root>
+                                <Tooltip.Trigger>
+                                    <svelte:component
+                                        this={roleData[role].icon}
+                                        class="w-5 h-5"
+                                    />
+                                </Tooltip.Trigger>
+                                <Tooltip.Content>
+                                    <p>{roleData[role].description}</p>
+                                </Tooltip.Content>
+                            </Tooltip.Root>
+                        </Tooltip.Provider>
+                    {/if}
+                {/each}
+            </div>
+            <!--{#if data.user}
+                <div class="flex items-center gap-2">
+                </div>
+            {/if}-->
+        </div>
+    </header>
+</div>
+
+<!--
 <div class="profile-container m-5">
     <div
         class="profile-header mt-5 rounded-t-lg bg-[#7056AE]"
@@ -91,27 +140,7 @@
                     </div>
                 {/if}
             </div>
-            <div class="user-info">
-                <div class="name-and-badges">
-                    <h1>{user.displayName || user.username}</h1>
-                    <div class="badges">
-                        {#each user.roles.sort((a, b) => roleData[a].priority - roleData[b].priority) as role}
-                            {#if roleData[role]}
-                                <Tooltip.Root>
-                                    <Tooltip.Trigger>
-                                        <svelte:component
-                                            this={roleData[role].icon}
-                                            class="w-5 h-5 mr-1 mt-1"
-                                        />
-                                    </Tooltip.Trigger>
-                                    <Tooltip.Content>
-                                        <p>{roleData[role].description}</p>
-                                    </Tooltip.Content>
-                                </Tooltip.Root>
-                            {/if}
-                        {/each}
-                    </div>
-                </div>
+            
                 <p class="username">@{user.username}</p>
 
                 {#if user.bio}
@@ -199,25 +228,12 @@
         </Tabs.Root>
     </div>
 </div>
+-->
 
 <style>
-    .profile-container {
-        max-width: 70rem;
-        margin: 0 auto;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-    }
-
     .profile-header {
         padding: 2rem;
         position: relative;
-    }
-
-    .profile-header-content {
-        display: flex;
-        align-items: flex-start;
-        gap: 1.5rem;
     }
 
     .avatar-container {
@@ -246,27 +262,10 @@
         font-weight: bold;
     }
 
-    .user-info {
-        color: white;
-        flex-grow: 1;
-    }
-
-    .name-and-badges {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 0.25rem;
-    }
-
     .user-info h1 {
         font-size: 2rem;
         margin: 0;
         font-weight: 700;
-    }
-
-    .badges {
-        display: flex;
-        align-items: center;
     }
 
     .username {
