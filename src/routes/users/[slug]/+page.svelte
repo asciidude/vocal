@@ -4,7 +4,6 @@
     import * as Dialog from "$lib/components/ui/dialog/index.js";
     import * as Tooltip from "$lib/components/ui/tooltip/index.js";
     import * as Tabs from "$lib/components/ui/tabs";
-    import { Button } from "$lib/components/ui/button/index.js";
     
     import { UserRoles } from "$lib/types/User.types";
     import {
@@ -15,7 +14,8 @@
         Sparkle,
         MessageCircle,
         UserPlus,
-        UserMinus
+        UserMinus,
+        Plus
     } from "lucide-svelte";
     import * as Avatar from "$lib/components/ui/avatar";
     import { getImage } from "$lib/utils/Cache.util";
@@ -26,8 +26,9 @@
     export let data: PageData;
 
     $: user = data?.user;
-    $: currentUser = data?.currentUser;
+    $: profileUser = data?.profileUser;
     $: isFollowing = data?.isFollowing;
+    $: posts = data?.posts;
 
     $: follow = {
         ing: data?.followingCount || 0,
@@ -73,10 +74,10 @@
         mounted = true;
     });
 
-    $: if (mounted && user?.avatarUrl) {
+    $: if (mounted && profileUser?.avatarUrl) {
         (async () => {
-            avatarSrc = await getImage(data.user.avatarUrl);
-            bannerSrc = await getImage(data.user.bannerUrl);
+            avatarSrc = await getImage(profileUser.avatarUrl);
+            bannerSrc = await getImage(profileUser.bannerUrl);
 
             const header = document.getElementById("profileHeader");
             header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${bannerSrc})`;
@@ -87,69 +88,23 @@
     }
 </script>
   
-<title>Vocal - {user.displayName || user.username}</title>
+<title>Vocal - {profileUser.displayName || profileUser.username}</title>
 
 <div class="flex flex-col min-h-screen">
-    <header class="sticky top-0 z-10 bg-[#130f1b] border-b border-[#2d2249] p-4 profile-header" id="profileHeader">
+    <header class="sticky top-0 z-10 bg-vocal_strong border-b border-[#2d2249] p-8" id="profileHeader">
         <div class="container mx-auto flex flex-col text-center">
             <Avatar.Root class="w-20 h-20 rounded-full object-cover mx-auto block mb-5">
                 <Avatar.Image 
-                    src={user.avatarUrl} 
-                    alt="@{user.username}"
+                    src={profileUser.avatarUrl} 
+                    alt="@{profileUser.username}"
                 />
                 <Avatar.Fallback>
-                    {user.displayName || user.username}
+                    {profileUser.displayName || profileUser.username}
                 </Avatar.Fallback>
             </Avatar.Root>
-            <h1 class="text-2xl font-bold text-white">{user.displayName || user.username}</h1>
-            <p class="text-1xl font-normal text-white">{user.bio}</p>
-            <div class="text-white flex align-middle justify-center text-center gap-5 mt-2">
-                    <Dialog.Root>
-                        <Dialog.Trigger>
-                            <span class="opacity-60">{follow.ing}</span>
-                            <span class="opacity-30">Following</span>
-                        </Dialog.Trigger>
-                        <Dialog.Content class="bg-vocal_darkest text-white">
-                            <Dialog.Header>
-                                <Dialog.Title>{user.displayName || user.username}'s following</Dialog.Title>
-                                <Dialog.Description>
-                                    {#each follow.ingData as f}
-                                        <Dialog.Close>
-                                            <a href="/users/{f.discordId}" class="flex items-center gap-2 mt-3">
-                                                <img src={f.avatarUrl} alt={f.username} class="w-6 h-6 rounded-full" />
-                                                <span>{f.displayName || f.username}</span>
-                                            </a>
-                                        </Dialog.Close>
-                                    {/each}
-                                </Dialog.Description>
-                            </Dialog.Header>
-                        </Dialog.Content>
-                    </Dialog.Root>
-
-                    <Dialog.Root>
-                        <Dialog.Trigger>
-                            <span class="opacity-60">{follow.ers}</span>
-                            <span class="opacity-30">Followers</span>
-                        </Dialog.Trigger>
-                        <Dialog.Content class="bg-vocal_darkest text-white">
-                            <Dialog.Header>
-                                <Dialog.Title>{user.displayName || user.username}'s followers</Dialog.Title>
-                                <Dialog.Description>
-                                    {#each follow.ersData as f}
-                                        <Dialog.Close>
-                                            <a href="/users/{f.discordId}" class="flex items-center gap-2 mt-3">
-                                                <img src={f.avatarUrl} alt={f.username} class="w-6 h-6 rounded-full" />
-                                                <span>{f.displayName || f.username}</span>
-                                            </a>
-                                        </Dialog.Close>
-                                    {/each}
-                                </Dialog.Description>
-                            </Dialog.Header>
-                        </Dialog.Content>
-                    </Dialog.Root>
-                </div>
             <div class="flex flex-row gap-3 justify-center mt-3 text-white">
-                {#each user.roles.sort((a, b) => roleData[a].priority - roleData[b].priority) as role}
+                <h1 class="text-4xl font-bold text-white">{profileUser.displayName || profileUser.username}</h1>
+                {#each profileUser.roles.sort((a, b) => roleData[a].priority - roleData[b].priority) as role}
                     {#if roleData[role]}
                         <Tooltip.Provider>
                             <Tooltip.Root>
@@ -167,91 +122,139 @@
                     {/if}
                 {/each}
             </div>
+            
+            <p class="text-xl text-vocal_lightest opacity-50">@{profileUser.username}</p>
 
-            {#if currentUser?._id && user._id !== currentUser._id}
-                <div class="mt-5 mx-auto">
-                    <button class="bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default" type="submit">
+            {#if user?._id && user._id !== profileUser._id}
+                <div class="mt-2 mb-2 mx-auto">
+                    <button class="bg-vocal_strong hover:bg-vocal_strongest text-white px-5 py-1 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default" type="submit">
                         {#if isFollowing == null}
                             <UserPlus size={16} />
-                            <span class="text-xs">Follow</span>
+                            <span class="text-lg">Follow</span>
                         {:else}
                             <UserMinus size={16} />
-                            <span class="text-xs">Unfollow</span>
+                            <span class="text-lg">Unfollow</span>
                         {/if}
                     </button>
                 </div>
             {/if}
+            <!--
+            <div class="relative flex py-5 items-center">
+                <div class="flex-grow border-t border-gray-400"></div>
+                <span class="flex-shrink mx-4 text-gray-400"><Plus /></span>
+                <div class="flex-grow border-t border-gray-400"></div>
+            </div>
+            -->
+            <p class="text-2xl text-white">{profileUser.bio}</p>
+            <div class="text-white flex align-middle justify-center text-center gap-5 mt-2">
+                <Dialog.Root>
+                    <Dialog.Trigger class="text-xl">
+                        <span class="opacity-60">{follow.ing}</span>
+                        <span class="opacity-30">Following</span>
+                    </Dialog.Trigger>
+                    <Dialog.Content class="bg-vocal_darkest text-white border-vocal_strong">
+                        <Dialog.Header>
+                            <Dialog.Title class="text-2xl">{profileUser.displayName || profileUser.username}'s following</Dialog.Title>
+                            <Dialog.Description>
+                                {#each follow.ingData as f}
+                                    <Dialog.Close>
+                                        <a href="/users/{f.discordId}" class="flex items-center gap-2 mt-3 text-xl">
+                                            <img src={f.avatarUrl} alt={f.username} class="w-6 h-6 rounded-full" />
+                                            <span>{f.displayName || f.username}</span>
+                                        </a>
+                                    </Dialog.Close>
+                                {/each}
+                            </Dialog.Description>
+                        </Dialog.Header>
+                    </Dialog.Content>
+                </Dialog.Root>
+
+                <Dialog.Root>
+                    <Dialog.Trigger class="text-xl">
+                        <span class="opacity-60">{follow.ers}</span>
+                        <span class="opacity-30">Followers</span>
+                    </Dialog.Trigger>
+                    <Dialog.Content class="bg-vocal_darkest text-white border-vocal_strong">
+                        <Dialog.Header>
+                            <Dialog.Title class="text-2xl">{profileUser.displayName || profileUser.username}'s followers</Dialog.Title>
+                            <Dialog.Description>
+                                {#each follow.ersData as f}
+                                    <Dialog.Close>
+                                        <a href="/users/{f.discordId}" class="flex items-center gap-2 mt-3 text-xl">
+                                            <img src={f.avatarUrl} alt={f.username} class="w-6 h-6 rounded-full" />
+                                            <span>{f.displayName || f.username}</span>
+                                        </a>
+                                    </Dialog.Close>
+                                {/each}
+                            </Dialog.Description>
+                        </Dialog.Header>
+                    </Dialog.Content>
+                </Dialog.Root>
+            </div>
         </div>
     </header>
-</div>
 
-<!--
-    <div class="profile-content pb-5">
+    <div class="pb-5">
         <Tabs.Root
             value={activeTab}
-            onValueChange={(value) => (activeTab = value!.toString())}
+            onValueChange={(value) => (activeTab = value.toString())}
             class="w-full"
         >
             <Tabs.List class="flex justify-center items-center bg-transparent p-5 pt-7">
-                <Tabs.Trigger value="posts" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white">
+                <Tabs.Trigger value="posts" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white text-xl mt-4">
                     Posts
                 </Tabs.Trigger>
-                <Tabs.Trigger value="replies" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white">
+                <Tabs.Trigger value="replies" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white text-xl mt-4">
                     Replies
                 </Tabs.Trigger>
-                <Tabs.Trigger value="media" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white">
+                <Tabs.Trigger value="media" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white text-xl mt-4">
                     Media
                 </Tabs.Trigger>
-                <Tabs.Trigger value="likes" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white">
+                <Tabs.Trigger value="likes" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white text-xl mt-4">
                     Likes
                 </Tabs.Trigger>
             </Tabs.List>
 
-            <Tabs.Content value="posts" class="tab-content">
-                {#if posts && posts.posts.length > 0}
-                    {#each posts.posts as post}
-                        <Post 
-                            {post}
-                            postAuthor={user}
-                            postLikes={posts.likes.filter((p) => p.parent_post === post._id).length}
-                            postReplies={posts.postReplies.filter((p) => p.parent_post === post._id).length}
-                        />
-                    {/each}
-                {:else}
-                    <p class="empty">No posts yet.</p>
-                {/if}
-            </Tabs.Content>
+            <div class="container mx-auto flex-grow py-6">
+                <Tabs.Content value="posts" class="tab-content space-y-4">
+                    {#if posts && posts.posts.length > 0}
+                        {#each posts.posts as post}
+                            <Post 
+                                {post}
+                                {user}
+                                postAuthor={profileUser}
+                                postLikes={posts.likes.filter((p) => p.parent_post === post._id).length}
+                                postReplies={posts.postReplies.filter((p) => p.parent_post === post._id).length}
+                            />
+                        {/each}
+                    {:else}
+                        <p class="text-white text-center text-2xl">No posts yet.</p>
+                    {/if}
+                </Tabs.Content>
 
-            <Tabs.Content value="replies" class="tab-content">
-                {#if posts && posts.userReplies.length > 0}
-                    {#each posts.userReplies as reply}
-                        <Reply 
-                            {reply}
-                            replyAuthor={user}
-                            replyLikes={posts.likes.filter((p) => p.parent_post === reply._id).length}
-                            replyReplies={posts.userReplies.filter((p) => p.parent_post === reply._id).length}
-                        />
-                    {/each}
-                {:else}
-                    <p class="empty">No replies yet.</p>
-                {/if}
-            </Tabs.Content>
+                <Tabs.Content value="replies" class="tab-content">
+                    {#if posts && posts.userReplies.length > 0}
+                        {#each posts.userReplies as reply}
+                            <Reply 
+                                {reply}
+                                replyAuthor={profileUser}
+                                replyLikes={posts.likes.filter((p) => p.parent_post === reply._id).length}
+                                replyReplies={posts.userReplies.filter((p) => p.parent_post === reply._id).length}
+                            />
+                        {/each}
+                    {:else}
+                        <p class="text-white text-center text-2xl">No replies yet.</p>
+                    {/if}
+                </Tabs.Content>
 
-            <Tabs.Content value="media" class="tab-content">
-                <p class="empty">Media posts will be displayed here.</p>
-            </Tabs.Content>
+                <Tabs.Content value="media" class="tab-content">
+                    <p class="text-white text-center text-2xl">Media posts will be displayed here.</p>
+                </Tabs.Content>
 
-            <Tabs.Content value="likes" class="tab-content">
-                <p class="empty">Liked posts will be displayed here.</p>
-            </Tabs.Content>
+                <Tabs.Content value="likes" class="tab-content">
+                    <p class="text-white text-center text-2xl">Liked posts will be displayed here.</p>
+                </Tabs.Content>
+            </div>
         </Tabs.Root>
     </div>
 </div>
--->
-
-<style>
-    .profile-header {
-        padding: 2rem;
-        position: relative;
-    }
-</style>

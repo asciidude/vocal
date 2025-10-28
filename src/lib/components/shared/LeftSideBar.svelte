@@ -55,9 +55,9 @@
     {#if screenLarge}
       <img src="/images/vocal-icon-square.png" alt="Vocal Icon" class="rounded-full drop-shadow-md drop-shadow-indigo-500/50">
     {:else}
-      <h2 class="text-lg font-bold text-white tracking-wider">Vocal</h2>
+      <h2 class="text-3xl font-bold text-white tracking-wider">Vocal</h2>
     {/if}
-    {#if !screenLarge}<p class="text-xs text-purple-300 mt-2">Connect with your community</p>{/if}
+    {#if !screenLarge}<p class="text-xl text-purple-300 mt-2">Connect with your community</p>{/if}
   </div>
 
   <nav class="space-y-1">
@@ -70,7 +70,7 @@
       >
         <svelte:component this={item.icon} class="h-5 w-5 { screenLarge ? 'ml-0.5' : 'mr-3' }" />
         {#if !screenLarge}
-          <span class="tracking-wide">{item.label}</span>
+          <span class="tracking-wide text-lg">{item.label}</span>
         {/if}
       </a>
     {/each}
@@ -95,15 +95,15 @@
         <div class="flex items-center gap-3 p-3">
           <img src="{avatarSrc}" alt="AV" class="h-10 w-10 rounded-sm ring-2 ring-purple-500" />
           <div>
-            <p class="font-medium text-white" use:twemojify>{user?.displayName || ''}</p>
-            <p class="text-xs text-purple-300">@{user?.username || null}</p>
+            <p class="font-medium text-white text-xl" use:twemojify>{user?.displayName || ''}</p>
+            <p class="text-md text-purple-300">@{user?.username || null}</p>
           </div>
         </div>
       </a>
 
       <button class="w-full flex items-center gap-3 p-3 rounded-md text-gray-300 hover:bg-purple-900/40 hover:text-white transition-colors">
         <LogOut class="h-5 w-5" />
-        <a href="/logout" class="tracking-wide">Logout</a>
+        <a href="/logout" class="tracking-wide text-xl">Logout</a>
       </button>
     {/if}
   </div>

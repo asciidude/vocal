@@ -1,12 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
-
-@font-face {
-  font-family: 'Minecraft';
-  src: url('https://cdnjs.cloudflare.com/ajax/libs/minecraft-font/1.0.0/minecraft.ttf') format('truetype');
-}
+@import url('https://fonts.googleapis.com/css2?family=Jersey+10&display=swap');
 
 body {
-  font-family: 'Press Start 2P', 'VT323', 'Minecraft', monospace;
+  font-family: "Jersey 10", sans-serif;
+  font-weight: 400;
+  font-style: normal;
   image-rendering: pixelated;
 }
 

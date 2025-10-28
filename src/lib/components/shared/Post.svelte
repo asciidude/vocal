@@ -24,11 +24,13 @@
     export let postLikes: Number = 0;
     export let postReplies: Number = 0;
 
-    let avatarSrc = '';
+    $: avatarSrc = '';
 
-    onMount(async () => {
-        avatarSrc = await getImage(postAuthor?.avatarUrl);
-    });
+    $: if (postAuthor) {
+        (async () => {
+            avatarSrc = await getImage(postAuthor.avatarUrl);
+        })();
+    }
 </script>
 
 <div class="post text-white">
@@ -44,42 +46,44 @@
                     >
                 </Avatar.Root>
                 <div class="username">
-                    <p class="leading-none">
-                        {postAuthor?.displayName}
+                    <p class="leading-none text-2xl">
+                        {postAuthor?.displayName || postAuthor?.username}
                     </p>
-                    <p class="text-sm text-gray-400">
+                    <p class="text-gray-400 text-md">
                         @{postAuthor?.username}
                     </p>
                 </div>
             </a>
         </div>
-            
+
+        {@debug postAuthor, user}
+
         <!-- work on form for this, or sm -->
         <DropdownMenu.Root>
-            <DropdownMenu.Trigger><Ellipsis class="size-5" /> </DropdownMenu.Trigger>
+            <DropdownMenu.Trigger><Ellipsis class="size-5" /></DropdownMenu.Trigger>
             <DropdownMenu.Content class="text-white !bg-vocal_darkest border border-[#9072d7]">
                 <DropdownMenu.Group>
                     {#if user._id === postAuthor._id}
-                        <DropdownMenu.Item class="cursor-pointer text-xs font-light">Delete</DropdownMenu.Item>
+                        <DropdownMenu.Item class="`cur`sor-pointer font-light text-xl">Delete</DropdownMenu.Item>
                     {/if}
-                    <DropdownMenu.Item class="text-red-400 cursor-pointer text-xs font-light">Report</DropdownMenu.Item>
+                    <DropdownMenu.Item class="text-red-400 cursor-pointer text-xl font-light">Report</DropdownMenu.Item>
                 </DropdownMenu.Group>
             </DropdownMenu.Content>
         </DropdownMenu.Root>
     </div>
-    <div class="post-content">
+    <div class="post-content text-2xl">
         <p>{post?.content}</p>
     </div>
     <div class="post-bottom flex items-center gap-5 mt-2">
         <a class="flex items-center gap-2 mt-2" href="/posts/{post?._id}">
             <MessageCircle class="size-4" />
-            <p class="size-5">
+            <p class="size-6 text-lg">
                 {postReplies}
             </p>
         </a>
         <a class="flex items-center gap-2 mt-2" href="/api/like/{post?._id}">
             <Heart class="size-4" />
-            <p class="size-5">
+            <p class="size-6 text-lg">
                 {postLikes}
             </p>
         </a>

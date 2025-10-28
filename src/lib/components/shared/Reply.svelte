@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { UserType } from "$lib/types/User.types";
 
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import * as Avatar from "$lib/components/ui/avatar";
     import { Ellipsis, Heart, MessageCircle } from "lucide-svelte";
 
@@ -22,17 +23,19 @@
     export let replyLikes: Number = 0;
     export let replyReplies: Number = 0;
 
-    let avatarSrc = '';
+    $: avatarSrc = '';
 
-    onMount(async () => {
-        avatarSrc = await getImage(replyAuthor?.avatarUrl);
-    });
+    $: if (replyAuthor) {
+        (async () => {
+            avatarSrc = await getImage(replyAuthor.avatarUrl);
+        })();
+    }
 </script>
 
-<div class="post">
+<div class="post text-white">
     <div class="post-header">
         <div class="left-section">
-            <a href="/users/{reply?.author}" class="flex items-center gap-2">
+            <a href="/users/{replyAuthor?.discordId}" class="flex items-center gap-2">
                 <Avatar.Root>
                     <Avatar.Image src={avatarSrc} alt="@{replyAuthor?.username}" />
                     <Avatar.Fallback
@@ -42,30 +45,44 @@
                     >
                 </Avatar.Root>
                 <div class="username">
-                    <p class="leading-none">
-                        {replyAuthor?.displayName}
+                    <p class="leading-none text-2xl">
+                        {replyAuthor?.displayName || replyAuthor?.username}
                     </p>
-                    <p class="text-sm text-gray-400">
+                    <p class="text-gray-400 text-md">
                         @{replyAuthor?.username}
                     </p>
                 </div>
             </a>
         </div>
-        <Ellipsis class="size-5" />
+            
+        <!-- work on form for this, or sm -->
+        <DropdownMenu.Root>
+            <DropdownMenu.Trigger><Ellipsis class="size-5" /></DropdownMenu.Trigger>
+            <DropdownMenu.Content class="text-white !bg-vocal_darkest border border-[#9072d7]">
+                <DropdownMenu.Group>
+                    {#if user._id === replyAuthor._id}
+                        <DropdownMenu.Item class="cursor-pointer font-light text-xl">Delete</DropdownMenu.Item>
+                    {/if}
+                    <DropdownMenu.Item class="text-red-400 cursor-pointer text-xl font-light">Report</DropdownMenu.Item>
+                </DropdownMenu.Group>
+            </DropdownMenu.Content>
+        </DropdownMenu.Root>
     </div>
-    <div class="post-content">
+
+    <div class="post-content text-2xl">
         <p>{reply?.content}</p>
     </div>
+
     <div class="post-bottom flex items-center gap-5 mt-2">
         <a class="flex items-center gap-2 mt-2" href="/posts/{reply?._id}">
             <MessageCircle class="size-4" />
-            <p class="size-5">
+            <p class="size-6 text-lg">
                 {replyReplies}
             </p>
         </a>
         <a class="flex items-center gap-2 mt-2" href="/api/like/{reply?._id}">
             <Heart class="size-4" />
-            <p class="size-5">
+            <p class="size-6 text-lg">
                 {replyLikes}
             </p>
         </a>
@@ -80,8 +97,6 @@
         padding: 1.25rem;
         border: 1px solid rgb(45, 34, 73);
         transition: border-color 0.2s;
-        margin-right: 2rem;
-        margin-left: 2rem;
     }
 
     .post:hover {

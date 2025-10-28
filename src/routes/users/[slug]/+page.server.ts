@@ -14,19 +14,19 @@ const parseAndStringify = (data: any) => {
 }
 
 export const load = async ({ params, locals }) => {
-    const currentUser = locals.user as UserType | null;
+    const user = locals.user as UserType | null;
     
     const userId = params.slug;
     if(!userId) throw error(400, 'Bad Request');
 
-    const user = await UserModel.findOne({ discordId: userId });
-    if(!user) throw error(404, 'Not Found');
+    const profileUser = await UserModel.findOne({ discordId: userId });
+    if(!profileUser) throw error(404, 'Not Found');
 
-    const followers = await FollowModel.find({ followingId: user._id });
-    const following = await FollowModel.find({ followerId: user._id });
+    const followers = await FollowModel.find({ followingId: profileUser._id });
+    const following = await FollowModel.find({ followerId: profileUser._id });
 
-    const posts = await PostModel.find({ author: user._id });
-    const userReplies = await ReplyModel.find({ author: user._id });
+    const posts = await PostModel.find({ author: profileUser._id });
+    const userReplies = await ReplyModel.find({ author: profileUser._id });
 
     let postLikes = [];
     const likePromises = posts.map(post => LikeModel.find({ parent_post: post._id }));
@@ -50,14 +50,14 @@ export const load = async ({ params, locals }) => {
         /** TODO: Recursively look through replies and find post information to show parent post */
     }
 
-    const isFollowing = await FollowModel.exists({ followingId: user._id, followerId: currentUser?._id });
+    const isFollowing = await FollowModel.exists({ followingId: profileUser._id, followerId: user?._id });
     
     return {
-        user: {
-            ...user.toObject(),
-            _id: user._id.toString()
+        user: JSON.parse(user),
+        profileUser: {
+            ...profileUser.toObject(),
+            _id: profileUser._id.toString()
         } as UserType,
-        currentUser: JSON.parse(currentUser),
         followingCount: following.length,
         followersCount: followers.length,
         following: parseAndStringify(followingUsers),

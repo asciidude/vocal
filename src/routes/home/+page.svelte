@@ -40,7 +40,7 @@
 <div class="flex flex-col min-h-screen bg-[#0a080f]">
     <header class="sticky top-0 z-10 bg-[#130f1b] border-b border-[#2d2249] p-4">
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-white">Home</h1>
+            <h1 class="text-3xl font-bold text-white">Home</h1>
             {#if data.user}
                 <div class="flex items-center gap-2">
                     <a href="/users/{data.user.discordId}">
@@ -83,7 +83,7 @@
                     >
                         <input type="hidden" name="postType" value="post">
                         <textarea
-                            class="w-full bg-transparent border border-[#2d2249] rounded-lg p-3 focus:border-vocal_medium focus:outline-none resize-none text-white placeholder-gray-500"
+                            class="w-full bg-transparent border border-[#2d2249] rounded-lg p-3 focus:border-vocal_medium focus:outline-none resize-none text-white placeholder-gray-500 text-2xl"
                             rows="3"
                             placeholder="What's on your mind?"
                             bind:value={newPostContent}
@@ -95,8 +95,8 @@
                                 disabled={isSubmitting || !newPostContent.trim()}
                                 type="submit"
                             >
-                                <Plus class="size-4" />
-                                <span>Post</span>
+                                <Plus class="size-5" />
+                                <span class="text-xl">Post</span>
                             </button>
                         </div>
                     </form>
