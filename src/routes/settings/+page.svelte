@@ -38,14 +38,21 @@
     function isActive(section) {
       return activeSection === section;
     }
+
+    export let data: PageData;
+    $: user = data?.user;
 </script>
 
 <title>Vocal - Settings</title>
 
+<header class="sticky top-0 z-10 bg-[#130f1b] border-b border-[#2d2249] p-4">
+    <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-white">Settings</h1>
+    </div>
+</header>
+
 <div class="min-h-screen">
     <div class="max-w-6xl mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold text-purple-600 mb-8">Settings</h1>
-      
       <div class="flex flex-col md:flex-row gap-8">
         <div class="w-full md:w-1/4">
           <nav class="bg-[#130f1b] text-white rounded-lg shadow-md p-4">
@@ -72,19 +79,19 @@
           <div class="bg-[#130f1b] text-white rounded-lg shadow-md p-6">
             
             {#if activeSection === 'account'}
-              <h2 class="text-2xl font-bold text-purple-600 mb-6">Account Settings</h2>
+              <h2 class="text-2xl font-bold mb-6">Account Settings</h2>
               
               <div class="space-y-6">
                 <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
                   <h3 class="text-lg font-medium mb-2">Profile Information</h3>
                   <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Update your profile details and how you appear to others</p>
-                  <div class="flex items-center justify-between py-2">
+                  <a href="/users/edit" class="flex items-center justify-between py-2">
                     <div class="flex items-center gap-3">
                       <User size={18} class="text-purple-500" />
                       <span>Edit Profile</span>
                     </div>
                     <ChevronRight size={18} class="text-gray-400" />
-                  </div>
+                  </a>
                 </div>
                 
                 <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
@@ -97,6 +104,7 @@
                     </div>
                     <ChevronRight size={18} class="text-gray-400" />
                   </div>
+                  
                   <div class="flex items-center justify-between py-2">
                     <div class="flex items-center gap-3">
                       <Mail size={18} class="text-purple-500" />
@@ -117,7 +125,7 @@
             {/if}
             
             {#if activeSection === 'privacy'}
-              <h2 class="text-2xl font-bold text-purple-600 mb-6">Privacy & Security</h2>
+              <h2 class="text-2xl font-bold mb-6">Privacy & Security</h2>
               
               <div class="space-y-6">
                 <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
@@ -171,7 +179,7 @@
             {/if}
             
             {#if activeSection === 'notifications'}
-              <h2 class="text-2xl font-bold text-purple-600 mb-6">Notifications</h2>
+              <h2 class="text-2xl font-bold mb-6">Notifications</h2>
               
               <div class="space-y-6">
                 <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
@@ -235,7 +243,7 @@
             {/if}
             
             {#if activeSection === 'content'}
-              <h2 class="text-2xl font-bold text-purple-600 mb-6">Content Preferences</h2>
+              <h2 class="text-2xl font-bold mb-6">Content Preferences</h2>
               
               <div class="space-y-6">
                 <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
@@ -296,7 +304,7 @@
             {/if}
             
             {#if activeSection === 'appearance'}
-              <h2 class="text-2xl font-bold text-purple-600 mb-6">Appearance</h2>
+              <h2 class="text-2xl font-bold mb-6">Appearance</h2>
               
               <div class="space-y-6">
                 <div class="border-b border-gray-200 dark:border-gray-700 pb-4">
@@ -357,7 +365,7 @@
             {/if}
             
             {#if activeSection === 'help'}
-              <h2 class="text-2xl font-bold text-purple-600 mb-6">Help & Support</h2>
+              <h2 class="text-2xl font-bold mb-6">Help & Support</h2>
               
               <div class="space-y-6">
                 <div class="border-b border-gray-200 dark:border-gray-700 pb-4">

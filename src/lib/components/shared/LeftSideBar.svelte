@@ -13,7 +13,6 @@
   import { getImage } from '$lib/utils/Cache.util';
   import { onMount } from 'svelte';
   import { twemojify } from 'svelte-twemojify';
-  import { derived } from 'svelte/store';
   import type { UserType } from "$lib/types/User.types";
 
   export let user: UserType | null = null;
@@ -35,6 +34,7 @@
   });
 
   $: screenLarge = screenWidth <= 1475;
+  $: screenLarger = screenWidth <= 514;
 
   let avatarSrc = '';
   let mounted = false;
@@ -50,7 +50,8 @@
 
 <svelte:window bind:innerWidth={screenWidth} />
 
-<div class="{ screenLarge ? 'w-20' : 'w-72' } z-50 fixed top-0 left-0 h-screen bg-[#110b13] border-l border-[#202225] p-4 flex flex-col text-sm overflow-y-auto">
+<div
+  class={` ${screenLarge ? 'w-20' : 'w-72'} ${screenLarger ? 'display-hidden' : ''} z-50 fixed top-0 left-0 h-screen bg-[#110b13] border-l border-[#202225] p-4 flex flex-col text-sm overflow-y-auto`}>
   <div class="mb-6">
     {#if screenLarge}
       <img src="/images/vocal-icon-square.png" alt="Vocal Icon" class="rounded-full drop-shadow-md drop-shadow-indigo-500/50">

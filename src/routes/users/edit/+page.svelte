@@ -11,7 +11,7 @@
         Shield,
         Sparkle,
         UserPlus,
-        UserMinus,
+        UserMinus
     } from "lucide-svelte";
     import * as Avatar from "$lib/components/ui/avatar";
     import { getImage } from "$lib/utils/Cache.util";
@@ -22,7 +22,6 @@
     export let data: PageData;
 
     $: user = data?.user;
-    $: profileUser = data?.profileUser;
     $: isFollowing = data?.isFollowing;
     $: posts = data?.posts;
 
@@ -61,10 +60,10 @@
         mounted = true;
     });
 
-    $: if (mounted && profileUser?.avatarUrl) {
+    $: if (mounted && user?.avatarUrl) {
         (async () => {
-            avatarSrc = await getImage(profileUser.avatarUrl);
-            bannerSrc = await getImage(profileUser.bannerUrl);
+            avatarSrc = await getImage(user.avatarUrl);
+            bannerSrc = await getImage(user.bannerUrl);
 
             const header = document.getElementById("profileHeader");
             header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${bannerSrc})`;
@@ -75,23 +74,23 @@
     }
 </script>
   
-<title>Vocal - {profileUser.displayName || profileUser.username}</title>
+<title>Vocal - {user.displayName || user.username}</title>
 
 <div class="flex flex-col min-h-screen">
     <header class="sticky top-0 z-10 bg-vocal_strong border-b border-[#2d2249] p-8" id="profileHeader">
         <div class="container mx-auto flex flex-col text-center">
             <Avatar.Root class="w-20 h-20 rounded-full object-cover mx-auto block mb-5">
                 <Avatar.Image 
-                    src={profileUser.avatarUrl} 
-                    alt="@{profileUser.username}"
+                    src={user.avatarUrl} 
+                    alt="@{user.username}"
                 />
                 <Avatar.Fallback>
-                    {profileUser.displayName || profileUser.username}
+                    {user.displayName || user.username}
                 </Avatar.Fallback>
             </Avatar.Root>
             <div class="flex flex-row gap-3 justify-center mt-3 text-white">
-                <h1 class="text-4xl font-bold text-white">{profileUser.displayName || profileUser.username}</h1>
-                {#each profileUser.roles.sort((a, b) => roleData[a].priority - roleData[b].priority) as role}
+                <h1 class="text-4xl font-bold text-white">{user.displayName || user.username}</h1>
+                {#each user.roles.sort((a, b) => roleData[a].priority - roleData[b].priority) as role}
                     {#if roleData[role]}
                         <Tooltip.Provider>
                             <Tooltip.Root>
@@ -110,9 +109,9 @@
                 {/each}
             </div>
             
-            <p class="text-xl text-vocal_lightest opacity-50">@{profileUser.username}</p>
+            <p class="text-xl text-vocal_lightest opacity-50">@{user.username}</p>
 
-            {#if user?._id && user._id !== profileUser._id}
+            {#if user?._id && user._id !== user._id}
                 <div class="mt-2 mb-2 mx-auto">
                     <button class="bg-vocal_strong hover:bg-vocal_strongest text-white px-5 py-1 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default" type="submit">
                         {#if isFollowing == null}
@@ -125,7 +124,7 @@
                     </button>
                 </div>
             {/if}
-            <p class="text-2xl text-white">{profileUser.bio}</p>
+            <p class="text-2xl text-white">{user.bio}</p>
             <div class="text-white flex align-middle justify-center text-center gap-5 mt-2">
                 <Dialog.Root>
                     <Dialog.Trigger class="text-xl">
@@ -134,7 +133,7 @@
                     </Dialog.Trigger>
                     <Dialog.Content class="bg-vocal_darkest text-white border-vocal_strong">
                         <Dialog.Header>
-                            <Dialog.Title class="text-2xl">{profileUser.displayName || profileUser.username}'s following</Dialog.Title>
+                            <Dialog.Title class="text-2xl">{user.displayName || user.username}'s following</Dialog.Title>
                             <Dialog.Description>
                                 {#each follow.ingData as f}
                                     <Dialog.Close>
@@ -156,7 +155,7 @@
                     </Dialog.Trigger>
                     <Dialog.Content class="bg-vocal_darkest text-white border-vocal_strong">
                         <Dialog.Header>
-                            <Dialog.Title class="text-2xl">{profileUser.displayName || profileUser.username}'s followers</Dialog.Title>
+                            <Dialog.Title class="text-2xl">{user.displayName || user.username}'s followers</Dialog.Title>
                             <Dialog.Description>
                                 {#each follow.ersData as f}
                                     <Dialog.Close>
@@ -202,7 +201,7 @@
                             <Post 
                                 {post}
                                 {user}
-                                postAuthor={profileUser}
+                                postAuthor={user}
                                 postLikes={posts.likes.filter((p) => p.parent_post === post._id).length}
                                 postReplies={posts.postReplies.filter((p) => p.parent_post === post._id).length}
                             />
@@ -217,7 +216,7 @@
                         {#each posts.userReplies as reply}
                             <Reply 
                                 {reply}
-                                replyAuthor={profileUser}
+                                replyAuthor={user}
                                 replyLikes={posts.likes.filter((p) => p.parent_post === reply._id).length}
                                 replyReplies={posts.userReplies.filter((p) => p.parent_post === reply._id).length}
                             />
