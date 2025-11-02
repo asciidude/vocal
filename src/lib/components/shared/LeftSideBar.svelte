@@ -8,12 +8,14 @@
     Bookmark, 
     Heart,
     LogOut,
-    Search
+    Search,
+    Menu
   } from 'lucide-svelte';
   import { getImage } from '$lib/utils/Cache.util';
   import { onMount } from 'svelte';
   import { twemojify } from 'svelte-twemojify';
   import type { UserType } from "$lib/types/User.types";
+  import { Button } from "$lib/components/ui/button/index.js";
 
   export let user: UserType | null = null;
   let screenLarge = false;
@@ -34,7 +36,8 @@
   });
 
   $: screenLarge = screenWidth <= 1475;
-  $: screenLarger = screenWidth <= 514;
+  $: screenSmaller = screenWidth <= 500;
+  $: menuActive = false;
 
   let avatarSrc = '';
   let mounted = false;
@@ -50,8 +53,21 @@
 
 <svelte:window bind:innerWidth={screenWidth} />
 
+{#if screenSmaller}
+  <Button
+    class="rounded-full fixed bottom-4 right-4 z-100 opacity-50 overflow-hidden cursor-pointer bg-vocal_strong border-vocal_lightest border hover:bg-vocal_strongest"
+    onclick={() => (menuActive = !menuActive)}
+  >
+    <Menu size={12} />
+  </Button>
+{/if}
+
 <div
-  class={` ${screenLarge ? 'w-20' : 'w-72'} ${screenLarger ? 'display-hidden' : ''} z-50 fixed top-0 left-0 h-screen bg-[#110b13] border-l border-[#202225] p-4 flex flex-col text-sm overflow-y-auto`}>
+  class="fixed top-0 left-0 h-screen z-40 bg-[#110b13] border-r border-[#202225] p-4 flex flex-col text-sm overflow-y-auto transition-transform duration-300 transform"
+  class:w-20={screenLarge}
+  class:w-72={!screenLarge}
+  class:translate-x-[-100%]={!menuActive && screenSmaller}
+>
   <div class="mb-6">
     {#if screenLarge}
       <img src="/images/vocal-icon-square.png" alt="Vocal Icon" class="rounded-full drop-shadow-md drop-shadow-indigo-500/50">
@@ -110,4 +126,4 @@
   </div>
 </div>
 
-<div class="{ screenLarge ? 'w-20' : 'w-72' }"></div>
+<div class="{ screenSmaller ? 'hidden' : '' } { screenLarge ? 'w-20' : 'w-72' }"></div>

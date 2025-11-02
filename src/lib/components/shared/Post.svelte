@@ -56,8 +56,6 @@
             </a>
         </div>
 
-        {@debug postAuthor, user}
-
         <!-- work on form for this, or sm -->
         <DropdownMenu.Root>
             <DropdownMenu.Trigger><Ellipsis class="size-5" /></DropdownMenu.Trigger>
