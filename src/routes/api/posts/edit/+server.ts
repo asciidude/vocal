@@ -33,7 +33,7 @@ export const PATCH: RequestHandler = async({ request, locals }) => {
                 message: 'Success',
                 user, post
             });
-        } else if(postType === 'reply') {
+        } else if(postType === 'post') {
             const post = await PostModel.updateOne(
                 { _id: postId },
                 { content: content }

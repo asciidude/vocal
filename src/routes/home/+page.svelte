@@ -75,7 +75,7 @@
                         </Avatar.Root>
                     </a>
                     <form
-                        action="/api/posts/create/post" method="post"
+                        action="/api/posts/create" method="post"
                         use:enhance={handleFormEnhance}
                         id="postSubmission"
                         class="flex-grow"
