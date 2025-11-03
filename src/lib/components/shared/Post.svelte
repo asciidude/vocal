@@ -6,8 +6,8 @@
     import * as Avatar from "$lib/components/ui/avatar";
     import { Ellipsis, Heart, MessageCircle } from "lucide-svelte";
 
-    import { onMount } from "svelte";
     import { getImage } from "$lib/utils/Cache.util";
+    import { enhance } from '$app/forms';
 
     function getInitials(name: string | undefined) {
         if (!name) return "?";
@@ -31,46 +31,78 @@
             avatarSrc = await getImage(postAuthor.avatarUrl);
         })();
     }
+
+    function deletePost() {
+        return async ({ result }) => {
+            if (result.status === 200) {
+                document.getElementById(`post-${post!._id}`)?.classList.add('hidden');
+            }
+        }
+    }
 </script>
 
-<div class="post text-white">
+<div class="post text-white" id="post-{post?._id}">
     <div class="post-header">
-        <div class="left-section">
-            <a href="/users/{postAuthor?.discordId}" class="flex items-center gap-2">
-                <Avatar.Root>
-                    <Avatar.Image src={avatarSrc} alt="@{postAuthor?.username}" />
-                    <Avatar.Fallback
-                        >{getInitials(
-                            postAuthor?.displayName || postAuthor?.username,
-                        )}</Avatar.Fallback
-                    >
-                </Avatar.Root>
-                <div class="username">
-                    <p class="leading-none text-2xl">
-                        {postAuthor?.displayName || postAuthor?.username}
-                    </p>
-                    <p class="text-gray-400 text-md">
-                        @{postAuthor?.username}
-                    </p>
-                </div>
-            </a>
+        {#if post}
+            <div class="left-section">
+                <a href="/users/{postAuthor?.discordId}" class="flex items-center gap-2">
+                    <Avatar.Root>
+                        <Avatar.Image src={avatarSrc} alt="@{postAuthor?.username}" />
+                        <Avatar.Fallback
+                            >{getInitials(
+                                postAuthor?.displayName || postAuthor?.username,
+                            )}</Avatar.Fallback
+                        >
+                    </Avatar.Root>
+                    <div class="username">
+                        <p class="leading-none text-2xl">
+                            {postAuthor?.displayName || postAuthor?.username}
+                        </p>
+                        <p class="text-gray-400 text-md">
+                            @{postAuthor?.username}
+                        </p>
+                    </div>
+                </a>
         </div>
+        {/if}
 
-        <!-- work on form for this, or sm -->
-        <DropdownMenu.Root>
-            <DropdownMenu.Trigger><Ellipsis class="size-5" /></DropdownMenu.Trigger>
-            <DropdownMenu.Content class="text-white !bg-vocal_darkest border border-[#9072d7]">
-                <DropdownMenu.Group>
-                    {#if user._id === postAuthor._id}
-                        <DropdownMenu.Item class="`cur`sor-pointer font-light text-xl">Delete</DropdownMenu.Item>
-                    {/if}
-                    <DropdownMenu.Item class="text-red-400 cursor-pointer text-xl font-light">Report</DropdownMenu.Item>
-                </DropdownMenu.Group>
-            </DropdownMenu.Content>
-        </DropdownMenu.Root>
+        {#if post}
+            <DropdownMenu.Root>
+                <DropdownMenu.Trigger><Ellipsis class="size-5" /></DropdownMenu.Trigger>
+                <DropdownMenu.Content class="text-white !bg-vocal_darkest border border-[#9072d7]">
+                    <DropdownMenu.Group>
+                        {#if user?._id === postAuthor!._id}
+                            <form
+                                action="/api/posts/delete" method="post"
+                                use:enhance={deletePost}
+                                id="deletePost-{post._id}"
+                            >
+                                <input type="hidden" name="postType" value="post">
+                                <input type="hidden" name="postId" value={post._id}>
+                                <input type="hidden" name="posterId" value={postAuthor!._id}>
+                            </form>
+
+                            <DropdownMenu.Item class="cursor-pointer font-light text-xl">
+                                <button
+                                    on:click={() => (document.getElementById(`deletePost-${post._id}`) as HTMLFormElement)?.requestSubmit()}
+                                    type="submit"
+                                >
+                                    <span class="text-xl">Delete</span>
+                                </button>
+                            </DropdownMenu.Item>
+                        {/if}
+                        <DropdownMenu.Item class="text-red-400 cursor-pointer text-xl font-light">Report</DropdownMenu.Item>
+                    </DropdownMenu.Group>
+                </DropdownMenu.Content>
+            </DropdownMenu.Root>
+        {/if}
     </div>
     <div class="post-content text-2xl">
-        <p>{post?.content}</p>
+        {#if post}
+            <p>{post.content}</p>
+        {:else}
+            <p class="italic text-gray-600">This post has been deleted.</p>
+        {/if}
     </div>
     <div class="post-bottom flex items-center gap-5 mt-2">
         <a class="flex items-center gap-2 mt-2" href="/posts/{post?._id}">

@@ -25,7 +25,10 @@ export const load = async ({ params, locals }) => {
     const followers = await FollowModel.find({ followingId: profileUser._id });
     const following = await FollowModel.find({ followerId: profileUser._id });
 
-    const posts = await PostModel.find({ author: profileUser._id });
+    const posts = await PostModel.find({ author: profileUser._id })
+        .sort({ createdAt: -1 })
+        .lean();
+        
     const userReplies = await ReplyModel.find({ author: profileUser._id });
 
     let postLikes = [];

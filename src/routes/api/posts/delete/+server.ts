@@ -2,7 +2,7 @@ import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { PostModel } from "src/lib/models/Post.model";
 import { ReplyModel } from "src/lib/models/Reply.model";
 
-export const DELETE: RequestHandler = async({ request, locals }) => {
+export const POST: RequestHandler = async({ request, locals }) => {
     const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
 
     const formData = await request.formData();
