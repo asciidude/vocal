@@ -73,12 +73,11 @@
                     <DropdownMenu.Group>
                         {#if user?._id === postAuthor!._id}
                             <form
-                                action="/api/posts/delete" method="post"
+                                action="/api/posts/delete/{post._id}" method="post"
                                 use:enhance={deletePost}
                                 id="deletePost-{post._id}"
                             >
                                 <input type="hidden" name="postType" value="post">
-                                <input type="hidden" name="postId" value={post._id}>
                                 <input type="hidden" name="posterId" value={postAuthor!._id}>
                             </form>
 

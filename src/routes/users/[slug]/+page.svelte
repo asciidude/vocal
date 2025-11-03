@@ -93,7 +93,7 @@
                 <h1 class="text-4xl font-bold text-white">{profileUser.displayName || profileUser.username}</h1>
                 {#each profileUser.roles.sort((a, b) => roleData[a].priority - roleData[b].priority) as role}
                     {#if roleData[role]}
-                        <Tooltip.Provider>
+                        <Tooltip.Provider delayDuration={0}>
                             <Tooltip.Root>
                                 <Tooltip.Trigger>
                                     <svelte:component
@@ -102,7 +102,7 @@
                                     />
                                 </Tooltip.Trigger>
                                 <Tooltip.Content>
-                                    <p>{roleData[role].description}</p>
+                                    <p class="text-lg">{roleData[role].description}</p>
                                 </Tooltip.Content>
                             </Tooltip.Root>
                         </Tooltip.Provider>
@@ -201,10 +201,10 @@
                         {#each posts.posts as post}
                             <Post 
                                 {post}
-                                {user}
                                 postAuthor={profileUser}
                                 postLikes={posts.likes.filter((p) => p.parent_post === post._id).length}
                                 postReplies={posts.postReplies.filter((p) => p.parent_post === post._id).length}
+                                user={JSON.parse(user)}
                             />
                         {/each}
                     {:else}

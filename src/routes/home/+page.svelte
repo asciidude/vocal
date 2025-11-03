@@ -109,7 +109,7 @@
                 {#each posts as post (post._id)}
                     <Post 
                         {post} 
-                        postAuthor={post.authorObj} 
+                        postAuthor={post.authorObj}
                         postLikes={data.likes.filter((p: LikeType) => p.parent_post === post._id).length}
                         postReplies={data.replies.filter((p: ReplyType) => p.parent_post === post._id).length}
                         user={data.user}
