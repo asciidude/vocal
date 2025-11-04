@@ -4,3 +4,5 @@
  * regarding the post such as categories...later.
  */
 
+const LikeModel = require('$lib/models/Like.model');
+
