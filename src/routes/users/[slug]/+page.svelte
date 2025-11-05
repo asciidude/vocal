@@ -21,7 +21,7 @@
   
     export let data: PageData;
 
-    $: user = data?.user;
+    $: user = JSON.parse(data?.user);
     $: profileUser = data?.profileUser;
     $: isFollowing = data?.isFollowing;
     $: posts = data?.posts;
@@ -112,7 +112,7 @@
             
             <p class="text-xl text-vocal_lightest opacity-50">@{profileUser.username}</p>
 
-            {#if user?._id && user._id !== profileUser._id}
+            {#if user && user._id !== profileUser._id}
                 <div class="mt-2 mb-2 mx-auto">
                     <button class="bg-vocal_strong hover:bg-vocal_strongest text-white px-5 py-1 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default" type="submit">
                         {#if isFollowing == null}
@@ -202,9 +202,9 @@
                             <Post 
                                 {post}
                                 postAuthor={profileUser}
-                                postLikes={posts.likes.filter((p) => p.parent_post === post._id).length}
-                                postReplies={posts.postReplies.filter((p) => p.parent_post === post._id).length}
-                                user={JSON.parse(user)}
+                                postLikes={posts.likes.filter((p) => p.parent_post === post._id)}
+                                postReplies={posts.postReplies.filter((p) => p.parent_post === post._id)}
+                                user={user}
                             />
                         {/each}
                     {:else}
