@@ -140,11 +140,11 @@
                             {#if files.length > 0}
                                 <div class="grid gap-2" style={`grid-template-columns: repeat(auto-fill, minmax(${screenSmaller ? '100px' : '120px'}, 1fr));`}>
                                     {#each files as file, i}
-                                        <div class="relative border border-vocal_strongest bg-vocal_lightest rounded-md overflow-hidden">
+                                        <div class="relative border border-vocal_strongest rounded overflow-hidden">
                                             <img src={file.previewUrl} alt="Preview" class="object-cover w-full h-24" />
                                             <button type="button"
                                                 on:click={() => removeFile(i)}
-                                                class="absolute top-1 right-1 bg-vocal_strong hover:bg-vocal_strongest rounded-full p-1"
+                                                class="absolute top-1 right-1 bg-vocal_strong hover:bg-vocal_strongest rounded-full p-1 transition"
                                                 disabled={isSubmitting}>
                                                 <X class="size-3 text-white" />
                                             </button>
