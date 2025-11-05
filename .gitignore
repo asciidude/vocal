@@ -25,3 +25,6 @@ vite.config.ts.timestamp-*
 
 # bun stuff
 bun.lockb
+
+# post stuff
+static/posts/*/**.*
