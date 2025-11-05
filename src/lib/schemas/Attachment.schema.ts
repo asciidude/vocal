@@ -1,4 +1,3 @@
-import type { AttachmentTypes } from "$lib/types/Attachment.type";
 import { Schema } from "mongoose";
 
 export const AttachmentSchema = new Schema({

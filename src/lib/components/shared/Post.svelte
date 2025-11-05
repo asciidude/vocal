@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { PostType } from "$lib/types/Post.type";
     import type { UserType } from "$lib/types/User.types";
+    import type { AttachmentType } from "$lib/types/Attachment.type";
 
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import * as Avatar from "$lib/components/ui/avatar";
@@ -23,6 +24,7 @@
     export let user: UserType | null = null;
     export let postLikes: Number = 0;
     export let postReplies: Number = 0;
+    let screenWidth = 0;
 
     $: avatarSrc = '';
 
@@ -39,7 +41,11 @@
             }
         }
     }
+
+    $: screenSmaller = screenWidth <= 713;
 </script>
+
+<svelte:window bind:innerWidth={screenWidth} />
 
 <div class="post text-white" id="post-{post?._id}">
     <div class="post-header">
@@ -98,10 +104,78 @@
     </div>
     <div class="post-content text-2xl">
         {#if post}
-            <p>{post.content}</p>
-        {:else}
-            <p class="italic text-gray-600">This post has been deleted.</p>
-        {/if}
+    <p>{post.content}</p>
+
+    {#if post.attachments.length > 0}
+        <div class="flex flex-wrap gap-2">
+            {#if post.attachments.length === 1}
+                <img
+                    src={post.attachments[0].url}
+                    alt={post.attachments[0].name}
+                    class="w-full max-w-[500px] rounded object-cover cursor-pointer hover:brightness-90 transition"
+                />
+            {:else if post.attachments.length === 2}
+                {#each post.attachments as attachment}
+                    <img
+                        src={attachment.url}
+                        alt={attachment.name}
+                        class="w-1/2 max-w-[240px] rounded object-cover cursor-pointer hover:brightness-90 transition"
+                    />
+                {/each}
+            {:else if post.attachments.length === 3}
+                {#if screenSmaller}
+                    <!-- Small screens: stacked Discord-style layout -->
+                    <div class="flex gap-2 mb-2">
+                        {#each post.attachments.slice(0,2) as attachment}
+                            <img
+                                src={attachment.url}
+                                alt={attachment.name}
+                                class="w-1/2 max-w-[240px] aspect-square rounded object-cover cursor-pointer hover:brightness-90 transition"
+                            />
+                        {/each}
+                    </div>
+                    <img
+                        src={post.attachments[2].url}
+                        alt={post.attachments[2].name}
+                        class="w-full max-w-[500px] rounded object-cover cursor-pointer hover:brightness-90 transition"
+                    />
+                {:else}
+                    <!-- Large screens: 3 images side by side -->
+                    <div class="flex gap-2">
+                        {#each post.attachments as attachment}
+                            <img
+                                src={attachment.url}
+                                alt={attachment.name}
+                                class="w-1/3 max-w-[240px] aspect-square rounded object-cover cursor-pointer hover:brightness-90 transition"
+                            />
+                        {/each}
+                    </div>
+                {/if}
+            {:else if post.attachments.length >= 4}
+                <div class="grid grid-cols-2 gap-2">
+                    {#each post.attachments.slice(0,4) as attachment, i}
+                        <div class="relative">
+                            <img
+                                src={attachment.url}
+                                alt={attachment.name}
+                                class="w-full h-32 max-w-[240px] object-cover rounded cursor-pointer hover:brightness-90 transition"
+                            />
+                            {#if i === 3 && post.attachments.length > 4}
+                                <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-2xl font-bold rounded">
+                                    +{post.attachments.length - 4}
+                                </div>
+                            {/if}
+                        </div>
+                    {/each}
+                </div>
+            {/if}
+        </div>
+    {/if}
+
+{:else}
+    <p class="italic text-gray-600">This post has been deleted.</p>
+{/if}
+
     </div>
     <div class="post-bottom flex items-center gap-5 mt-2">
         <a class="flex items-center gap-2 mt-2" href="/posts/{post?._id}">

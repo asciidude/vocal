@@ -2,12 +2,13 @@
     import type { PageData } from './$types';
     import Post from '$lib/components/shared/Post.svelte';
     import * as Avatar from "$lib/components/ui/avatar";
-    import { Plus } from 'lucide-svelte';
+    import { Plus, Image } from 'lucide-svelte';
     import { getImage } from 'src/lib/utils/Cache.util';
     import { onMount } from 'svelte';
     import type { ReplyType } from '$lib/types/Reply.type';
     import type { LikeType } from '$lib/types/Like.type';
     import { enhance } from '$app/forms';
+    import X from '@lucide/svelte/icons/x';
 
     export let data: PageData;
     
@@ -16,17 +17,35 @@
 
     let currentUserAv = '';
 
+    let files: File[] = [];
+
     let posts: typeof data.posts = [];
     $: posts;
     
     function handleFormEnhance() {
         return async ({ result }) => {
-            isSubmitting = false;
             if (result.status === 200) {
+                isSubmitting = false;
                 posts = [{ ...result.post, authorObj: data.user }, ...posts];
                 newPostContent = '';
+                files = [];
             }
         }
+    }
+
+    function handleFileChange(event: Event) {
+        const input = event.target as HTMLInputElement;
+        if(input.files) {
+            const selectedFiles = Array.from(input.files);
+            const combinedFiles = [...files, ...selectedFiles];
+            files = combinedFiles.slice(0,10);
+            input.value = '';
+        }
+    }
+
+    function removeFile(index: number) {
+        files.splice(index, 1);
+        files = [...files];
     }
 
     onMount(async () => {
@@ -63,8 +82,8 @@
         {#if data.user}
             <div class="post mb-6">
                 <div class="flex gap-3">
-                    <a href="/users/{data.user.discordId}">
-                        <Avatar.Root class="flex-shrink-0">
+                    <Avatar.Root class="flex-shrink-0">
+                        <a href="/users/{data.user.discordId}">
                             <Avatar.Image 
                                 src={currentUserAv} 
                                 alt="@{data.user.username}" 
@@ -72,11 +91,16 @@
                             <Avatar.Fallback>
                                 {data.user.displayName || data.user.username}
                             </Avatar.Fallback>
-                        </Avatar.Root>
-                    </a>
+                        </a>
+                    </Avatar.Root>
+
                     <form
                         action="/api/posts/create" method="post"
-                        use:enhance={handleFormEnhance}
+                        enctype="multipart/form-data"
+                        use:enhance={async ({ formData }) => {
+                            files.forEach(file => formData.append('attachments', file));
+                            handleFormEnhance();
+                        }}
                         id="postSubmission"
                         class="flex-grow"
                         on:submit|preventDefault={() => isSubmitting = true}
@@ -89,15 +113,58 @@
                             bind:value={newPostContent}
                             name="content" id="content"
                         ></textarea>
-                        <div class="flex justify-end mt-2">
-                            <button
-                                class="bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default"
-                                disabled={isSubmitting || !newPostContent.trim()}
-                                type="submit"
-                            >
-                                <Plus class="size-5" />
-                                <span class="text-xl">Post</span>
-                            </button>
+
+                        <div class="flex justify-end mt-2 flex-col gap-3">
+                            <!-- file preview -->
+                            {#if files.length > 0}
+                                <div class="flex flex-wrap gap-2">
+                                    {#each files as file, i}
+                                        <div class="flex items-center gap-1 border border-vocal_strongest bg-vocal_lightest rounded-md px-2 py-1 w-fit">
+                                            <span class="text-sm text-white truncate max-w-[60px]">{file.name}</span>
+                                            <button
+                                                type="button"
+                                                class="bg-vocal_strong hover:bg-vocal_strongest rounded-full p-1 flex-shrink-0 disabled:hidden"
+                                                on:click={() => removeFile(i)}
+                                                disabled={isSubmitting}
+                                            >
+                                                <X class="size-3 text-white" />
+                                            </button>
+                                        </div>
+                                    {/each}
+                                </div>
+                            {/if}
+                            
+                            <div class="flex justify-end gap-2">
+                                <!-- file upload -->
+                                <input
+                                    id="fileUpload"
+                                    type="file"
+                                    name="attachments"
+                                    class="hidden"
+                                    accept="image/*"
+                                    multiple
+                                    on:change={handleFileChange}
+                                />
+
+                                <button
+                                    class="bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default"
+                                    disabled={isSubmitting || !newPostContent.trim() || files.length >= 3}
+                                    on:click={() => document.getElementById('fileUpload')?.click()}
+                                    type="button"
+                                >
+                                    <Image class="size-5"/>
+                                    <span class="text-xl">Upload</span>
+                                </button>
+
+                                <button
+                                    class="ms-2 bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default"
+                                    disabled={isSubmitting || !newPostContent.trim()}
+                                    type="submit"
+                                >
+                                    <Plus class="size-5" />
+                                    <span class="text-xl">Post</span>
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
