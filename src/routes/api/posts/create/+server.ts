@@ -21,7 +21,7 @@ export const POST: RequestHandler = async({ request, locals }) => {
 
         const attachments = formData.getAll('attachments') as File[];
         const attachmentsLimited = attachments
-            .filter(file => file.name && file.size > 0)
+            .filter(file => file.name)
             .slice(0,10);
 
         if(!content) {

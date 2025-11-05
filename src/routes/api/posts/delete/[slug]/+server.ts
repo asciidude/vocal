@@ -34,7 +34,7 @@ export const POST: RequestHandler = async({ params, request, locals }) => {
         }
 
         const postMedia = `static/posts/${postId}`;
-        if(fs.readdirSync(postMedia)) {
+        if(fs.existsSync(postMedia)) {
             fs.rmSync(postMedia, { recursive: true });
         }
 

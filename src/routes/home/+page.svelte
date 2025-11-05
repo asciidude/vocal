@@ -26,21 +26,19 @@
     $: posts;
         
     const enhanceForm = ({ formData }) => {
-        files.forEach(file => formData.append('attachments', file));
+        files.forEach(({ file }) => formData.append('attachments', file));
         isSubmitting = true;
-
         return async ({ result, update }) => {
             await update();
-
-            console.log(result);
-            if (result.status === 200) {
-                isSubmitting = false;
+            if (result.status === 200 && result.post) {
                 posts = [{ ...result.post, authorObj: data.user }, ...posts];
                 newPostContent = '';
                 files = [];
             }
+            isSubmitting = false;
         };
     };
+
 
     function handleFileChange(event: Event) {
         const input = event.target as HTMLInputElement;
@@ -64,6 +62,7 @@
     }
 
     function removeFile(index: number) {
+        URL.revokeObjectURL(files[index].previewUrl);
         files.splice(index, 1);
         files = [...files];
     }
@@ -72,7 +71,12 @@
         posts = data.posts; 
         currentUserAv = await getImage(data.user?.avatarUrl);
     });
+
+    let screenWidth = 0;
+    $: screenSmaller = screenWidth <= 577;
 </script>
+
+<svelte:window bind:innerWidth={screenWidth} />
 
 <title>Vocal - Home</title>
 
@@ -134,17 +138,14 @@
                         <div class="flex justify-end mt-2 flex-col gap-3">
                             <!-- file previews -->
                             {#if files.length > 0}
-                                <div class="flex flex-wrap gap-2">
+                                <div class="grid gap-2" style={`grid-template-columns: repeat(auto-fill, minmax(${screenSmaller ? '100px' : '120px'}, 1fr));`}>
                                     {#each files as file, i}
-                                        <div class="pt-2 pb-2 flex items-center gap-1 border border-vocal_strongest bg-vocal_lightest rounded-md px-2 py-1 w-fit">
-                                            <img src={file.previewUrl} alt="Preview" class="w-20 h-20 object-cover rounded" />
-                                            <span class="text-sm text-white truncate max-w-[60px]">{file.file.name}</span>
-                                            <button
-                                                type="button"
-                                                class="bg-vocal_strong hover:bg-vocal_strongest rounded-full p-1 flex-shrink-0 disabled:hidden"
+                                        <div class="relative border border-vocal_strongest bg-vocal_lightest rounded-md overflow-hidden">
+                                            <img src={file.previewUrl} alt="Preview" class="object-cover w-full h-24" />
+                                            <button type="button"
                                                 on:click={() => removeFile(i)}
-                                                disabled={isSubmitting}
-                                            >
+                                                class="absolute top-1 right-1 bg-vocal_strong hover:bg-vocal_strongest rounded-full p-1"
+                                                disabled={isSubmitting}>
                                                 <X class="size-3 text-white" />
                                             </button>
                                         </div>
