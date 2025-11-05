@@ -102,7 +102,6 @@
                         action="/api/posts/create" method="post"
                         enctype="multipart/form-data"
                         use:enhance={enhanceForm}
-                        event.
                         id="postSubmission"
                         class="flex-grow"
                         on:submit|preventDefault={() => isSubmitting = true}
