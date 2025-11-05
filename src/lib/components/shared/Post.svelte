@@ -1,4 +1,6 @@
 <script lang="ts">
+    import type { LikeType } from "src/lib/types/Like.type";
+    import type { ReplyType } from "$lib/types/Reply.type";
     import type { PostType } from "$lib/types/Post.type";
     import type { UserType } from "$lib/types/User.types";
 
@@ -22,8 +24,9 @@
     export let post: PostType | null = null;
     export let postAuthor: UserType | null = null;
     export let user: UserType | null = null;
-    export let postLikes: Number = 0;
-    export let postReplies: Number = 0;
+    export let postLikes: LikeType;
+    export let postReplies: ReplyType;
+    export let postExpanded: Boolean = false;
     let screenWidth = 0;
 
     $: avatarSrc = "";
@@ -135,13 +138,13 @@
 
     <div class="post-content text-2xl">
         {#if post}
-            <p>{post.content}</p>
+            <p class="whitespace-pre-wrap">{post.content}</p>
 
             {#if post.attachments.length > 0}
                 {#if post.attachments.length === 1}
                     <div class="grid max-w-[520px]">
                         <Dialog.Root>
-                            <Dialog.Trigger>
+                            <Dialog.Trigger class="inline-flex w-fit h-fit">
                                 <img
                                     src={post.attachments[0].url}
                                     alt={post.attachments[0].name}
@@ -163,22 +166,23 @@
                             </Dialog.Content>
                         </Dialog.Root>
                     </div>
-                {:else if post.attachments.length === 2}
-                    <div class="grid grid-cols-2 gap-2 max-w-[520px]">
+                {:else if post.attachments.length === 3}
+                    <div
+                        class="grid grid-cols-2 gap-2 max-w-[520px] sm:grid-cols-3"
+                        style="grid-auto-rows: 1fr;"
+                    >
                         {#each post.attachments as attachment}
                             <Dialog.Root>
-                                <Dialog.Trigger>
+                                <Dialog.Trigger class="inline-flex w-full h-full">
                                     <div class="aspect-square w-full overflow-hidden rounded">
                                         <img
                                             src={attachment.url}
                                             alt={attachment.name}
-                                            class="h-full w-full object-cover cursor-pointer hover:brightness-90 transition"
+                                            class="w-full h-full object-cover cursor-pointer hover:brightness-90 transition"
                                         />
                                     </div>
                                 </Dialog.Trigger>
-                                <Dialog.Content
-                                    class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg"
-                                >
+                                <Dialog.Content class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg">
                                     <Dialog.Header>
                                         <Dialog.Description>
                                             <img
@@ -197,7 +201,7 @@
                         <div class="grid grid-cols-2 gap-2 max-w-[520px]">
                             {#each post.attachments.slice(0, 2) as attachment}
                                 <Dialog.Root>
-                                    <Dialog.Trigger>
+                                    <Dialog.Trigger class="inline-flex w-fit h-fit">
                                         <div
                                             class="aspect-square w-full overflow-hidden rounded"
                                         >
@@ -226,7 +230,7 @@
                         </div>
                         <div class="grid mt-2">
                             <Dialog.Root>
-                                <Dialog.Trigger>
+                                <Dialog.Trigger class="inline-flex w-fit h-fit">
                                     <div
                                         class="w-full max-w-[500px] overflow-hidden rounded"
                                     >
@@ -256,7 +260,7 @@
                         <div class="grid grid-cols-3 gap-2 max-w-[520px]">
                             {#each post.attachments as attachment}
                                 <Dialog.Root>
-                                    <Dialog.Trigger>
+                                    <Dialog.Trigger class="inline-flex w-fit h-fit">
                                         <div
                                             class="aspect-square w-full overflow-hidden rounded"
                                         >
@@ -285,11 +289,11 @@
                         </div>
                     {/if}
                 {:else}
-                    <div class="grid grid-cols-2 gap-2 max-w-[520px]">
-                        {#each post.attachments.slice(0, 4) as attachment, i}
+                    <div class="grid {postExpanded ? 'grid-cols-4' : 'grid-cols-2'} gap-2 { postExpanded ? 'max-w-[65rem]' : 'max-w-[520px]' }">
+                        {#each (postExpanded ? post.attachments : post.attachments.slice(0, 4)) as attachment, i}
                             <div class="relative aspect-square rounded overflow-hidden">
                                 <Dialog.Root>
-                                    <Dialog.Trigger>
+                                    <Dialog.Trigger class="inline-flex w-fit h-fit">
                                         <img
                                             src={attachment.url}
                                             alt={attachment.name}
@@ -309,13 +313,15 @@
                                     </Dialog.Content>
                                 </Dialog.Root>
 
-                                {#if i === 3 && post.attachments.length > 4}
-                                    <a
-                                        href="/posts/{post._id}"
-                                        class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-2xl font-bold"
-                                    >
-                                        +{post.attachments.length - 4}
-                                    </a>
+                                {#if !postExpanded}
+                                    {#if i === 3 && post.attachments.length > 4}
+                                        <a
+                                            href="/posts/{post._id}"
+                                            class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-2xl font-bold"
+                                        >
+                                            +{post.attachments.length - 4}
+                                        </a>
+                                    {/if}
                                 {/if}
                             </div>
                         {/each}
@@ -324,18 +330,18 @@
             {/if}
         {/if}
     </div>
-    
+
     <div class="post-bottom flex items-center gap-5 mt-2">
         <a class="flex items-center gap-2 mt-2" href="/posts/{post?._id}">
             <MessageCircle class="size-4" />
             <p class="size-6 text-lg">
-                {postReplies}
+                {postReplies.length}
             </p>
         </a>
         <a class="flex items-center gap-2 mt-2" href="/api/like/{post?._id}">
             <Heart class="size-4" />
             <p class="size-6 text-lg">
-                {postLikes}
+                {postLikes.length}
             </p>
         </a>
     </div>

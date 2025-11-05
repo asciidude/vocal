@@ -19,14 +19,14 @@ export const POST: RequestHandler = async({ request, locals }) => {
         const postType = formData.get('postType');
         const content = formData.get('content');
 
+        if(!content) {
+            throw error(422, 'Unprocessable Content');
+        }
+
         const attachments = formData.getAll('attachments') as File[];
         const attachmentsLimited = attachments
             .filter(file => file.name)
             .slice(0,10);
-
-        if(!content) {
-            throw error(422, 'Unprocessable Content');
-        }
 
         let post;
 

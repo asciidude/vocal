@@ -196,9 +196,10 @@
                     <Post 
                         {post} 
                         postAuthor={post.authorObj}
-                        postLikes={data.likes.filter((p: LikeType) => p.parent_post === post._id).length}
-                        postReplies={data.replies.filter((p: ReplyType) => p.parent_post === post._id).length}
+                        postLikes={data.likes.filter((p: LikeType) => p.parent_post === post._id)}
+                        postReplies={data.replies.filter((p: ReplyType) => p.parent_post === post._id)}
                         user={data.user}
+                        postExpanded={false}
                     />
                 {/each}
             {:else}
