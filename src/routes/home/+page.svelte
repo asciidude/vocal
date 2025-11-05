@@ -11,27 +11,31 @@
     import X from '@lucide/svelte/icons/x';
 
     export let data: PageData;
-    
-    let newPostContent = '';
     let isSubmitting = false;
 
     let currentUserAv = '';
 
+    let newPostContent = '';
     let files: File[] = [];
-
     let posts: typeof data.posts = [];
     $: posts;
-    
-    function handleFormEnhance() {
-        return async ({ result }) => {
+        
+    const enhanceForm = ({ formData }) => {
+        files.forEach(file => formData.append('attachments', file));
+        isSubmitting = true;
+
+        return async ({ result, update }) => {
+            await update();
+
+            console.log(result);
             if (result.status === 200) {
                 isSubmitting = false;
                 posts = [{ ...result.post, authorObj: data.user }, ...posts];
                 newPostContent = '';
                 files = [];
             }
-        }
-    }
+        };
+    };
 
     function handleFileChange(event: Event) {
         const input = event.target as HTMLInputElement;
@@ -97,10 +101,8 @@
                     <form
                         action="/api/posts/create" method="post"
                         enctype="multipart/form-data"
-                        use:enhance={async ({ formData }) => {
-                            files.forEach(file => formData.append('attachments', file));
-                            handleFormEnhance();
-                        }}
+                        use:enhance={enhanceForm}
+                        event.
                         id="postSubmission"
                         class="flex-grow"
                         on:submit|preventDefault={() => isSubmitting = true}

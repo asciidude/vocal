@@ -145,7 +145,7 @@
                                 <img
                                     src={post.attachments[0].url}
                                     alt={post.attachments[0].name}
-                                    class="w-full max-w-[500px] rounded object-cover cursor-pointer hover:brightness-90 transition"
+                                    class=" aspect-square w-full max-w-[250px] rounded object-cover cursor-pointer hover:brightness-90 transition"
                                 />
                             </Dialog.Trigger>
                             <Dialog.Content
@@ -285,24 +285,18 @@
                         </div>
                     {/if}
                 {:else}
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="grid grid-cols-2 gap-2 max-w-[520px]">
                         {#each post.attachments.slice(0, 4) as attachment, i}
-                            <div class="relative">
+                            <div class="relative aspect-square rounded overflow-hidden">
                                 <Dialog.Root>
                                     <Dialog.Trigger>
-                                        <div
-                                            class="aspect-square w-full overflow-hidden rounded"
-                                        >
-                                            <img
-                                                src={attachment.url}
-                                                alt={attachment.name}
-                                                class="h-full w-full object-cover cursor-pointer hover:brightness-90 transition"
-                                            />
-                                        </div>
+                                        <img
+                                            src={attachment.url}
+                                            alt={attachment.name}
+                                            class="absolute top-0 left-0 w-full h-full object-cover cursor-pointer hover:brightness-90 transition"
+                                        />
                                     </Dialog.Trigger>
-                                    <Dialog.Content
-                                        class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg"
-                                    >
+                                    <Dialog.Content class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg">
                                         <Dialog.Header>
                                             <Dialog.Description>
                                                 <img
@@ -318,7 +312,7 @@
                                 {#if i === 3 && post.attachments.length > 4}
                                     <a
                                         href="/posts/{post._id}"
-                                        class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-2xl font-bold rounded"
+                                        class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-2xl font-bold"
                                     >
                                         +{post.attachments.length - 4}
                                     </a>
