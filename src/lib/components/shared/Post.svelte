@@ -24,8 +24,8 @@
     export let post: PostType | null = null;
     export let postAuthor: UserType | null = null;
     export let user: UserType | null = null;
-    export let postLikes: LikeType;
-    export let postReplies: ReplyType;
+    export let postLikes: LikeType[] = [];
+    export let postReplies: ReplyType[] = [];
     export let postExpanded: Boolean = false;
     let screenWidth = 0;
 
@@ -333,13 +333,17 @@
 
     <div class="post-bottom flex items-center gap-5 mt-2">
         <a class="flex items-center gap-2 mt-2" href="/posts/{post?._id}">
-            <MessageCircle class="size-4" />
+            <MessageCircle class="size-4 stroke-vocal_lightest" />
             <p class="size-6 text-lg">
                 {postReplies.length}
             </p>
         </a>
         <a class="flex items-center gap-2 mt-2" href="/api/like/{post?._id}">
-            <Heart class="size-4" />
+            {#if (postLikes.find(like => like.author.toString() == user?._id))}
+                <Heart class="size-4 stroke-vocal_lightest fill-vocal_lightest" />
+            {:else}
+                <Heart class="size-4 stroke-vocal_lightest" />
+            {/if}
             <p class="size-6 text-lg">
                 {postLikes.length}
             </p>
