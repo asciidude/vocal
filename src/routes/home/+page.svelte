@@ -15,8 +15,13 @@
 
     let currentUserAv = '';
 
+    type FileWithPreview = {
+        file: File;
+        previewUrl: string;
+    }
+
     let newPostContent = '';
-    let files: File[] = [];
+    let files: FileWithPreview[] = [];
     let posts: typeof data.posts = [];
     $: posts;
         
@@ -39,12 +44,23 @@
 
     function handleFileChange(event: Event) {
         const input = event.target as HTMLInputElement;
-        if(input.files) {
-            const selectedFiles = Array.from(input.files);
-            const combinedFiles = [...files, ...selectedFiles];
-            files = combinedFiles.slice(0,10);
-            input.value = '';
-        }
+        if (!input.files) return;
+
+        const selectedFiles = Array.from(input.files);
+
+        const newFiles = selectedFiles.map((file) => {
+            let previewUrl = '';
+
+            if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                previewUrl = URL.createObjectURL(file);
+            }
+
+            return { file, previewUrl };
+        });
+
+        files = [...files, ...newFiles].slice(0, 10);
+
+        input.value = '';
     }
 
     function removeFile(index: number) {
@@ -120,8 +136,9 @@
                             {#if files.length > 0}
                                 <div class="flex flex-wrap gap-2">
                                     {#each files as file, i}
-                                        <div class="flex items-center gap-1 border border-vocal_strongest bg-vocal_lightest rounded-md px-2 py-1 w-fit">
-                                            <span class="text-sm text-white truncate max-w-[60px]">{file.name}</span>
+                                        <div class="pt-2 pb-2 flex items-center gap-1 border border-vocal_strongest bg-vocal_lightest rounded-md px-2 py-1 w-fit">
+                                            <img src={file.previewUrl} alt="Preview" class="w-20 h-20 object-cover rounded" />
+                                            <span class="text-sm text-white truncate max-w-[60px]">{file.file.name}</span>
                                             <button
                                                 type="button"
                                                 class="bg-vocal_strong hover:bg-vocal_strongest rounded-full p-1 flex-shrink-0 disabled:hidden"
@@ -149,7 +166,7 @@
 
                                 <button
                                     class="bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default"
-                                    disabled={isSubmitting || !newPostContent.trim() || files.length >= 3}
+                                    disabled={isSubmitting || !newPostContent.trim() || files.length >= 10}
                                     on:click={() => document.getElementById('fileUpload')?.click()}
                                     type="button"
                                 >
