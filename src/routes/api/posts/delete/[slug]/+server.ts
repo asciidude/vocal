@@ -1,6 +1,7 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { PostModel } from "src/lib/models/Post.model";
 import { ReplyModel } from "src/lib/models/Reply.model";
+import fs from 'fs';
 
 export const POST: RequestHandler = async({ params, request, locals }) => {
     const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
@@ -26,21 +27,21 @@ export const POST: RequestHandler = async({ params, request, locals }) => {
 
         if(postType === 'reply') {
             await ReplyModel.deleteOne({ _id: postId });
-
-            return json({
-                status: 200,
-                message: 'Success'
-            });
         } else if(postType === 'post') {
             await PostModel.deleteOne({ _id: postId });
-    
-            return json({
-                status: 200,
-                message: 'Success'
-            });
         } else {
             throw error(401, 'Invalid Request')
         }
+
+        const postMedia = `static/posts/${postId}`;
+        if(fs.existsSync(postMedia)) {
+            fs.rmSync(postMedia, { recursive: true });
+        }
+
+        return json({
+            status: 200,
+            message: 'Success'
+        });
     } catch(err) {
         console.log(err);
         throw error(500, 'Internal Server Error');
