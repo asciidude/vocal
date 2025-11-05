@@ -115,7 +115,7 @@
                         ></textarea>
 
                         <div class="flex justify-end mt-2 flex-col gap-3">
-                            <!-- file preview -->
+                            <!-- file previews -->
                             {#if files.length > 0}
                                 <div class="flex flex-wrap gap-2">
                                     {#each files as file, i}
@@ -135,7 +135,7 @@
                             {/if}
                             
                             <div class="flex justify-end gap-2">
-                                <!-- file upload -->
+                                <!-- buttons -->
                                 <input
                                     id="fileUpload"
                                     type="file"
