@@ -3,11 +3,16 @@ import { PostModel } from "src/lib/models/Post.model";
 import { ReplyModel } from "src/lib/models/Reply.model";
 
 export const POST: RequestHandler = async({ params, request, locals }) => {
+    /** 
+     * TODO: Add attachment removal thru edits
+    */
+
     const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
 
     const formData = await request.formData();
     const posterId = formData.get('posterId');
     const content = formData.get('content');
+    const attachments = formData.get('attachments');
     const postId = params.slug;
 
     if(!postId) {

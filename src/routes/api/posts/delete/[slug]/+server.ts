@@ -27,8 +27,10 @@ export const POST: RequestHandler = async({ params, request, locals }) => {
 
         if(postType === 'reply') {
             await ReplyModel.deleteOne({ _id: postId });
+            await ReplyModel.deleteMany({ parent_post: postId });
         } else if(postType === 'post') {
             await PostModel.deleteOne({ _id: postId });
+            await ReplyModel.deleteMany({ parent_post: postId });
         } else {
             throw error(401, 'Invalid Request')
         }

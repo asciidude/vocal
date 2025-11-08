@@ -12,75 +12,37 @@ const parseAndStringify = (data: any) => {
     return JSON.parse(JSON.stringify(data));
 };
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
     try {
-        const posts = await PostModel.find()
-            .sort({ createdAt: -1 })
-            .limit(30)
-            .lean();
-            
-        if (!posts) {
-            return {
-                posts: [],
-                likesCountMap: {},
-                repliesCountMap: {}
-            };
-        }
-        
-        const postsWithAuthors = await Promise.all(posts.map(async (post) => {
-            const authorObj = await UserModel.findOne({ _id: post.author }).lean();
-            return { ...post, authorObj };
-        }));
-        
-        let postLikes = [];
-        const likePromises = posts.map(post => LikeModel.find({ parent_post: post._id }));
-        postLikes = await Promise.all(likePromises);
-        postLikes = postLikes.flat();
+        const postId = params.slug;
 
-        let postReplies = [];
-        const replyPromises = posts.map(post => ReplyModel.find({ parent_post: post._id }));
-        postReplies = await Promise.all(replyPromises);
-        postReplies = postReplies.flat();
+        const post = await PostModel.findOne({ _id: postId });
+
+        if(!post) {
+            throw error(404, 'Not Found');
+        }
+
+        const postAuthor = await UserModel.findOne({ _id: post.author }).lean();
+
+        const replies = await ReplyModel.find({ parent_post: postId })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        const repliesWithAuthors = await Promise.all(replies.map(async (reply) => {
+            const replyAuthor = await UserModel.findOne({ _id: reply.author }).lean();
+            return parseAndStringify({ ...reply, replyAuthor });
+        }));
+
+        const likes = await LikeModel.find({ parent_post: postId });
         
         return {
-            posts: parseAndStringify(postsWithAuthors),
-            likes: parseAndStringify(postLikes),
-            replies: parseAndStringify(postReplies)
+            post: parseAndStringify(post),
+            author: parseAndStringify(postAuthor),
+            likes: parseAndStringify(likes),
+            replies: repliesWithAuthors
         };
     } catch (err) {
         console.error('Error loading home page:', err);
         throw error(500, 'Failed to load posts');
-    }
-};
-
-export const actions = {
-    default: async ({ request, locals }) => {
-        const currentUser = locals.user as UserType | null;
-        
-        if (!currentUser) {
-            throw error(401, 'You must be logged in to create a post');
-        }
-        
-        const formData = await request.formData();
-        const content = formData.get('content')?.toString();
-        
-        if (!content || content.trim() === '') {
-            throw error(400, 'Post content cannot be empty');
-        }
-        
-        try {
-            const newPost = new PostModel({
-                author: new mongoose.Types.ObjectId(currentUser._id),
-                content,
-                attachments: []
-            });
-            
-            await newPost.save();
-            
-            return { success: true };
-        } catch (err) {
-            console.error('Error creating post:', err);
-            throw error(500, 'Failed to create post');
-        }
     }
 };

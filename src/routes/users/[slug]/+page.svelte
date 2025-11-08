@@ -4,20 +4,11 @@
     import * as Dialog from "$lib/components/ui/dialog/index.js";
     import * as Tooltip from "$lib/components/ui/tooltip/index.js";
     import * as Tabs from "$lib/components/ui/tabs";
-    
     import { UserRoles } from "$lib/types/User.types";
-    import {
-        HardHat,
-        Shield,
-        Sparkle,
-        UserPlus,
-        UserMinus,
-    } from "lucide-svelte";
+    import { HardHat, Shield, Sparkle, UserPlus, UserMinus } from "lucide-svelte";
     import * as Avatar from "$lib/components/ui/avatar";
     import { getImage } from "$lib/utils/Cache.util";
-
     import Post from "$lib/components/shared/Post.svelte";
-    import Reply from "$lib/components/shared/Reply.svelte";
   
     export let data: PageData;
 
@@ -36,36 +27,21 @@
     let activeTab: string = "posts";
   
     const roleData = {
-        [UserRoles.SuperAdmin]: {
-            icon: Sparkle,
-            description: "This user is a site owner",
-            priority: 3
-        },
-        [UserRoles.Admin]: {
-            icon: Shield,
-            description: "This user is a site admin",
-            priority: 2
-        },
-        [UserRoles.Beta]: {
-            icon: HardHat,
-            description: "This user is a beta tester",
-            priority: 1
-        },
+        [UserRoles.SuperAdmin]: { icon: Sparkle, description: "This user is a site owner", priority: 3 },
+        [UserRoles.Admin]: { icon: Shield, description: "This user is a site admin", priority: 2 },
+        [UserRoles.Beta]: { icon: HardHat, description: "This user is a beta tester", priority: 1 }
     };
 
     let avatarSrc = '';
     let bannerSrc = '';
     let mounted = false;
 
-    onMount(() => {
-        mounted = true;
-    });
+    onMount(() => { mounted = true; });
 
     $: if (mounted && profileUser?.avatarUrl) {
         (async () => {
             avatarSrc = await getImage(profileUser.avatarUrl);
             bannerSrc = await getImage(profileUser.bannerUrl);
-
             const header = document.getElementById("profileHeader");
             header!.style.background = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${bannerSrc})`;
             header!.style.backgroundRepeat = "no-repeat";
@@ -81,13 +57,8 @@
     <header class="sticky top-0 z-10 bg-vocal_strong border-b border-[#2d2249] p-8" id="profileHeader">
         <div class="container mx-auto flex flex-col text-center">
             <Avatar.Root class="w-20 h-20 rounded-full object-cover mx-auto block mb-5">
-                <Avatar.Image 
-                    src={profileUser.avatarUrl} 
-                    alt="@{profileUser.username}"
-                />
-                <Avatar.Fallback>
-                    {profileUser.displayName || profileUser.username}
-                </Avatar.Fallback>
+                <Avatar.Image src={profileUser.avatarUrl} alt="@{profileUser.username}" />
+                <Avatar.Fallback>{profileUser.displayName || profileUser.username}</Avatar.Fallback>
             </Avatar.Root>
             <div class="flex flex-row gap-3 justify-center mt-3 text-white">
                 <h1 class="text-4xl font-bold text-white">{profileUser.displayName || profileUser.username}</h1>
@@ -96,10 +67,7 @@
                         <Tooltip.Provider delayDuration={0}>
                             <Tooltip.Root>
                                 <Tooltip.Trigger>
-                                    <svelte:component
-                                        this={roleData[role].icon}
-                                        class="w-5 h-5"
-                                    />
+                                    <svelte:component this={roleData[role].icon} class="w-5 h-5" />
                                 </Tooltip.Trigger>
                                 <Tooltip.Content>
                                     <p class="text-lg">{roleData[role].description}</p>
@@ -109,7 +77,6 @@
                     {/if}
                 {/each}
             </div>
-            
             <p class="text-xl text-vocal_lightest opacity-50">@{profileUser.username}</p>
 
             {#if user && user._id !== profileUser._id}
@@ -125,7 +92,9 @@
                     </button>
                 </div>
             {/if}
+
             <p class="text-2xl text-white">{profileUser.bio}</p>
+
             <div class="text-white flex align-middle justify-center text-center gap-5 mt-2">
                 <Dialog.Root>
                     <Dialog.Trigger class="text-xl">
@@ -175,24 +144,12 @@
     </header>
 
     <div class="pb-5">
-        <Tabs.Root
-            value={activeTab}
-            onValueChange={(value) => (activeTab = value.toString())}
-            class="w-full"
-        >
+        <Tabs.Root value={activeTab} onValueChange={(value) => (activeTab = value.toString())} class="w-full">
             <Tabs.List class="flex justify-center items-center bg-transparent p-5 pt-7">
-                <Tabs.Trigger value="posts" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white text-xl mt-4">
-                    Posts
-                </Tabs.Trigger>
-                <Tabs.Trigger value="replies" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white text-xl mt-4">
-                    Replies
-                </Tabs.Trigger>
-                <Tabs.Trigger value="media" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white text-xl mt-4">
-                    Media
-                </Tabs.Trigger>
-                <Tabs.Trigger value="likes" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white text-xl mt-4">
-                    Likes
-                </Tabs.Trigger>
+                <Tabs.Trigger value="posts" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white text-xl mt-4">Posts</Tabs.Trigger>
+                <Tabs.Trigger value="replies" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white text-xl mt-4">Replies</Tabs.Trigger>
+                <Tabs.Trigger value="media" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white text-xl mt-4">Media</Tabs.Trigger>
+                <Tabs.Trigger value="likes" class="data-[state=active]:bg-vocal_strong data-[state=active]:text-white text-xl mt-4">Likes</Tabs.Trigger>
             </Tabs.List>
 
             <div class="container mx-auto flex-grow py-6">
@@ -202,8 +159,8 @@
                             <Post 
                                 {post}
                                 postAuthor={profileUser}
-                                postLikes={posts.likes.filter((p) => p.parent_post === post._id)}
-                                postReplies={posts.postReplies.filter((p) => p.parent_post === post._id)}
+                                postLikes={posts.likes.filter(p => p.parent_post === post._id)}
+                                postReplies={posts.postReplies.filter(p => p.parent_post === post._id)}
                                 user={user}
                             />
                         {/each}
@@ -212,14 +169,15 @@
                     {/if}
                 </Tabs.Content>
 
-                <Tabs.Content value="replies" class="tab-content">
+                <Tabs.Content value="replies" class="tab-content space-y-4">
                     {#if posts && posts.userReplies.length > 0}
                         {#each posts.userReplies as reply}
-                            <Reply 
-                                {reply}
-                                replyAuthor={profileUser}
-                                replyLikes={posts.likes.filter((p) => p.parent_post === reply._id).length}
-                                replyReplies={posts.userReplies.filter((p) => p.parent_post === reply._id).length}
+                            <Post 
+                                post={reply}
+                                postAuthor={profileUser}
+                                postLikes={posts.replyLikes.filter(p => p.parent_post === reply._id)}
+                                postReplies={posts.nestedReplies.filter(p => p.parent_post === reply._id)}
+                                user={user}
                             />
                         {/each}
                     {:else}

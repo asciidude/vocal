@@ -31,15 +31,37 @@ export const load = async ({ params, locals }) => {
         
     const userReplies = await ReplyModel.find({ author: profileUser._id });
 
-    let postLikes = [];
-    const likePromises = posts.map(post => LikeModel.find({ parent_post: post._id }));
-    postLikes = await Promise.all(likePromises);
-    postLikes = postLikes.flat();
+    const replyLikePromises = userReplies.map(async (reply) => {
+        const likes = await LikeModel.find({ parent_post: reply._id }).lean();
+        return likes;
+    });
 
-    let postReplies = [];
-    const replyPromises = posts.map(post => ReplyModel.find({ parent_post: post._id }));
-    postReplies = await Promise.all(replyPromises);
-    postReplies = postReplies.flat();
+    const replyLikesNested = await Promise.all(replyLikePromises);
+    const replyLikes = replyLikesNested.flat();
+
+    const nestedReplyPromises = userReplies.map(async (reply) => {
+        const replies = await ReplyModel.find({ parent_post: reply._id }).lean();
+        return replies;
+    });
+
+    const nestedRepliesNested = await Promise.all(nestedReplyPromises);
+    const nestedReplies = nestedRepliesNested.flat();
+
+    const likePromises = posts.map(async (post) => {
+        const likes = await LikeModel.find({ parent_post: post._id }).lean();
+        return likes;
+    });
+
+    const postLikesNested = await Promise.all(likePromises);
+    const postLikes = postLikesNested.flat();
+    
+    const replyPromises = posts.map(async (post) => {
+        const posts = await ReplyModel.find({ parent_post: post._id }).lean();
+        return posts;
+    });
+
+    const postRepliesNested = await Promise.all(replyPromises);
+    const postReplies = postRepliesNested.flat();
 
     const followerUsers = await Promise.all(
         followers.map(f => UserModel.findById(f.followerId))
@@ -50,7 +72,7 @@ export const load = async ({ params, locals }) => {
     );
 
     const isFollowing = await FollowModel.exists({ followingId: profileUser._id, followerId: user?._id });
-    
+
     return {
         user: user,
         profileUser: {
@@ -63,10 +85,12 @@ export const load = async ({ params, locals }) => {
         followers: parseAndStringify(followerUsers),
         isFollowing,
         posts: {
-            posts: parseAndStringify(posts) as Array<PostType>,
-            postReplies: parseAndStringify(postReplies) as Array<ReplyType>,
-            userReplies: parseAndStringify(userReplies) as Array<ReplyType>,
-            likes: parseAndStringify(postLikes) as Array<LikeType>
+            posts: parseAndStringify(posts),
+            postReplies: parseAndStringify(postReplies),
+            userReplies: parseAndStringify(userReplies),
+            replyLikes: parseAndStringify(replyLikes),
+            nestedReplies: parseAndStringify(nestedReplies),
+            likes: parseAndStringify(postLikes),
         }
     }
 }
