@@ -1,5 +1,5 @@
 export interface AuthProviderType {
-  platform: string;
+  platform: Platform;
   id: string;
   email?: string;
   passwordHash?: string;

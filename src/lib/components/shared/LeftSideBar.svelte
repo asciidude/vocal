@@ -23,7 +23,7 @@
 
   $: navItems = [
     { icon: Home, label: 'Home', href: '/home' },
-    { icon: User, label: 'Profile', href: `/users/${user?.discordId}` },
+    { icon: User, label: 'Profile', href: `/users/${user?._id}` },
     { icon: Bell, label: 'Notifications', href: '/notifications' },
     { icon: Bookmark, label: 'Bookmarks', href: '/bookmarks' },
     { icon: Heart, label: 'Likes', href: '/likes' },
@@ -103,12 +103,12 @@
       </button>
     
       <div class="flex items-center mt-4">
-        <a href="/users/{user?.discordId}">
+        <a href="/users/{user?._id}">
           <img src="{avatarSrc}" alt="Avatar" class="rounded-full ring-2 ring-purple-500" />
         </a>
       </div>
     {:else}
-      <a href="/users/{user?.discordId}">
+      <a href="/users/{user?._id}">
         <div class="flex items-center gap-3 p-3">
           <img src="{avatarSrc}" alt="AV" class="h-10 w-10 rounded-sm ring-2 ring-purple-500" />
           <div>
