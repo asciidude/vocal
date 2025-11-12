@@ -3,7 +3,7 @@
     export let data: { user: typeof user | null };
 </script>
   
-<div class="flex min-h-screen bg-[#110b13]">
+<div class="flex min-h-screen bg-vocal_dark_bg">
     <LeftSideBar user={data.user} />
     
     <main class="flex-1 overflow-y-auto">

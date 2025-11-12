@@ -53,7 +53,7 @@
   
 <title>Vocal - {profileUser.displayName || profileUser.username}</title>
 
-<div class="flex flex-col min-h-screen">
+<div class="flex flex-col min-h-screen bg-vocal_dark_bg">
     <header class="sticky top-0 z-10 bg-vocal_strong border-b border-[#2d2249] p-8" id="profileHeader">
         <div class="container mx-auto flex flex-col text-center">
             <Avatar.Root class="w-20 h-20 rounded-full object-cover mx-auto block mb-5">

@@ -92,7 +92,7 @@
 
 <title>Vocal - {postAuthor.displayName || postAuthor.username}'s post</title>
 
-<div class="container mt-5">
+<div class="container mt-5 bg-vocal_dark_bg">
     <Post
         {post}
         {postAuthor}

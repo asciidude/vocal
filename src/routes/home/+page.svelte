@@ -82,7 +82,7 @@
 
 <title>Vocal - Home</title>
 
-<div class="flex flex-col min-h-screen bg-[#0a080f]">
+<div class="flex flex-col min-h-screen bg-vocal_dark_bg">
     <header
         class="sticky top-0 z-10 bg-[#130f1b] border-b border-[#2d2249] p-4"
     >
