@@ -19,7 +19,7 @@ export const load = async ({ params, locals }) => {
     const userId = params.slug;
     if(!userId) throw error(400, 'Bad Request');
 
-    const profileUser = await UserModel.findOne({ discordId: userId });
+    const profileUser = await UserModel.findById(userId);
     if(!profileUser) throw error(404, 'Not Found');
 
     const followers = await FollowModel.find({ followingId: profileUser._id });

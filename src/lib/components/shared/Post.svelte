@@ -57,7 +57,7 @@
         {#if post}
             <div class="left-section">
                 <a
-                    href="/users/{postAuthor?.discordId}"
+                    href="/users/{postAuthor?._id}"
                     class="flex items-center gap-2"
                 >
                     <Avatar.Root>

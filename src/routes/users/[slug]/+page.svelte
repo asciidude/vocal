@@ -107,7 +107,7 @@
                             <Dialog.Description>
                                 {#each follow.ingData as f}
                                     <Dialog.Close>
-                                        <a href="/users/{f.discordId}" class="flex items-center gap-2 mt-3 text-xl">
+                                        <a href="/users/{f._id}" class="flex items-center gap-2 mt-3 text-xl">
                                             <img src={f.avatarUrl} alt={f.username} class="w-6 h-6 rounded-full" />
                                             <span>{f.displayName || f.username}</span>
                                         </a>
@@ -129,7 +129,7 @@
                             <Dialog.Description>
                                 {#each follow.ersData as f}
                                     <Dialog.Close>
-                                        <a href="/users/{f.discordId}" class="flex items-center gap-2 mt-3 text-xl">
+                                        <a href="/users/{f._id}" class="flex items-center gap-2 mt-3 text-xl">
                                             <img src={f.avatarUrl} alt={f.username} class="w-6 h-6 rounded-full" />
                                             <span>{f.displayName || f.username}</span>
                                         </a>

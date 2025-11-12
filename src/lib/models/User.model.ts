@@ -1,10 +1,12 @@
 import { Model, model, Schema } from "mongoose";
 import type { UserType } from "$lib/types/User.types";
+import { AuthProviderSchema } from "../schemas/AuthProvider.schema";
 
 const UserSchema = new Schema({
-    discordId: {
-        type: String,
-        required: true
+    authProviders: {
+        type: [AuthProviderSchema],
+        require: true,
+        default: []
     },
 
     avatarUrl: String,
@@ -17,7 +19,11 @@ const UserSchema = new Schema({
     displayName: String,
 
     bio: String,
-    roles: Array
+    roles: {
+        type: [String],
+        enum: ['tester', 'beta', 'admin', 'superadmin'],
+        default: []
+    }
 }, { timestamps: true })
 
 export const UserModel: Model<UserType> = model<UserType>('User', UserSchema);

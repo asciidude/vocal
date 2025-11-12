@@ -90,7 +90,7 @@
             <h1 class="text-3xl font-bold text-white">Home</h1>
             {#if data.user}
                 <div class="flex items-center gap-2">
-                    <a href="/users/{data.user.discordId}">
+                    <a href="/users/{data.user._id}">
                         <Avatar.Root>
                             <Avatar.Image
                                 src={data.user.avatarUrl}
@@ -111,7 +111,7 @@
             <div class="post mb-6">
                 <div class="flex gap-3">
                     <Avatar.Root class="flex-shrink-0">
-                        <a href="/users/{data.user.discordId}">
+                        <a href="/users/{data.user._id}">
                             <Avatar.Image
                                 src={currentUserAv}
                                 alt="@{data.user.username}"
