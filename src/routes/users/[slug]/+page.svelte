@@ -12,7 +12,7 @@
   
     export let data: PageData;
 
-    $: user = JSON.parse(data?.user);
+    $: user = data?.user;
     $: profileUser = data?.profileUser;
     $: isFollowing = data?.isFollowing;
     $: posts = data?.posts;
