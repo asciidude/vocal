@@ -6,9 +6,8 @@ function generateRandomSuffix(length = 4) {
     return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
-export async function getUniqueUsername(base: string, excludeId: ObjectId) {
+export async function getUniqueUsername(base: string) {
     const existing = await UserModel.find({ username: new RegExp(`^${base}`) }).select('username');
-    if(existing && (existing._id === excludeId)) return;
     
     const taken = new Set(existing.map(u => u.username));
 
