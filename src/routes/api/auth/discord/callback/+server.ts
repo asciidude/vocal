@@ -5,7 +5,9 @@ import { error, redirect, type Cookies } from "@sveltejs/kit";
 import jwt from 'jsonwebtoken';
 import { getUniqueUsername } from "src/lib/utils/UsernameUniquenessCheck.util";
 
-export const GET = async ({ url, cookies }: { url: URL, cookies: Cookies }) => {
+export const GET = async (event) => {
+    const { url, cookies, locals } = event;
+
     try {
         const code = url.searchParams.get('code');
         if (!code) throw error(400, 'No code provided');
@@ -37,42 +39,55 @@ export const GET = async ({ url, cookies }: { url: URL, cookies: Cookies }) => {
         const userData = await userResponse.json();
         console.log('[OAuth] Discord user data:', userData);
 
-        const username = await getUniqueUsername(userData.username);
+        let jwtToken;
 
-        const updatedUser = await UserModel.findOneAndUpdate(
-            { 'authProviders.id': userData.id },
-            {
-                $set: {
-                    username,
-                    displayName: userData.global_name,
-                    avatarUrl: userData.avatar
-                        ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=512`
-                        : "https://cdn.discordapp.com/embed/avatars/1.png?size=4096",
-                    bannerUrl: userData.banner
-                        ? `https://cdn.discordapp.com/banners/${userData.id}/${userData.banner}.png?size=1024`
-                        : "none"
+        if(!locals.user) {
+            const username = await getUniqueUsername(userData.username);
+
+            const updatedUser = await UserModel.findOneAndUpdate(
+                { 'authProviders.id': userData.id },
+                {
+                    $set: {
+                        username,
+                        displayName: userData.global_name,
+                        avatarUrl: userData.avatar
+                            ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=512`
+                            : "https://cdn.discordapp.com/embed/avatars/1.png?size=4096",
+                        bannerUrl: userData.banner
+                            ? `https://cdn.discordapp.com/banners/${userData.id}/${userData.banner}.png?size=1024`
+                            : "none"
+                    },
+                    $setOnInsert: {
+                        authProviders: [
+                            { platform: "discord", id: userData.id, accessToken: tokenData.access_token }
+                        ],
+                        bio: "",
+                        roles: [UserRoles.Beta]
+                    }
                 },
-                $setOnInsert: {
-                    authProviders: [
-                        { platform: "discord", id: userData.id, accessToken: tokenData.access_token }
-                    ],
-                    bio: "",
-                    roles: [UserRoles.Beta]
-                }
-            },
-            { new: true, upsert: true }
-        );
+                { new: true, upsert: true }
+            );
 
-        if (!updatedUser) throw error(500, "Failed to create or update user");
+            if (!updatedUser) throw error(500, "Failed to create or update user");
+        
+            if (!updatedUser.roles.includes(UserRoles.Beta)) {
+                throw error(403, 'Your account does not have beta access, please apply on our Discord.');
+            }
 
-        if (!updatedUser.roles.includes(UserRoles.Beta)) {
-            throw error(403, 'Your account does not have beta access, please apply on our Discord.');
+            jwtToken = jwt.sign({
+                id: userData.id,
+                username: updatedUser.username
+            }, JWT_SECRET, { expiresIn: '7d' });
+        } else {
+            if (!locals.user.roles.includes(UserRoles.Beta)) {
+                throw error(403, 'Your account does not have beta access, please apply on our Discord.');
+            }
+
+            jwtToken = jwt.sign({
+                id: userData.id,
+                username: locals.user.username
+            }, JWT_SECRET, { expiresIn: '7d' });
         }
-
-        const jwtToken = jwt.sign({
-            id: userData.id,
-            username: updatedUser.username
-        }, JWT_SECRET, { expiresIn: '7d' });
 
         cookies.set('session', jwtToken, {
             httpOnly: true,
