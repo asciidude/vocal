@@ -54,6 +54,7 @@ export const GET: RequestHandler = async() => {
         attachments: []
     });
 
+    await ReplyModel.deleteMany();
     await ReplyModel.insertOne({
         parent_post: post._id,
         author: gone!._id,
@@ -64,11 +65,13 @@ export const GET: RequestHandler = async() => {
         } as AttachmentType]
     });
     
+    await FollowModel.deleteMany();
     await FollowModel.insertOne({
         followerId: gseppo!._id,
         followingId: gone!._id
     });
 
+    await LikeModel.deleteMany();
     await LikeModel.insertOne({
         parent_post: post._id,
         author: gone!._id

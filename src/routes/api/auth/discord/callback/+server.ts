@@ -6,78 +6,84 @@ import jwt from 'jsonwebtoken';
 import { getUniqueUsername } from "src/lib/utils/UsernameUniquenessCheck.util";
 
 export const GET = async ({ url, cookies }: { url: URL, cookies: Cookies }) => {
-    const code = url.searchParams.get('code');
-    if (!code) throw error(400, 'No code provided');
+    try {
+        const code = url.searchParams.get('code');
+        if (!code) throw error(400, 'No code provided');
+        console.log('[OAuth] Code received:', code);
 
-    const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-            client_id: DISCORD_CLIENT_ID,
-            client_secret: DISCORD_CLIENT_SECRET,
-            grant_type: 'authorization_code',
-            code,
-            redirect_uri: NODE_ENV === 'production'
-                ? DISCORD_REDIRECT_URI
-                : `http://localhost:${PORT}/api/auth/discord/callback`
-        })
-    });
+        // Fetch Discord token
+        const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                client_id: DISCORD_CLIENT_ID,
+                client_secret: DISCORD_CLIENT_SECRET,
+                grant_type: 'authorization_code',
+                code,
+                redirect_uri: NODE_ENV === 'production'
+                    ? DISCORD_REDIRECT_URI
+                    : `http://localhost:${PORT}/api/auth/discord/callback`
+            })
+        });
 
-    const tokenData = await tokenResponse.json();
-    if (!tokenData.access_token) throw error(400, 'Unable to obtain access token');
+        const tokenData = await tokenResponse.json();
+        console.log('[OAuth] Token response:', tokenData);
 
-    const userResponse = await fetch('https://discord.com/api/users/@me', {
-        headers: { Authorization: `Bearer ${tokenData.access_token}` }
-    });
-    const userData = await userResponse.json();
+        if (!tokenData.access_token) throw error(400, 'Unable to obtain access token');
 
-    const username = await getUniqueUsername(userData.username);
+        const userResponse = await fetch('https://discord.com/api/users/@me', {
+            headers: { Authorization: `Bearer ${tokenData.access_token}` }
+        });
+        const userData = await userResponse.json();
+        console.log('[OAuth] Discord user data:', userData);
 
-    const updatedUser = await UserModel.findOneAndUpdate(
-        { authProviders: { $elemMatch: { platform: "discord", id: userData.id } } },
-        {
-            $set: {
-                username,
-                displayName: userData.global_name,
-                avatarUrl: userData.avatar
-                    ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=512`
-                    : "https://cdn.discordapp.com/embed/avatars/1.png?size=4096",
-                bannerUrl: userData.banner
-                    ? `https://cdn.discordapp.com/banners/${userData.id}/${userData.banner}.png?size=1024`
-                    : "none"
+        const username = await getUniqueUsername(userData.username);
+
+        const updatedUser = await UserModel.findOneAndUpdate(
+            { 'authProviders.id': userData.id },
+            {
+                $set: {
+                    username,
+                    displayName: userData.global_name,
+                    avatarUrl: userData.avatar
+                        ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=512`
+                        : "https://cdn.discordapp.com/embed/avatars/1.png?size=4096",
+                    bannerUrl: userData.banner
+                        ? `https://cdn.discordapp.com/banners/${userData.id}/${userData.banner}.png?size=1024`
+                        : "none"
+                },
+                $setOnInsert: {
+                    authProviders: [
+                        { platform: "discord", id: userData.id, accessToken: tokenData.access_token }
+                    ],
+                    bio: "",
+                    roles: [UserRoles.Beta]
+                }
             },
-            $setOnInsert: {
-                authProviders: [
-                    {
-                        platform: "discord",
-                        id: userData.id,
-                        accessToken: tokenData.access_token
-                    }
-                ],
-                bio: "",
-                roles: []
-            }
-        },
-        { new: true, upsert: true }
-    );
+            { new: true, upsert: true }
+        );
 
-    if (!updatedUser) throw error(500, "Failed to create or update user");
+        if (!updatedUser) throw error(500, "Failed to create or update user");
 
-    // BETA ONLY FEATURE //
-    if (!updatedUser.roles.includes(UserRoles.Beta)) throw error(403, 'Your account does not have beta access, please apply on our Discord.');
-    // BETA ONLY FEATURE //
+        if (!updatedUser.roles.includes(UserRoles.Beta)) {
+            throw error(403, 'Your account does not have beta access, please apply on our Discord.');
+        }
 
-    const jwtToken = jwt.sign({
-        id: userData.id,
-        username: updatedUser.username
-    }, JWT_SECRET, { expiresIn: '7d' });
+        const jwtToken = jwt.sign({
+            id: userData.id,
+            username: updatedUser.username
+        }, JWT_SECRET, { expiresIn: '7d' });
 
-    cookies.set('session', jwtToken, {
-        httpOnly: true,
-        secure: true,
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7 // 1 week
-    });
+        cookies.set('session', jwtToken, {
+            httpOnly: true,
+            secure: NODE_ENV === 'production',
+            path: '/',
+            maxAge: 60 * 60 * 24 * 7,
+            sameSite: 'lax'
+        });
 
-    return redirect(302, '/home');
+        return redirect(302, '/home');
+    } catch (err) {
+        throw error(500, 'Discord OAuth failed');
+    }
 };
