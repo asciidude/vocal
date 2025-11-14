@@ -1,6 +1,7 @@
 <script lang="ts">
     import LeftSideBar from '$lib/components/shared/LeftSideBar.svelte';
-    export let data: { user: typeof user | null };
+    import type { UserType } from 'src/lib/types/User.types';
+    export let data: { user: UserType | null };
 </script>
   
 <div class="flex min-h-screen bg-vocal_dark_bg">

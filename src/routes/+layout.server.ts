@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 
 export function load({ route, locals }) {
-    const user = locals.user ? structuredClone(JSON.parse(locals.user)) : null;
+    const user = locals.user ? structuredClone(locals.user) : null;
     
     const restrictedUrls = {
         authenticated: {

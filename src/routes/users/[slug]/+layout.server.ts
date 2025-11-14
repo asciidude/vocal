@@ -1,3 +1,3 @@
 export function load({ locals, params }) {
-    return { user: locals.user ? structuredClone(JSON.parse(locals.user)) : null };
+    return { user: locals.user ? structuredClone(locals.user) : null };
 }

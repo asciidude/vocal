@@ -13,8 +13,7 @@ const parseAndStringify = (data: any) => {
 }
 
 export const load = async ({ params, locals }) => {
-    const u = locals.user as UserType;
-    const user = JSON.parse(u);
+    const user = locals.user as UserType;
 
     const followers = await FollowModel.find({ followingId: user._id });
     const following = await FollowModel.find({ followerId: user._id });
