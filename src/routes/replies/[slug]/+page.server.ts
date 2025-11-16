@@ -12,7 +12,7 @@ const parseAndStringify = (data: any) => {
 export const load: PageServerLoad = async ({ url, params }) => {
     try {
         const postId = params.slug;
-        let post = await PostModel.findOne({ _id: postId });
+        let post = await ReplyModel.findOne({ _id: postId });
 
         if(!post) {
             throw error(404, 'Not Found');

@@ -11,9 +11,6 @@
 
     import { getImage } from "$lib/utils/Cache.util";
     import { enhance } from "$app/forms";
-    import type { SubmitFunction } from "@sveltejs/kit";
-    import type { ObjectId } from "mongoose";
-    import { writable } from "svelte/store";
 
     function getInitials(name: string | undefined) {
         if (!name) return "?";
@@ -30,7 +27,7 @@
     export let postLikes: LikeType[] = [];
     export let postReplies: ReplyType[] = [];
     export let postExpanded: Boolean = false;
-    export let reply: Boolean = false;
+    export let reply: boolean = false;
     let screenWidth = 0;
 
     $: avatarSrc = "";
@@ -126,7 +123,7 @@
                                 <input
                                     type="hidden"
                                     name="postType"
-                                    value="{reply ? 'reply' : 'post'}"
+                                    value="{reply.isReply ? 'reply' : 'post'}"
                                 />
                                 <input
                                     type="hidden"
@@ -358,7 +355,7 @@
     </div>
 
     <div class="post-bottom flex items-center gap-5 mt-2">
-        <a class="flex items-center gap-2 mt-2" href="/posts/{post?._id}">
+        <a class="flex items-center gap-2 mt-2" href={reply ? `/replies/${post?._id}` : `/posts/${post?._id}`}>
             <MessageCircle class="size-4 stroke-vocal_lightest" />
             <p class="size-6 text-lg">
                 {postReplies.length}
