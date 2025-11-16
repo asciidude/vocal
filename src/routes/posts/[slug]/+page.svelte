@@ -109,7 +109,7 @@
     {#if data.user}
         <div class="flex gap-3">
             <Avatar.Root class="flex-shrink-0">
-                <a href="/users/{data.user.discordId}">
+                <a href="/users/{data.user.username}">
                     <Avatar.Image
                         src={currentUserAv}
                         alt="@{data.user.username}"
