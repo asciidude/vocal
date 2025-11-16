@@ -5,7 +5,7 @@
     import * as Tooltip from "$lib/components/ui/tooltip/index.js";
     import * as Tabs from "$lib/components/ui/tabs";
     import { UserRoles } from "$lib/types/User.types";
-    import { HardHat, Shield, Sparkle, UserPlus, UserMinus } from "lucide-svelte";
+    import { HardHat, Shield, Sparkle, UserPlus, UserMinus, Bug } from "lucide-svelte";
     import * as Avatar from "$lib/components/ui/avatar";
     import { getImage } from "$lib/utils/Cache.util";
     import Post from "$lib/components/shared/Post.svelte";
@@ -29,7 +29,8 @@
     const roleData = {
         [UserRoles.SuperAdmin]: { icon: Sparkle, description: "This user is a site owner", priority: 3 },
         [UserRoles.Admin]: { icon: Shield, description: "This user is a site admin", priority: 2 },
-        [UserRoles.Beta]: { icon: HardHat, description: "This user is a beta tester", priority: 1 }
+        [UserRoles.Beta]: { icon: HardHat, description: "This user is a beta tester", priority: 1 },
+        [UserRoles.Tester]: { icon: Bug, description: "This user is Vocal tester", priority: 1 },
     };
 
     let avatarSrc = '';
@@ -54,7 +55,7 @@
 <title>Vocal - {profileUser.displayName || profileUser.username}</title>
 
 <div class="flex flex-col min-h-screen bg-vocal_dark_bg">
-    <header class="sticky top-0 z-10 bg-vocal_strong border-b border-[#2d2249] p-8" id="profileHeader">
+    <header class="sticky top-0 z-10  border-b bg-gradient-to-t from-bg-vocal_strongest to-bg-vocal_strong border-[#2d2249] p-8" id="profileHeader">
         <div class="container mx-auto flex flex-col text-center">
             <Avatar.Root class="w-20 h-20 rounded-full object-cover mx-auto block mb-5">
                 <Avatar.Image src={profileUser.avatarUrl} alt="@{profileUser.username}" />
