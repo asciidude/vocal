@@ -103,12 +103,12 @@
       </button>
     
       <div class="flex items-center mt-4">
-        <a href="/users/{user?._id}">
+        <a href="/users/{user?.username}">
           <img src="{avatarSrc}" alt="Avatar" class="rounded-full ring-2 ring-purple-500" />
         </a>
       </div>
     {:else}
-      <a href="/users/{user?._id}">
+      <a href="/users/{user?.username}">
         <div class="flex items-center gap-3 p-3">
           <img src="{avatarSrc}" alt="AV" class="h-10 w-10 rounded-sm ring-2 ring-purple-500" />
           <div>
