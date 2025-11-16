@@ -216,6 +216,8 @@
         {user}
             post={reply}
             postAuthor={reply.replyAuthor}
+            postLikes={reply.likes}
+            postReplies={reply.replies}
             reply={true}
         />
     {/each}

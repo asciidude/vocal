@@ -13,7 +13,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     try {
         const postId = params.slug;
 
-        const post = await PostModel.findOne({ _id: postId });
+        let post = await PostModel.findOne({ _id: postId });
+        if(!post) await ReplyModel.findOne({ _id: postId });
 
         if(!post) {
             throw error(404, 'Not Found');
@@ -25,10 +26,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
             .sort({ createdAt: -1 })
             .lean();
 
-        const repliesWithAuthors = await Promise.all(replies.map(async (reply) => {
-            const replyAuthor = await UserModel.findOne({ _id: reply.author }).lean();
-            return parseAndStringify({ ...reply, replyAuthor });
-        }));
+        const replies_alr = await Promise.all(
+            replies.map(async (reply) => {
+                const replyAuthor = await UserModel.findOne({ _id: reply.author }).lean();
+                const replyLikes = await LikeModel.find({ parent_post: reply._id }).lean();
+                const replyReplies = await ReplyModel.find({ parent_post: reply._id }).lean();
+                return parseAndStringify({ ...reply, replyAuthor, likes: replyLikes, replies: replyReplies });
+            })
+        );
 
         const likes = await LikeModel.find({ parent_post: postId });
         
@@ -36,7 +41,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
             post: parseAndStringify(post),
             author: parseAndStringify(postAuthor),
             likes: parseAndStringify(likes),
-            replies: repliesWithAuthors
+            replies: replies_alr
         };
     } catch (err) {
         console.error('Error loading home page:', err);
