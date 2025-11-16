@@ -26,10 +26,6 @@ export const POST: RequestHandler = async({ params, request, locals }) => {
     try {
         const postType = formData.get('postType');
 
-        if(!postId) {
-            throw error(422, 'Unprocessable Content');
-        }
-
         if(postType === 'reply') {
             await ReplyModel.updateOne({ _id: postId, content: content });
 

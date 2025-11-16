@@ -11,6 +11,9 @@
 
     import { getImage } from "$lib/utils/Cache.util";
     import { enhance } from "$app/forms";
+    import type { SubmitFunction } from "@sveltejs/kit";
+    import type { ObjectId } from "mongoose";
+    import { writable } from "svelte/store";
 
     function getInitials(name: string | undefined) {
         if (!name) return "?";
@@ -44,6 +47,28 @@
                 document
                     .getElementById(`post-${post!._id}`)
                     ?.classList.add("hidden");
+            }
+        };
+    }
+
+    let liked = false;
+    let likeCount = 0;
+
+    $: if (postLikes && user) {
+        liked = postLikes.some(like => like.author.toString() === user._id);
+        likeCount = postLikes.length;
+    }
+
+    function likePost() {
+        return async ({ result }) => {
+            if (result.status === 200) {
+                if (result.newlyLiked) {
+                    likeCount++;
+                    liked = true;
+                } else {
+                    likeCount--;
+                    liked = false;
+                }
             }
         };
     }
@@ -114,13 +139,13 @@
                                 class="cursor-pointer font-light text-xl"
                             >
                                 <button
+                                    type="button"
                                     on:click={() =>
                                         (
                                             document.getElementById(
                                                 `deletePost-${post._id}`,
                                             ) as HTMLFormElement
-                                        )?.requestSubmit()}
-                                    type="submit"
+                                        ).requestSubmit()}
                                 >
                                     <span class="text-xl">Delete</span>
                                 </button>
@@ -339,16 +364,28 @@
                 {postReplies.length}
             </p>
         </a>
-        <a class="flex items-center gap-2 mt-2" href="/api/like/{post?._id}">
-            {#if (postLikes.find(like => like.author.toString() == user?._id))}
-                <Heart class="size-4 stroke-vocal_lightest fill-vocal_lightest" />
-            {:else}
-                <Heart class="size-4 stroke-vocal_lightest" />
-            {/if}
-            <p class="size-6 text-lg">
-                {postLikes.length}
-            </p>
-        </a>
+        <form
+            action="/api/posts/like/{post?._id}"
+            method="post"
+            use:enhance={likePost}
+            id="likePost-{post?._id}"
+        >
+            <button
+                on:click={() =>
+                    (
+                        document.getElementById(
+                            `likePost-${post?._id}`,
+                        ) as HTMLFormElement
+                    ).requestSubmit()}
+                class="flex items-center mt-2"
+                type="button"
+            >
+                <Heart
+                    class={`size-4 stroke-vocal_lightest ${liked ? 'fill-vocal_lightest' : ''}`}
+                />
+                <p class="size-6 text-lg">{likeCount}</p>
+            </button>
+        </form>
     </div>
 </div>
 
@@ -397,8 +434,16 @@
         text-decoration: none;
         transition: color 0.2s;
     }
+    .post-bottom button {
+        color: #ccc;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
 
     .post-bottom a:hover {
+        color: #a481f6;
+    }
+    .post-bottom button:hover {
         color: #a481f6;
     }
 </style>

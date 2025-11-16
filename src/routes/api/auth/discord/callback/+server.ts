@@ -3,7 +3,7 @@ import { UserModel } from "$lib/models/User.model";
 import { UserRoles } from "$lib/types/User.types";
 import { error, redirect, type Cookies } from "@sveltejs/kit";
 import jwt from 'jsonwebtoken';
-import { getUniqueUsername } from "src/lib/utils/UsernameUniquenessCheck.util";
+import { getUniqueUsername } from "src/lib/utils/GetUniqueUsername";
 
 export const GET = async (event) => {
     const { url, cookies, locals } = event;

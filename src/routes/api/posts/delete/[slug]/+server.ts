@@ -21,10 +21,6 @@ export const POST: RequestHandler = async({ params, request, locals }) => {
     try {
         const postType = formData.get('postType');
 
-        if(!postId) {
-            throw error(422, 'Unprocessable Content');
-        }
-
         if(postType === 'reply') {
             await ReplyModel.deleteOne({ _id: postId });
             await ReplyModel.deleteMany({ parent_post: postId });
