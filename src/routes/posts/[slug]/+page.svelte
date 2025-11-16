@@ -40,7 +40,7 @@
             await update();
             if (result.status === 200 && result.post) {
                 replies = [
-                    { ...result.post, authorObj: data.user },
+                    { ...result.post, replyAuthor: data.user },
                     ...replies,
                 ];
                 newPostContent = "";
@@ -213,8 +213,10 @@
         {reply.content}
         <!-- TODO: Add reply likes/replies -->
         <Post
-        post={reply}
-        postAuthor={reply.replyAuthor}
+        {user}
+            post={reply}
+            postAuthor={reply.replyAuthor}
+            reply={true}
         />
     {/each}
 </div>

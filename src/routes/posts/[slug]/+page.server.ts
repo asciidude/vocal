@@ -2,9 +2,6 @@ import { PostModel } from '$lib/models/Post.model';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { UserModel } from '$lib/models/User.model';
-import mongoose from 'mongoose';
-import type { PostType } from '$lib/types/Post.type';
-import type { UserType } from '$lib/types/User.types';
 import { LikeModel } from 'src/lib/models/Like.model';
 import { ReplyModel } from 'src/lib/models/Reply.model';
 

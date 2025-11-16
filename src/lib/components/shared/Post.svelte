@@ -27,6 +27,7 @@
     export let postLikes: LikeType[] = [];
     export let postReplies: ReplyType[] = [];
     export let postExpanded: Boolean = false;
+    export let reply: Boolean = false;
     let screenWidth = 0;
 
     $: avatarSrc = "";
@@ -57,7 +58,7 @@
         {#if post}
             <div class="left-section">
                 <a
-                    href="/users/{postAuthor?._id}"
+                    href="/users/{postAuthor?.username}"
                     class="flex items-center gap-2"
                 >
                     <Avatar.Root>
@@ -100,7 +101,7 @@
                                 <input
                                     type="hidden"
                                     name="postType"
-                                    value="post"
+                                    value="{reply ? 'reply' : 'post'}"
                                 />
                                 <input
                                     type="hidden"
