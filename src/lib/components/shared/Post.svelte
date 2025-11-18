@@ -85,6 +85,28 @@
         };
     }
 
+    function parseContent(content: string) {
+        const hashtagRegex = /(#\w+)/g;
+        const parts = content.split(hashtagRegex);
+        
+        return parts.map((part, index) => {
+            if (part.match(hashtagRegex)) {
+                const tag = part.slice(1);
+                return {
+                    type: 'hashtag',
+                    content: part,
+                    tag: tag,
+                    key: index
+                };
+            }
+            return {
+                type: 'text',
+                content: part,
+                key: index
+            };
+        });
+    }
+
     $: screenSmaller = screenWidth <= 713;
 </script>
 
@@ -176,7 +198,17 @@
 
     <div class="post-content text-2xl">
         {#if post}
-            <p class="whitespace-pre-wrap">{post.content}</p>
+            <p class="whitespace-pre-wrap">
+                {#each parseContent(String(post.content)) as part}
+                    {#if part.type === 'hashtag'}
+                        <a href="/hashtag/{part.tag}" class="text-vocal_lightest rounded">
+                            {part.content}
+                        </a>
+                    {:else}
+                        {part.content}
+                    {/if}
+                {/each}
+            </p>
 
             {#if post.attachments.length > 0}
                 {#if post.attachments.length === 1}

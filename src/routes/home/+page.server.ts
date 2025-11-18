@@ -22,11 +22,6 @@ export const load: PageServerLoad = async ({ locals }) => {
             minSimilarity: 0.1
         });
         
-        const postsWithAuthors = await Promise.all(posts.map(async (post) => {
-            const authorObj = await UserModel.findOne({ _id: post.author }).lean();
-            return { ...post, authorObj };
-        }));
-        
         const postIds = posts.map(p => p._id);
         
         const [postLikes, postReplies] = await Promise.all([
@@ -35,7 +30,7 @@ export const load: PageServerLoad = async ({ locals }) => {
         ]);
         
         return {
-            posts: parseAndStringify(postsWithAuthors),
+            posts: parseAndStringify(posts),
             likes: parseAndStringify(postLikes),
             replies: parseAndStringify(postReplies),
             user: user || null
