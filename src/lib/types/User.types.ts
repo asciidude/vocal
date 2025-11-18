@@ -14,9 +14,11 @@ export interface UserType {
     displayName?: string | null;
 
     bio: string;
-    roles: Array<UserRoles>
+    roles: Array<UserRoles>;
 
     userInterestVectors: Record<string, number>;
+    followedHashtags: Array<string>;
+    excludedKeywords: Array<string>;
 }
 
 export enum UserRoles {

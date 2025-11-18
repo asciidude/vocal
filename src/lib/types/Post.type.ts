@@ -6,5 +6,5 @@ export interface PostType {
     author: Schema.Types.ObjectId,
     content: String,
     attachments: Array<AttachmentType>,
-    postVectors: Map<String, Number>
+    postVectors: Record<string, number>
 }

@@ -25,7 +25,9 @@ const UserSchema = new Schema<UserType>({
         default: []
     },
     
-    userInterestVectors: Object
+    userInterestVectors: Object,
+    followedHashtags: [String],
+    excludedKeywords: [String]
 }, { timestamps: true })
 
 export const UserModel: Model<UserType> = model<UserType>('User', UserSchema);
