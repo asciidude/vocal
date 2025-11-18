@@ -14,11 +14,11 @@ export function computeVector(text: string) {
     const vector: Record<string, number> = {};
 
     tfidf.addDocument(text);
+
     tfidf.tfidfs(text, (i: number, measure: number, key?: string | Record<string, any>) => {
         if (!key || typeof key !== 'string') return;
         if (measure > 0) vector[key] = measure;
     });
-    tfidf.documents.pop();
 
     return normalize(vector);
 }
