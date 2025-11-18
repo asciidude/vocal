@@ -1,18 +1,18 @@
-/**
- * Like/unlike should be handled here,
- * extra information should be added to the user object
- * regarding the post such as categories...later.
- */
-
 import { error, json, type RequestHandler } from "@sveltejs/kit";
-import { LikeModel } from '$lib/models/Like.model';
+import { FollowModel } from "src/lib/models/Follow.model";
+import { UserModel } from "src/lib/models/User.model";
 
 export const POST: RequestHandler = async({ params, request, locals }) => {
     const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
 
-    const postId = params.slug;
+    const userId = params.slug;
+    const followingUser = await UserModel.exists({ _id: userId });
 
-    if(!postId) {
+    if(
+        !userId
+        || !followingUser
+        || user._id == userId
+    ) {
         throw error(422, 'Unprocessable Entity');
     }
 
@@ -21,28 +21,28 @@ export const POST: RequestHandler = async({ params, request, locals }) => {
     }
 
     try {
-        const like = await LikeModel.exists({ parent_post: postId, author: user._id });
+        const following = await FollowModel.exists({ followerId: user._id, followingId: userId });
 
-        if(!like) {
-            await LikeModel.create({
-                parent_post: postId,
-                author: user._id
+        if(!following) {
+            await FollowModel.create({
+                followerId: user._id,
+                followingId: userId
             });
             
             return json({
                 status: 200,
-                newlyLiked: true,
+                newlyFollowed: true,
                 message: 'Success'
             });
         } else {
-            await LikeModel.deleteOne({
-                parent_post: postId,
-                author: user._id
+            await FollowModel.deleteOne({
+                followerId: user._id,
+                followingId: userId
             });
 
             return json({
                 status: 200,
-                newlyLiked: false,
+                newlyFollowed: false,
                 message: 'Success'
             });
         }

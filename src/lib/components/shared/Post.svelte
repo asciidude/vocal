@@ -123,7 +123,7 @@
                                 <input
                                     type="hidden"
                                     name="postType"
-                                    value="{reply.isReply ? 'reply' : 'post'}"
+                                    value="{reply ? 'reply' : 'post'}"
                                 />
                                 <input
                                     type="hidden"
@@ -365,17 +365,10 @@
             action="/api/posts/like/{post?._id}"
             method="post"
             use:enhance={likePost}
-            id="likePost-{post?._id}"
         >
             <button
-                on:click={() =>
-                    (
-                        document.getElementById(
-                            `likePost-${post?._id}`,
-                        ) as HTMLFormElement
-                    ).requestSubmit()}
                 class="flex items-center mt-2"
-                type="button"
+                type="submit"
             >
                 <Heart
                     class={`size-4 stroke-vocal_lightest ${liked ? 'fill-vocal_lightest' : ''}`}

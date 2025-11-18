@@ -9,6 +9,7 @@
     import * as Avatar from "$lib/components/ui/avatar";
     import { getImage } from "$lib/utils/Cache.util";
     import Post from "$lib/components/shared/Post.svelte";
+    import { enhance } from "$app/forms";
   
     export let data: PageData;
 
@@ -29,7 +30,7 @@
     const roleData = {
         [UserRoles.SuperAdmin]: { icon: Sparkle, description: "This user is a site owner", priority: 3 },
         [UserRoles.Admin]: { icon: Shield, description: "This user is a site admin", priority: 2 },
-        [UserRoles.Beta]: { icon: HardHat, description: "This user is a beta tester", priority: 1 },
+        [UserRoles.Beta]: { icon: HardHat, description: "This user was apart of our beta program", priority: 1 },
         [UserRoles.Tester]: { icon: Bug, description: "This user is Vocal tester", priority: 1 },
     };
 
@@ -38,6 +39,22 @@
     let mounted = false;
 
     onMount(() => { mounted = true; });
+
+    function followUser() {
+        return async ({ result }) => {
+            if (result.status === 200) {
+                if (result.newlyFollowed) {
+                    isFollowing = true;
+                    follow.ers++;
+                    follow.ersData.push(user);
+                } else {
+                    isFollowing = false;
+                    follow.ers--;
+                    follow.ersData = follow.ersData.filter(u => u._id !== user?._id);
+                }
+            }
+        };
+    }
 
     $: if (mounted && profileUser?.avatarUrl) {
         (async () => {
@@ -82,15 +99,24 @@
 
             {#if user && user._id !== profileUser._id}
                 <div class="mt-2 mb-2 mx-auto">
-                    <button class="bg-vocal_strong hover:bg-vocal_strongest text-white px-5 py-1 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default" type="submit">
-                        {#if isFollowing == null}
-                            <UserPlus size={16} />
-                            <span class="text-lg">Follow</span>
-                        {:else}
-                            <UserMinus size={16} />
-                            <span class="text-lg">Unfollow</span>
-                        {/if}
-                    </button>
+                    <form
+                        action="/api/users/follow/{profileUser?._id}"
+                        method="post"
+                        use:enhance={followUser}
+                    >
+                        <button
+                            class="bg-vocal_strong hover:bg-vocal_strongest text-white px-5 py-1 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default"
+                            type="submit"
+                        >
+                            {#if !isFollowing}
+                                <UserPlus size={16} />
+                                <span class="text-lg">Follow</span>
+                            {:else}
+                                <UserMinus size={16} />
+                                <span class="text-lg">Unfollow</span>
+                            {/if}
+                        </button>
+                    </form>
                 </div>
             {/if}
 
@@ -108,7 +134,7 @@
                             <Dialog.Description>
                                 {#each follow.ingData as f}
                                     <Dialog.Close>
-                                        <a href="/users/{f._id}" class="flex items-center gap-2 mt-3 text-xl">
+                                        <a href="/users/{f.username}" class="flex items-center gap-2 mt-3 text-xl">
                                             <img src={f.avatarUrl} alt={f.username} class="w-6 h-6 rounded-full" />
                                             <span>{f.displayName || f.username}</span>
                                         </a>
@@ -130,7 +156,7 @@
                             <Dialog.Description>
                                 {#each follow.ersData as f}
                                     <Dialog.Close>
-                                        <a href="/users/{f._id}" class="flex items-center gap-2 mt-3 text-xl">
+                                        <a href="/users/{f.username}" class="flex items-center gap-2 mt-3 text-xl">
                                             <img src={f.avatarUrl} alt={f.username} class="w-6 h-6 rounded-full" />
                                             <span>{f.displayName || f.username}</span>
                                         </a>
@@ -179,6 +205,7 @@
                                 postLikes={posts.replyLikes.filter(p => p.parent_post === reply._id)}
                                 postReplies={posts.nestedReplies.filter(p => p.parent_post === reply._id)}
                                 user={user}
+                                reply={true}
                             />
                         {/each}
                     {:else}

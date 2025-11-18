@@ -71,7 +71,7 @@ export const load = async ({ params, locals }) => {
         following.map(f => UserModel.findById(f.followingId))
     );
 
-    const isFollowing = await FollowModel.exists({ followingId: profileUser._id, followerId: user?._id });
+    const isFollowing = await FollowModel.exists({ followingId: profileUser._id, followerId: user?._id }) !== null;
 
     return {
         user: user,

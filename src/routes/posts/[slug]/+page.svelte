@@ -211,7 +211,6 @@
 
     {#each replies as reply (reply._id)}
         {reply.content}
-        <!-- TODO: Add reply likes/replies -->
         <Post
         {user}
             post={reply}
