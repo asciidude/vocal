@@ -27,7 +27,7 @@
 
 <title>Vocal - {postAuthor.displayName || postAuthor.username}'s post</title>
 
-<div class="container mt-5 bg-vocal_dark_bg">
+<div class="container mt-5">
     <Post
         {post}
         {postAuthor}
