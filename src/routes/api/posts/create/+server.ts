@@ -6,6 +6,7 @@ import type { UserType } from "src/lib/types/User.types";
 import fs from 'node:fs';
 import path from 'node:path';
 import type { AttachmentType } from "src/lib/types/Attachment.type";
+import { computeVector, tfidf } from "src/lib/utils/TF-IDF.util";
 
 export const POST: RequestHandler = async({ request, locals }) => {
     const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
@@ -40,13 +41,13 @@ export const POST: RequestHandler = async({ request, locals }) => {
             post = await ReplyModel.create({
                 parent_post: replyParent,
                 author: (user as UserType)._id,
-                content: content,
+                content,
                 attachments: [] // later
             });
         } else if(postType === 'post') {
             post = await PostModel.create({
                 author: user._id,
-                content: content,
+                content,
                 attachments: []
             });
         } else {
@@ -83,8 +84,14 @@ export const POST: RequestHandler = async({ request, locals }) => {
 
         if(linkedFiles.length > 0) {
             post.attachments = linkedFiles;
-            await post.save();
         }
+
+        tfidf.addDocument(content);
+
+        const vector = computeVector(String(content));
+        post.postVectors = vector;
+        
+        await post.save();
 
         return json({
             status: 200,
