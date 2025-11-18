@@ -22,7 +22,7 @@
 
     const deleteReply = (replyId: string) => {
         replies = replies.filter(r => r._id !== replyId);
-    };
+    }
 </script>
 
 <title>Vocal - {postAuthor.displayName || postAuthor.username}'s post</title>
@@ -32,9 +32,7 @@
         {post}
         {postAuthor}
         postLikes={likes.filter((p: LikeType) => p.parent_post === post._id)}
-        postReplies={replies?.filter(
-            (p: ReplyType) => p.parent_post === post._id,
-        )}
+        postReplies={replies?.filter((p: ReplyType) => p.parent_post === post._id)}
         user={data.user}
         postExpanded={true}
         redirectOnDelete={'back'}

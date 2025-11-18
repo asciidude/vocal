@@ -75,7 +75,7 @@
 
     const deletePost = (postId) => {
         posts.posts = posts.posts.filter(p => p._id !== postId);
-    };
+    }
 </script>
   
 <title>Vocal - {profileUser.displayName || profileUser.username}</title>
