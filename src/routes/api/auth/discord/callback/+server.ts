@@ -29,15 +29,14 @@ export const GET = async (event) => {
         });
 
         const tokenData = await tokenResponse.json();
-        console.log('[OAuth] Token response:', tokenData);
 
         if (!tokenData.access_token) throw error(400, 'Unable to obtain access token');
 
         const userResponse = await fetch('https://discord.com/api/users/@me', {
             headers: { Authorization: `Bearer ${tokenData.access_token}` }
         });
+        
         const userData = await userResponse.json();
-        console.log('[OAuth] Discord user data:', userData);
 
         let jwtToken;
 
