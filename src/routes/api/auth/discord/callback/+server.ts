@@ -8,95 +8,116 @@ import { getUniqueUsername } from "src/lib/utils/GetUniqueUsername";
 export const GET = async (event) => {
     const { url, cookies, locals } = event;
 
-    try {
-        const code = url.searchParams.get('code');
-        if (!code) throw error(400, 'No code provided');
+    const code = url.searchParams.get('code');
+    if (!code) throw error(400, 'No code provided');
 
-        // Fetch Discord token
-        const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                client_id: DISCORD_CLIENT_ID,
-                client_secret: DISCORD_CLIENT_SECRET,
-                grant_type: 'authorization_code',
-                code,
-                redirect_uri: NODE_ENV === 'production'
-                    ? DISCORD_REDIRECT_URI
-                    : `http://localhost:${PORT}/api/auth/discord/callback`
-            })
-        });
+    console.log('[OAuth] Starting Discord callback with code');
 
-        const tokenData = await tokenResponse.json();
+    const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            client_id: DISCORD_CLIENT_ID,
+            client_secret: DISCORD_CLIENT_SECRET,
+            grant_type: 'authorization_code',
+            code,
+            redirect_uri: NODE_ENV === 'production'
+                ? DISCORD_REDIRECT_URI
+                : `http://localhost:${PORT}/api/auth/discord/callback`
+        })
+    });
 
-        if (!tokenData.access_token) throw error(400, 'Unable to obtain access token');
+    const tokenData = await tokenResponse.json();
 
-        const userResponse = await fetch('https://discord.com/api/users/@me', {
-            headers: { Authorization: `Bearer ${tokenData.access_token}` }
-        });
+    if (!tokenData.access_token) {
+        throw error(400, 'Unable to obtain access token');
+    }
 
-        const userData = await userResponse.json();
+    const userResponse = await fetch('https://discord.com/api/users/@me', {
+        headers: { Authorization: `Bearer ${tokenData.access_token}` }
+    });
 
-        let jwtToken;
+    if (!userResponse.ok) {
+        throw error(500, 'Failed to fetch user data from Discord');
+    }
 
-        if(!locals.user) {
-            const username = await getUniqueUsername(userData.username);
+    const userData = await userResponse.json();
+    console.log('[OAuth] Discord user data received');
 
-            const updatedUser = await UserModel.findOneAndUpdate(
-                { 'authProviders.id': userData.id },
-                {
-                    $set: {
-                        username,
-                        displayName: userData.global_name,
-                        avatarUrl: userData.avatar
-                            ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=512`
-                            : "https://cdn.discordapp.com/embed/avatars/1.png?size=4096",
-                        bannerUrl: userData.banner
-                            ? `https://cdn.discordapp.com/banners/${userData.id}/${userData.banner}.png?size=1024`
-                            : "none"
-                    },
-                    $setOnInsert: {
-                        authProviders: [
-                            { platform: "discord", id: userData.id, accessToken: tokenData.access_token }
-                        ],
-                        bio: "",
-                        roles: [UserRoles.Beta]
-                    }
-                },
-                { new: true, upsert: true }
-            );
+    let jwtToken;
+    const userWithDiscord = await UserModel.findOne({ 'authProviders.id': userData.id });
 
-            if (!updatedUser) throw error(500, "Failed to create or update user");
-        
-            if (!updatedUser.roles.includes(UserRoles.Beta)) {
-                throw error(403, 'Your account does not have beta access, please apply on our Discord.');
-            }
-
-            jwtToken = jwt.sign({
-                id: userData.id,
-                username: updatedUser.username
-            }, JWT_SECRET, { expiresIn: '7d' });
-        } else {
-            if (!locals.user.roles.includes(UserRoles.Beta)) {
-                throw error(403, 'Your account does not have beta access, please apply on our Discord.');
-            }
-
-            jwtToken = jwt.sign({
-                id: userData.id,
-                username: locals.user.username
-            }, JWT_SECRET, { expiresIn: '7d' });
+    if (userWithDiscord) {
+        const discordProvider = userWithDiscord.authProviders.find(p => p.platform === 'discord');
+        if (discordProvider) {
+            discordProvider.accessToken = tokenData.access_token;
+            await userWithDiscord.save();
         }
 
-        cookies.set('session', jwtToken, {
-            httpOnly: true,
-            secure: NODE_ENV === 'production',
-            path: '/',
-            maxAge: 60 * 60 * 24 * 7,
-            sameSite: 'lax'
+        if (!userWithDiscord.roles.includes(UserRoles.Beta)) {
+            throw error(403, 'No beta access');
+        }
+
+        jwtToken = jwt.sign({
+            id: userData.id,
+            username: userWithDiscord.username
+        }, JWT_SECRET, { expiresIn: '7d' });
+
+    } else if (locals.user) {
+        const currentUser = await UserModel.findById(locals.user._id);
+        if (!currentUser) throw error(500, "User not found");
+        
+        currentUser.authProviders.push({
+            platform: "discord", 
+            id: userData.id, 
+            accessToken: tokenData.access_token 
+        });
+        await currentUser.save();
+
+        jwtToken = jwt.sign({
+            id: userData.id,
+            username: currentUser.username
+        }, JWT_SECRET, { expiresIn: '7d' });
+
+    } else {
+        const username = await getUniqueUsername(userData.username);
+
+        const newUser = await UserModel.create({
+            username,
+            displayName: userData.global_name,
+            avatarUrl: userData.avatar
+                ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png?size=512`
+                : "https://cdn.discordapp.com/embed/avatars/1.png?size=4096",
+            bannerUrl: userData.banner
+                ? `https://cdn.discordapp.com/banners/${userData.id}/${userData.banner}.png?size=1024`
+                : "none",
+            authProviders: [
+                { platform: "discord", id: userData.id, accessToken: tokenData.access_token }
+            ],
+            bio: "",
+            roles: [UserRoles.Beta],
+            userInterestVectors: {},
+            followedHashtags: [],
+            excludedKeywords: []
         });
 
-        return redirect(302, '/home');
-    } catch (err) {
-        throw error(500, 'Discord OAuth failed');
+        if (!newUser.roles.includes(UserRoles.Beta)) {
+            throw error(403, 'No beta access');
+        }
+
+        jwtToken = jwt.sign({
+            id: userData.id,
+            username: newUser.username
+        }, JWT_SECRET, { expiresIn: '7d' });
     }
+
+    cookies.set('session', jwtToken, {
+        httpOnly: true,
+        secure: NODE_ENV === 'production',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+        sameSite: 'lax'
+    });
+
+    throw redirect(302, '/home');
 };
