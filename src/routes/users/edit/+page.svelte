@@ -10,8 +10,6 @@
         HardHat,
         Shield,
         Sparkle,
-        UserPlus,
-        UserMinus,
         Bug,
     } from "lucide-svelte";
     import * as Avatar from "$lib/components/ui/avatar";

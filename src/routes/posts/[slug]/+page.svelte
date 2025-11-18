@@ -102,6 +102,7 @@
         )}
         user={data.user}
         postExpanded={true}
+        redirectOnDelete={'back'}
     />
 
     <hr class="mt-7 mb-7 text-gray-700" />

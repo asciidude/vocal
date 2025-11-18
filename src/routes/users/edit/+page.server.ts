@@ -4,16 +4,13 @@ import type { UserType } from '$lib/types/User.types';
 import { FollowModel } from '$lib/models/Follow.model';
 import { PostModel } from '$lib/models/Post.model';
 import { ReplyModel } from '$lib/models/Reply.model';
-import type { PostType } from '$lib/types/Post.type';
-import type { ReplyType } from '$lib/types/Reply.type';
 import { LikeModel } from '$lib/models/Like.model';
-import type { LikeType } from '$lib/types/Like.type';
 
 const parseAndStringify = (data: any) => {
     return JSON.parse(JSON.stringify(data));
 }
 
-export const load = async ({ params, locals }) => {
+export const load = async ({ locals }) => {
     const user = locals.user as UserType | null;
     if(!user) throw error(404, 'Not Found');
 

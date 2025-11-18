@@ -11,6 +11,7 @@
 
     import { getImage } from "$lib/utils/Cache.util";
     import { enhance } from "$app/forms";
+    import { redirect } from "@sveltejs/kit";
 
     function getInitials(name: string | undefined) {
         if (!name) return "?";
@@ -27,6 +28,7 @@
     export let postLikes: LikeType[] = [];
     export let postReplies: ReplyType[] = [];
     export let postExpanded: Boolean = false;
+    export let redirectOnDelete: String | null = null;
     export let reply: boolean = false;
     let screenWidth = 0;
 
@@ -41,6 +43,17 @@
     function deletePost() {
         return async ({ result }) => {
             if (result.status === 200) {
+                if(redirectOnDelete === 'back') {
+                    if(document.referrer && document.referrer.startsWith(location.origin)) {
+                        history.back();
+                        return;
+                    } else {
+                        window.location.href = '/home';
+                    }
+                } else if(redirectOnDelete) {
+                    window.location.href = String(redirectOnDelete);
+                }
+
                 document
                     .getElementById(`post-${post!._id}`)
                     ?.classList.add("hidden");
