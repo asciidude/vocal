@@ -20,7 +20,7 @@
     }
 
     const deletePost = (postId) => {
-        posts = posts.filter(p => p._id === postId);
+        posts = posts.filter(p => p._id !== postId);
     }
 
     onMount(async () => {
