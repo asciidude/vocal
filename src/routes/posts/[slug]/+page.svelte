@@ -45,6 +45,8 @@
     <CreatePost
         {user}
         postSubmission={submitReply}
+        postType={'reply'}
+        replyParent={post._id}
     />
 
     {#if replies.length > 0}

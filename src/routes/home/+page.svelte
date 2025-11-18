@@ -59,6 +59,7 @@
         <CreatePost
             user={data.user ?? null}
             postSubmission={submitPost}
+            postType={'post'}
         />
 
         <div class="space-y-4" id="postArea">

@@ -194,6 +194,7 @@
                         <CreatePost
                             user={data.user ?? null}
                             postSubmission={submitPost}
+                            postType={'post'}
                         />
                     {/if}
                     

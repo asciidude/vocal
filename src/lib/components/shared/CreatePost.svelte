@@ -9,16 +9,16 @@
 
     export let user: UserType | null = null;
     export let postSubmission: any;
-
-    export let initialContent: string = "";
+    export let postType: 'reply' | 'post';
+    export let replyParent: string = '';
 
     type FileWithPreview = { file: File; previewUrl: string };
 
-    let newPostContent: string = initialContent;
     let files: FileWithPreview[] = [];
     let isSubmitting = false;
     let currentUserAv: string | null = null;
 
+    let newPostContent = '';
     let screenWidth = 0;
     $: screenSmaller = screenWidth <= 577;
 
@@ -93,7 +93,10 @@
                 class="flex-grow"
                 on:submit|preventDefault={() => (isSubmitting = true)}
             >
-                <input type="hidden" name="postType" value="post" />
+                <input type="hidden" name="postType" value={postType} />
+                {#if postType === 'reply'}
+                    <input type="hidden" name="replyParent" value={replyParent} />
+                {/if}
 
                 <textarea
                     class="w-full bg-transparent border border-[#2d2249] rounded-lg p-3 focus:border-vocal_medium focus:outline-none resize-none text-white placeholder-gray-500 text-2xl"

@@ -76,7 +76,7 @@ export const POST: RequestHandler = async({ request, locals }) => {
                     url: `/posts/${post._id}/uploads/${safeName}`,
                     type: 'image',
                     name: safeName,
-                    size: file.size
+                    size: String(file.size)
                 });
             }
         }
