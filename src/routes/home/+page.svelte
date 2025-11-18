@@ -2,7 +2,7 @@
     import type { PageData } from "./$types";
     import Post from "$lib/components/shared/Post.svelte";
     import * as Avatar from "$lib/components/ui/avatar";
-    import { onMount } from "svelte";
+    import { onMount, tick } from "svelte";
     import type { ReplyType } from "$lib/types/Reply.type";
     import type { LikeType } from "$lib/types/Like.type";
     import CreatePost from "src/lib/components/shared/CreatePost.svelte";
@@ -30,15 +30,23 @@
         page++;
 
         try {
-            const response = await fetch(`/api/posts?page=${page}&limit=5`)
+            const response = await fetch(`/api/feed?page=${page}&limit=5&minSimilarity=0.1`)
             const result = await response.json();
 
             if(result.feed.length === 0) {
                 hasMore = false;
                 return;
             }
+            
+            const existingIds = new Set(posts.map(p => p._id));
+            const newPosts = result.feed.filter(post => !existingIds.has(post._id));
 
-            posts = [...posts, ...result.feed];
+            if (newPosts.length === 0) {
+                console.log('All loaded posts were duplicates, trying next page');
+                return loadPosts();
+            }
+
+            posts = [...posts, ...newPosts];
         } catch(err) {
             console.error('Failed to load more posts:', err);
             page--;
@@ -47,8 +55,8 @@
         }
     }
 
-    onMount(async () => {
-        posts = data.posts;
+    const setupObserver = async () => {
+        await tick();
         
         observer = new IntersectionObserver((entries) => {
             if(entries[0].isIntersecting && !isLoading && hasMore) {
@@ -57,7 +65,15 @@
         }, { threshold: 0.1 });
 
         const sentinel = document.getElementById('sentinel');
-        if (sentinel) observer.observe(sentinel);
+        console.log('Sentinel found after tick:', !!sentinel);
+        if (sentinel) {
+            observer.observe(sentinel);
+        }
+    }
+
+    onMount(async () => {
+        posts = data.posts;
+        await setupObserver();
     });
 
     $effect.pre(() => {

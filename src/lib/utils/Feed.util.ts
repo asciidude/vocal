@@ -23,7 +23,7 @@ export class FeedAlgorithm {
             .populate('author', 'username displayName avatarUrl')
             .sort({ createdAt: -1 })
             .skip(skip)
-            .limit(limit * 30)
+            .limit(limit)
             .lean();
 
         const feedSections = await Promise.all([

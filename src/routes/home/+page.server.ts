@@ -18,7 +18,7 @@ export const load: PageServerLoad = async ({ locals }) => {
         if (!user) throw error(401, 'Unauthorized');
         
         let posts = await FeedAlgorithm.generateFeed(String(user._id), {
-            limit: 15,
+            limit: 5,
             minSimilarity: 0.1
         });
         
