@@ -2,6 +2,7 @@ import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { PostModel } from "src/lib/models/Post.model";
 import { ReplyModel } from "src/lib/models/Reply.model";
 import fs from 'fs';
+import { LikeModel } from "src/lib/models/Like.model";
 
 export const POST: RequestHandler = async({ params, request, locals }) => {
     const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
@@ -23,13 +24,14 @@ export const POST: RequestHandler = async({ params, request, locals }) => {
 
         if(postType === 'reply') {
             await ReplyModel.deleteOne({ _id: postId });
-            await ReplyModel.deleteMany({ parent_post: postId });
         } else if(postType === 'post') {
             await PostModel.deleteOne({ _id: postId });
-            await ReplyModel.deleteMany({ parent_post: postId });
-        } else {
-            throw error(401, 'Invalid Request')
+        } else if(postType !== 'reply' && postType !== 'post') {
+            throw error(400, 'Bad Request');
         }
+
+        await ReplyModel.deleteMany({ parent_post: postId });
+        await LikeModel.deleteMany({ parent_post: postId });
 
         const postMedia = `static/posts/${postId}`;
         if(fs.existsSync(postMedia)) {

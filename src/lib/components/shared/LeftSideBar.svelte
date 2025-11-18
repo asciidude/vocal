@@ -23,7 +23,7 @@
 
   $: navItems = [
     { icon: Home, label: 'Home', href: '/home' },
-    { icon: User, label: 'Profile', href: `/users/${user?._id}` },
+    { icon: User, label: 'Profile', href: `/users/${user?.username}` },
     { icon: Bell, label: 'Notifications', href: '/notifications' },
     { icon: Bookmark, label: 'Bookmarks', href: '/bookmarks' },
     { icon: Heart, label: 'Likes', href: '/likes' },
