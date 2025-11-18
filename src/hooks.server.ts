@@ -33,7 +33,9 @@ export const handle: Handle = async ({ event, resolve }) => {
                     bio: userDoc.bio ?? "",
                     roles: userDoc.roles ?? [],
                     authProviders: userDoc.authProviders ?? [],
-                    userInterestVectors: userDoc.userInterestVectors ?? {}
+                    userInterestVectors: userDoc.userInterestVectors ?? {},
+                    followedHashtags: userDoc.followedHashtags ?? [],
+                    excludedKeywords: userDoc.excludedKeywords ?? []
                 };
             }
         } catch (err) {

@@ -35,8 +35,7 @@ export const POST: RequestHandler = async({ request, locals }) => {
 
         let post;
 
-        // FIRST: Add document to TF-IDF and compute vector
-        let vector;
+        let vector: Record<string, number> = {};
         if(postType === 'post') {
             tfidf.addDocument(contentString);
             vector = computeDocumentVector(contentString);
