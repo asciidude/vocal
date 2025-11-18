@@ -10,6 +10,7 @@
     import { getImage } from "$lib/utils/Cache.util";
     import Post from "$lib/components/shared/Post.svelte";
     import { enhance } from "$app/forms";
+    import CreatePost from "src/lib/components/shared/CreatePost.svelte";
   
     export let data: PageData;
 
@@ -67,6 +68,14 @@
             header!.style.backgroundSize = "cover";
         })();
     }
+
+    const submitPost = (post) => {
+        posts.posts = [{ ...post, authorObj: data.user }, ...posts.posts];
+    }
+
+    const deletePost = (postId) => {
+        posts.posts = posts.posts.filter(p => p._id !== postId);
+    };
 </script>
   
 <title>Vocal - {profileUser.displayName || profileUser.username}</title>
@@ -181,6 +190,13 @@
 
             <div class="container mx-auto flex-grow py-6">
                 <Tabs.Content value="posts" class="tab-content space-y-4">
+                    {#if data.user && data.user._id === profileUser._id}
+                        <CreatePost
+                            user={data.user ?? null}
+                            postSubmission={submitPost}
+                        />
+                    {/if}
+                    
                     {#if posts && posts.posts.length > 0}
                         {#each posts.posts as post}
                             <Post 
@@ -189,6 +205,7 @@
                                 postLikes={posts.likes.filter(p => p.parent_post === post._id)}
                                 postReplies={posts.postReplies.filter(p => p.parent_post === post._id)}
                                 user={user}
+                                postDeletion={deletePost}
                             />
                         {/each}
                     {:else}
@@ -206,6 +223,7 @@
                                 postReplies={posts.nestedReplies.filter(p => p.parent_post === reply._id)}
                                 user={user}
                                 reply={true}
+                                postDeletion={deletePost}
                             />
                         {/each}
                     {:else}

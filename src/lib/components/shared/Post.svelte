@@ -11,7 +11,6 @@
 
     import { getImage } from "$lib/utils/Cache.util";
     import { enhance } from "$app/forms";
-    import { redirect } from "@sveltejs/kit";
 
     function getInitials(name: string | undefined) {
         if (!name) return "?";
@@ -30,6 +29,7 @@
     export let postExpanded: Boolean = false;
     export let redirectOnDelete: String | null = null;
     export let reply: boolean = false;
+    export let postDeletion: any;
     let screenWidth = 0;
 
     $: avatarSrc = "";
@@ -57,6 +57,8 @@
                 document
                     .getElementById(`post-${post!._id}`)
                     ?.classList.add("hidden");
+                
+                postDeletion(post?._id);
             }
         };
     }
