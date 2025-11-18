@@ -18,15 +18,11 @@ export class FeedAlgorithm {
         const user = await UserModel.findById(userId);
         if (!user) throw new Error('User not found');
 
-        console.log('[Feed] Generating feed for user:', user._id);
-
         const allPosts = await PostModel.find({})
             .populate('author', 'username displayName avatarUrl')
             .sort({ createdAt: -1 })
             .limit(1000)
             .lean();
-
-        console.log('[Feed] Found posts:', allPosts.length);
 
         const feedSections = await Promise.all([
             this.getFollowingPosts(user, allPosts, Math.floor(limit * 0.10)),
