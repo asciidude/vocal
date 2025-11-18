@@ -1,7 +1,7 @@
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { FeedAlgorithm } from '$lib/utils/Feed.util';
 
-export const POST: RequestHandler = async ({ request, locals }) => {
+export const GET: RequestHandler = async ({ request, locals }) => {
     const user = locals.user;
 
     if(!user) {
