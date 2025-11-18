@@ -9,11 +9,12 @@ import { cosineSimilarity } from "./TF-IDF.util";
 export interface FeedOptions {
     limit?: number;
     minSimilarity?: number;
+    skip?: number
 }
 
 export class FeedAlgorithm {
     static async generateFeed(userId: string, options: FeedOptions = {}) {
-        const { limit = 15, minSimilarity = 0.1 } = options;
+        const { limit = 15, minSimilarity = 0.1, skip = 0 } = options;
 
         const user = await UserModel.findById(userId);
         if (!user) throw new Error('User not found');
@@ -21,7 +22,8 @@ export class FeedAlgorithm {
         const allPosts = await PostModel.find({})
             .populate('author', 'username displayName avatarUrl')
             .sort({ createdAt: -1 })
-            .limit(1000)
+            .skip(skip)
+            .limit(limit * 30)
             .lean();
 
         const feedSections = await Promise.all([

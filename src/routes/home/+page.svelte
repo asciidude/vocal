@@ -2,18 +2,18 @@
     import type { PageData } from "./$types";
     import Post from "$lib/components/shared/Post.svelte";
     import * as Avatar from "$lib/components/ui/avatar";
-    import { getImage } from "src/lib/utils/Cache.util";
     import { onMount } from "svelte";
     import type { ReplyType } from "$lib/types/Reply.type";
     import type { LikeType } from "$lib/types/Like.type";
     import CreatePost from "src/lib/components/shared/CreatePost.svelte";
 
-    export let data: PageData;
+    const { data } = $props<{ data: PageData }>();
 
-    let currentUserAv = "";
-
-    let posts: typeof data.posts = [];
-    $: posts;
+    let posts = $state<typeof data.posts>([]);
+    let page = $state(1);
+    let isLoading = $state(false);
+    let hasMore = $state(true);
+    let observer: IntersectionObserver;
 
     const submitPost = (post) => {
         posts = [{ ...post, authorObj: data.user }, ...posts];
@@ -23,9 +23,49 @@
         posts = posts.filter(p => p._id !== postId);
     }
 
+    const loadPosts = async () => {
+        if(isLoading || !hasMore) return;
+
+        isLoading = true;
+        page++;
+
+        try {
+            const response = await fetch(`/api/posts?page=${page}&limit=5`)
+            const result = await response.json();
+
+            if(result.feed.length === 0) {
+                hasMore = false;
+                return;
+            }
+
+            posts = [...posts, ...result.feed];
+        } catch(err) {
+            console.error('Failed to load more posts:', err);
+            page--;
+        } finally {
+            isLoading = false;
+        }
+    }
+
     onMount(async () => {
         posts = data.posts;
-        currentUserAv = await getImage(data.user?.avatarUrl);
+        
+        observer = new IntersectionObserver((entries) => {
+            if(entries[0].isIntersecting && !isLoading && hasMore) {
+                loadPosts();
+            }
+        }, { threshold: 0.1 });
+
+        const sentinel = document.getElementById('sentinel');
+        if (sentinel) observer.observe(sentinel);
+    });
+
+    $effect.pre(() => {
+        if(observer) {
+            observer.disconnect();
+            const sentinel = document.getElementById('sentinel');
+            if (sentinel) observer.observe(sentinel);
+        }
     });
 </script>
 
@@ -79,10 +119,18 @@
                         postDeletion={deletePost}
                     />
                 {/each}
-            {:else}
-                <div
-                    class="flex flex-col items-center justify-center p-8 text-center"
-                >
+                
+                <div id="sentinel" class="h-10 flex items-center justify-center">
+                    {#if isLoading}
+                        <div class="text-gray-400">Loading more posts...</div>
+                    {:else if hasMore}
+                        <div class="h-1"></div>
+                    {:else if posts.length >= 10}
+                        <div class="text-gray-500 text-sm py-4">No more posts to load</div>
+                    {/if}
+                </div>
+            {:else if !isLoading}
+                <div class="flex flex-col items-center justify-center p-8 text-center">
                     <p class="text-gray-400 mb-2">No posts yet</p>
                     <p class="text-sm text-gray-500">
                         Be the first to create a post!
