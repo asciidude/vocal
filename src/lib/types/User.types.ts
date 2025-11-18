@@ -16,7 +16,7 @@ export interface UserType {
     bio: string;
     roles: Array<UserRoles>
 
-    userInterestVectors: Map<String, Number>
+    userInterestVectors: Record<string, number>;
 }
 
 export enum UserRoles {
