@@ -4,7 +4,9 @@ import { connect } from '$lib/utils/Database.utils';
 import { UserModel } from '$lib/models/User.model';
 import jwt from 'jsonwebtoken';
 import type { UserType } from './lib/types/User.types';
+import { initializeTfIdf } from './lib/utils/TF-IDF.util';
 
+await initializeTfIdf();
 await connect();
 
 export const handleError = ({ error }: { error: any }) => {
