@@ -28,7 +28,7 @@ export const POST: RequestHandler = async({ params, request, locals }) => {
 
     const updatedVector = { ...(userDoc.userInterestVectors || {}) };
 
-    for (const [token, weight] of Object.entries(post.postVectors)) {
+    for (const [token, weight] of Object.entries(post.postVectors || {})) {
         updatedVector[token] = (updatedVector[token] || 0) + weight;
     }
 
