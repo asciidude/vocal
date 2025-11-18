@@ -37,7 +37,7 @@
         postExpanded={true}
     />
 
-    <hr class="mt-7 mb-7 text-gray-700" />
+    <hr class="mt-7 mb-7 border-vocal_strongest" />
 
     <CreatePost
         {user}
