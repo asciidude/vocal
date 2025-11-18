@@ -1,7 +1,7 @@
 import { Model, model, Schema } from "mongoose";
 import type { LikeType } from "$lib/types/Like.type";
 
-const LikeSchema = new Schema({
+const LikeSchema = new Schema<LikeType>({
     parent_post: Schema.Types.ObjectId,
     author: Schema.Types.ObjectId
 }, { timestamps: true })

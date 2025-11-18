@@ -1,7 +1,7 @@
 import { Model, model, Schema } from "mongoose";
 import type { FollowType } from "$lib/types/Follow.type";
 
-const FollowSchema = new Schema({
+const FollowSchema = new Schema<FollowType>({
     followerId: String,
     followingId: String
 }, { timestamps: true })

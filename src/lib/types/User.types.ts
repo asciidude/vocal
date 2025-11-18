@@ -5,7 +5,7 @@ export interface UserType {
     createdAt?: string;
     updatedAt?: string;
 
-    authProviders: AuthProviderType;
+    authProviders: Array<AuthProviderType>;
 
     avatarUrl: string;
     bannerUrl: string;
@@ -15,6 +15,8 @@ export interface UserType {
 
     bio: string;
     roles: Array<UserRoles>
+
+    userInterestVectors: Object
 }
 
 export enum UserRoles {

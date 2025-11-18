@@ -5,5 +5,6 @@ export interface PostType {
     _id: Schema.Types.ObjectId,
     author: Schema.Types.ObjectId,
     content: String,
-    attachments: Array<AttachmentType>
+    attachments: Array<AttachmentType>,
+    postVectors: Object
 }
