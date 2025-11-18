@@ -1,14 +1,16 @@
 import natural from "natural";
 import { PostModel } from "../models/Post.model";
-const TfIdf = natural.TfIdf;
 
+const TfIdf = natural.TfIdf;
 export const tfidf = new TfIdf();
 
 export async function initializeTfIdf() {
     const posts = await PostModel.find({}, 'content').lean();
-    
-    [...posts].forEach(doc => {
-        if (doc.content) tfidf.addDocument(String(doc.content));
+
+    posts.forEach(doc => {
+        if (doc.content && doc.content.trim()) {
+            tfidf.addDocument(String(doc.content));
+        }
     });
 
     console.log(`TF-IDF model initialized with ${tfidf.documents.length} documents`);
@@ -22,6 +24,8 @@ export function normalize(vec: Record<string, number>) {
 }
 
 export function computeVector(text: string) {
+    if (!text || !text.trim()) return { unknown: 1 };
+
     const vector: Record<string, number> = {};
 
     tfidf.addDocument(text);
