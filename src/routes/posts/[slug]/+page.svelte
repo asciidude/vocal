@@ -6,8 +6,6 @@
     import type { LikeType } from "$lib/types/Like.type";
     import type { ReplyType } from "$lib/types/Reply.type";
 
-    import { getImage } from "src/lib/utils/Cache.util";
-    import { onMount } from "svelte";
     import CreatePost from "src/lib/components/shared/CreatePost.svelte";
 
     export let data: PageData;

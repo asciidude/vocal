@@ -29,7 +29,7 @@
     export let postExpanded: Boolean = false;
     export let redirectOnDelete: String | null = null;
     export let reply: boolean = false;
-    export let postDeletion: any;
+    export let postDeletion: any = null;
     let screenWidth = 0;
 
     $: avatarSrc = "";
