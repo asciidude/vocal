@@ -11,7 +11,6 @@ export const GET = async (event) => {
     try {
         const code = url.searchParams.get('code');
         if (!code) throw error(400, 'No code provided');
-        console.log('[OAuth] Code received:', code);
 
         // Fetch Discord token
         const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
@@ -35,7 +34,7 @@ export const GET = async (event) => {
         const userResponse = await fetch('https://discord.com/api/users/@me', {
             headers: { Authorization: `Bearer ${tokenData.access_token}` }
         });
-        
+
         const userData = await userResponse.json();
 
         let jwtToken;
