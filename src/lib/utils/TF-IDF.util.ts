@@ -1,3 +1,4 @@
+// TF-IDF.util.ts
 import natural from "natural";
 import { PostModel } from "../models/Post.model";
 
@@ -19,16 +20,38 @@ export function normalize(vec: Record<string, number>) {
     return out;
 }
 
+export function computeDocumentVector(text: string) {
+    if (!text || !text.trim()) return { unknown: 1 };
+    
+    const tempTfIdf = new TfIdf();
+    tempTfIdf.addDocument(text);
+    
+    const vector: Record<string, number> = {};
+    
+    const terms = new Set<string>();
+    tempTfIdf.listTerms(0).forEach(term => {
+        if (term.tfidf > 0) {
+            terms.add(term.term);
+        }
+    });
+    
+    terms.forEach(term => {
+        tfidf.tfidfs(term, (i, measure) => {
+            if (measure > 0) {
+                vector[term] = measure;
+            }
+        });
+    });
+    
+    return normalize(vector);
+}
+
 export function computeVector(text: string) {
     if (!text || !text.trim()) return { unknown: 1 };
-
     const vector: Record<string, number> = {};
-
-    tfidf.tfidfs(text, (i: number, measure: number, key?: string | Record<string, any>) => {
-        if (!key || typeof key !== 'string') return;
-        if (measure > 0) vector[key] = measure;
+    tfidf.tfidfs(text, (i, measure, key) => {
+        if (typeof key === 'string' && measure > 0) vector[key] = measure;
     });
-
     return normalize(vector);
 }
 

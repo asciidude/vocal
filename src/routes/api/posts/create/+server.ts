@@ -1,3 +1,4 @@
+// /src/routes/api/posts/create/+server.ts
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { isValidObjectId } from "mongoose";
 import { PostModel } from "src/lib/models/Post.model";
@@ -6,7 +7,7 @@ import type { UserType } from "src/lib/types/User.types";
 import fs from 'node:fs';
 import path from 'node:path';
 import type { AttachmentType } from "src/lib/types/Attachment.type";
-import { computeVector, normalize, tfidf } from "src/lib/utils/TF-IDF.util";
+import { computeDocumentVector, tfidf } from "src/lib/utils/TF-IDF.util"; // Changed import
 import { UserModel } from "src/lib/models/User.model";
 
 export const POST: RequestHandler = async({ request, locals }) => {
@@ -26,12 +27,20 @@ export const POST: RequestHandler = async({ request, locals }) => {
             throw error(422, 'Unprocessable Content');
         }
 
+        const contentString = String(content);
         const attachments = formData.getAll('attachments') as File[];
         const attachmentsLimited = attachments
             .filter(file => file.name)
             .slice(0,10);
 
         let post;
+
+        // FIRST: Add document to TF-IDF and compute vector
+        let vector;
+        if(postType === 'post') {
+            tfidf.addDocument(contentString);
+            vector = computeDocumentVector(contentString);
+        }
 
         if(postType === 'reply') {
             const replyParent = formData.get('replyParent');
@@ -43,14 +52,15 @@ export const POST: RequestHandler = async({ request, locals }) => {
             post = await ReplyModel.create({
                 parent_post: replyParent,
                 author: (user as UserType)._id,
-                content,
-                attachments: [] // later
+                content: contentString,
+                attachments: [], // will be updated later
             });
         } else if(postType === 'post') {
             post = await PostModel.create({
                 author: user._id,
-                content,
-                attachments: []
+                content: contentString,
+                attachments: [], // will be updated later
+                postVectors: vector
             });
         } else {
             throw error(401, 'Invalid Request')
@@ -86,20 +96,19 @@ export const POST: RequestHandler = async({ request, locals }) => {
 
         if(linkedFiles.length > 0) {
             post.attachments = linkedFiles;
+            await post.save();
         }
 
-        const vector = computeVector(String(content));
-
-        post.postVectors = vector;
-        await post.save();
-
-        tfidf.addDocument(String(content));
-
-        if (userDoc) {
+        if (userDoc && postType === 'post') {
             const updatedVector = { ...(userDoc.userInterestVectors || {}) };
 
             for (const [token, weight] of Object.entries(vector)) {
                 updatedVector[token] = (updatedVector[token] || 0) + weight;
+            }
+
+            const mag = Math.sqrt(Object.values(updatedVector).reduce((s, v) => s + v*v, 0)) || 1;
+            for (const k in updatedVector) {
+                updatedVector[k] = updatedVector[k] / mag;
             }
 
             userDoc.userInterestVectors = updatedVector;

@@ -6,8 +6,8 @@ import jwt from 'jsonwebtoken';
 import type { UserType } from './lib/types/User.types';
 import { initializeTfIdf } from './lib/utils/TF-IDF.util';
 
-await initializeTfIdf();
 await connect();
+await initializeTfIdf().catch(console.error);
 
 export const handleError = ({ error }: { error: any }) => {
     console.error('SvelteKit error:', error);
