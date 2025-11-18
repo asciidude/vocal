@@ -4,14 +4,15 @@ import { UserRoles, type UserType } from "$lib/types/User.types";
 import { NODE_ENV } from "$env/static/private";
 import { PostModel } from "$lib/models/Post.model";
 import { ReplyModel } from "$lib/models/Reply.model";
-import type { AttachmentType } from "$lib/types/Attachment.type";
 import { FollowModel } from "$lib/models/Follow.model";
 import { LikeModel } from "$lib/models/Like.model";
 import type { AuthProviderType } from "src/lib/types/AuthProvider.type";
 import { computeDocumentVector, tfidf } from "src/lib/utils/TF-IDF.util";
 
-export const GET: RequestHandler = async() => {
+export const GET: RequestHandler = async({ cookies }) => {
     if(NODE_ENV === 'production') throw error(403, 'Unable to seed database in production environment');
+
+    cookies.delete('session', { path: '/' });
 
     await UserModel.deleteMany();
     await UserModel.insertMany([{
