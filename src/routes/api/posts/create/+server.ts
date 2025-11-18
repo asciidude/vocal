@@ -7,11 +7,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { AttachmentType } from "src/lib/types/Attachment.type";
 import { computeVector, normalize, tfidf } from "src/lib/utils/TF-IDF.util";
+import { UserModel } from "src/lib/models/User.model";
 
 export const POST: RequestHandler = async({ request, locals }) => {
     const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
+    const userDoc = await UserModel.findById(user._id);
 
-    if(!user) {
+    if(!user || !userDoc) {
         throw error(401, 'Unauthorized');
     }
 
@@ -91,7 +93,6 @@ export const POST: RequestHandler = async({ request, locals }) => {
         post.postVectors = vector;
         await post.save();
 
-        const userDoc = await (user as UserType & { _id: string }).constructor.findById(user._id);
         if (userDoc) {
             const updatedVector = { ...(userDoc.userInterestVectors || {}) };
 
