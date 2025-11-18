@@ -6,7 +6,7 @@ import type { UserType } from "src/lib/types/User.types";
 import fs from 'node:fs';
 import path from 'node:path';
 import type { AttachmentType } from "src/lib/types/Attachment.type";
-import { computeVector, tfidf } from "src/lib/utils/TF-IDF.util";
+import { computeVector, normalize, tfidf } from "src/lib/utils/TF-IDF.util";
 
 export const POST: RequestHandler = async({ request, locals }) => {
     const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
@@ -86,11 +86,10 @@ export const POST: RequestHandler = async({ request, locals }) => {
             post.attachments = linkedFiles;
         }
 
-        tfidf.addDocument(content);
-
-        const vector = computeVector(String(content));
+        let vector = computeVector(String(content));
+        if (!vector || Object.keys(vector).length === 0) vector = { unknown: 1 };
         post.postVectors = vector;
-        
+
         await post.save();
 
         return json({
