@@ -6,14 +6,10 @@ export const tfidf = new TfIdf();
 
 export async function initializeTfIdf() {
     const posts = await PostModel.find({}, 'content').lean();
-
-    posts.forEach(doc => {
-        if (doc.content && doc.content.trim()) {
-            tfidf.addDocument(String(doc.content));
-        }
+    posts.forEach(p => {
+        if (p.content) tfidf.addDocument(String(p.content));
     });
-
-    console.log(`TF-IDF model initialized with ${tfidf.documents.length} documents`);
+    console.log(`TF-IDF initialized with ${tfidf.documents.length} documents`);
 }
 
 export function normalize(vec: Record<string, number>) {
@@ -27,8 +23,6 @@ export function computeVector(text: string) {
     if (!text || !text.trim()) return { unknown: 1 };
 
     const vector: Record<string, number> = {};
-
-    tfidf.addDocument(text);
 
     tfidf.tfidfs(text, (i: number, measure: number, key?: string | Record<string, any>) => {
         if (!key || typeof key !== 'string') return;

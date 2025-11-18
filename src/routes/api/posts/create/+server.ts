@@ -93,6 +93,8 @@ export const POST: RequestHandler = async({ request, locals }) => {
         post.postVectors = vector;
         await post.save();
 
+        tfidf.addDocument(String(content));
+
         if (userDoc) {
             const updatedVector = { ...(userDoc.userInterestVectors || {}) };
 
@@ -103,8 +105,6 @@ export const POST: RequestHandler = async({ request, locals }) => {
             userDoc.userInterestVectors = updatedVector;
             await userDoc.save();
         }
-
-        await post.save();
 
         return json({
             status: 200,
