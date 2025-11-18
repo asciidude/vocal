@@ -86,9 +86,22 @@ export const POST: RequestHandler = async({ request, locals }) => {
             post.attachments = linkedFiles;
         }
 
-        let vector = computeVector(String(content));
-        if (!vector || Object.keys(vector).length === 0) vector = { unknown: 1 };
+        const vector = computeVector(String(content));
+
         post.postVectors = vector;
+        await post.save();
+
+        const userDoc = await (user as UserType & { _id: string }).constructor.findById(user._id);
+        if (userDoc) {
+            const updatedVector = { ...(userDoc.userInterestVectors || {}) };
+
+            for (const [token, weight] of Object.entries(vector)) {
+                updatedVector[token] = (updatedVector[token] || 0) + weight;
+            }
+
+            userDoc.userInterestVectors = updatedVector;
+            await userDoc.save();
+        }
 
         await post.save();
 
