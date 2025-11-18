@@ -76,6 +76,10 @@
     const deletePost = (postId) => {
         posts.posts = posts.posts.filter(p => p._id !== postId);
     }
+
+    const deleteReply = (postId) => {
+        posts.userReplies = posts.userReplies.filter(p => p._id !== postId);
+    }
 </script>
   
 <title>Vocal - {profileUser.displayName || profileUser.username}</title>
@@ -224,7 +228,7 @@
                                 postReplies={posts.nestedReplies.filter(p => p.parent_post === reply._id)}
                                 user={user}
                                 reply={true}
-                                postDeletion={deletePost}
+                                postDeletion={deleteReply}
                             />
                         {/each}
                     {:else}
