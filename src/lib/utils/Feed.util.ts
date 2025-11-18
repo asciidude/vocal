@@ -18,17 +18,21 @@ export class FeedAlgorithm {
         const user = await UserModel.findById(userId);
         if (!user) throw new Error('User not found');
 
+        console.log('[Feed] Generating feed for user:', user._id);
+
         const allPosts = await PostModel.find({})
             .populate('author', 'username displayName avatarUrl')
             .sort({ createdAt: -1 })
             .limit(1000)
             .lean();
 
+        console.log('[Feed] Found posts:', allPosts.length);
+
         const feedSections = await Promise.all([
             this.getFollowingPosts(user, allPosts, Math.floor(limit * 0.10)),
             this.getFollowedHashtagPosts(user, allPosts, Math.floor(limit * 0.15)),
             this.getRecommendedPosts(user, allPosts, Math.floor(limit * 0.70)),
-            this.getRandomPosts(allPosts, Math.floor(0.05))
+            this.getRandomPosts(allPosts, Math.floor(limit * 0.05))
         ]);
 
         const seenIds = new Set();
@@ -46,7 +50,7 @@ export class FeedAlgorithm {
         if (finalFeed.length < limit) {
             const remainingPosts = limit - finalFeed.length;
             const extraPosts = this.getRandomPosts(
-                allPosts.filter(p => !seenIds.has(p._id.toString)),
+                allPosts.filter(p => !seenIds.has(p._id.toString())),
                 remainingPosts
             );
             finalFeed.push(...extraPosts);
