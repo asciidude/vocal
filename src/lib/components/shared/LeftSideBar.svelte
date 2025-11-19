@@ -6,7 +6,6 @@
     Settings, 
     Bell, 
     Bookmark, 
-    Heart,
     LogOut,
     Search,
     Menu
@@ -26,7 +25,6 @@
     { icon: User, label: 'Profile', href: `/users/${user?.username}` },
     { icon: Bell, label: 'Notifications', href: '/notifications' },
     { icon: Bookmark, label: 'Bookmarks', href: '/bookmarks' },
-    { icon: Heart, label: 'Likes', href: '/likes' },
     { icon: Settings, label: 'Settings', href: '/settings' },
     { icon: Search, label: 'Search', href: '/search' }
   ];
