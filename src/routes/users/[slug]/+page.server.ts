@@ -27,9 +27,13 @@ export const load = async ({ params, locals }) => {
 
     const posts = await PostModel.find({ author: profileUser._id })
         .sort({ createdAt: -1 })
+        .limit(5)
         .lean();
         
-    const userReplies = await ReplyModel.find({ author: profileUser._id });
+    const userReplies = await ReplyModel.find({ author: profileUser._id })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean();
 
     const replyLikePromises = userReplies.map(async (reply) => {
         const likes = await LikeModel.find({ parent_post: reply._id }).lean();
