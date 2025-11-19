@@ -24,30 +24,38 @@
     }
 
     const loadPosts = async () => {
-        if(isLoading || !hasMore) return;
+        if (isLoading || !hasMore) return;
 
         isLoading = true;
-        page++;
 
         try {
-            const response = await fetch(`/api/feed?page=${page}&limit=5&minSimilarity=0.1`)
+            page++;
+
+            const existingIds = posts.map(p => p._id);
+            
+            const response = await fetch('/api/feed', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    page,
+                    limit: 5,
+                    minSimilarity: 0.1,
+                    seenIds: existingIds
+                })
+            });
+
             const result = await response.json();
 
-            if(result.feed.length === 0) {
+            if (result.feed.length === 0) {
                 hasMore = false;
                 return;
             }
+
+            posts = [...posts, ...result.feed];
             
-            const existingIds = new Set(posts.map(p => p._id));
-            const newPosts = result.feed.filter(post => !existingIds.has(post._id));
-
-            if (newPosts.length === 0) {
-                console.log('All loaded posts were duplicates, trying next page');
-                return loadPosts();
-            }
-
-            posts = [...posts, ...newPosts];
-        } catch(err) {
+        } catch (err) {
             console.error('Failed to load more posts:', err);
             page--;
         } finally {

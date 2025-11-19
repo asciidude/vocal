@@ -11,6 +11,7 @@
 
     import { getImage } from "$lib/utils/Cache.util";
     import { enhance } from "$app/forms";
+    import type { SubmitFunction } from "@sveltejs/kit";
 
     function getInitials(name: string | undefined) {
         if (!name) return "?";
@@ -31,6 +32,9 @@
     export let reply: boolean = false;
     export let postDeletion: any = null;
     let screenWidth = 0;
+    let isEditing = false;
+    let editContent = '';
+    let isSubmitting = false;
 
     $: avatarSrc = "";
 
@@ -61,6 +65,34 @@
                 postDeletion(post?._id);
             }
         };
+    }
+
+    function enableEditMode() {
+        if (!post) return;
+        isEditing = true;
+        editContent = String(post.content);
+    }
+
+    function cancelEdit() {
+        isEditing = false;
+        editContent = '';
+    }
+
+    const editPost: SubmitFunction = () => {
+        isSubmitting = true;
+    
+        return async ({ result }) => {
+            isSubmitting = false;
+            
+            if (result.type === 'success' && result.status === 200) {
+                if (post) {
+                    post.content = editContent;
+                    //post.updatedAt = new Date().toISOString();
+                }
+                
+                cancelEdit();
+            }
+        }
     }
 
     let liked = false;
@@ -184,6 +216,17 @@
                                     <span class="text-xl">Delete</span>
                                 </button>
                             </DropdownMenu.Item>
+
+                            <DropdownMenu.Item
+                                class="cursor-pointer font-light text-xl"
+                            >
+                                <button
+                                    type="button"
+                                    on:click={enableEditMode}
+                                >
+                                    <span class="text-xl">Edit</span>
+                                </button>
+                            </DropdownMenu.Item>
                         {/if}
                         <DropdownMenu.Item
                             class="text-red-400 cursor-pointer text-xl font-light"
@@ -198,118 +241,66 @@
 
     <div class="post-content text-2xl">
         {#if post}
-            <p class="whitespace-pre-wrap">
-                {#each parseContent(String(post.content)) as part}
-                    {#if part.type === 'hashtag'}
-                        <a href="/hashtag/{part.tag}" class="text-vocal_lightest rounded">
+            {#if isEditing}
+                <form
+                    action="/api/posts/edit/{post._id}"
+                    method="post"
+                    use:enhance={editPost}
+                    class="edit-form"
+                >
+                    <input type="hidden" name="postType" value="{reply ? 'reply' : 'post'}" />
+                    <input type="hidden" name="posterId" value={postAuthor!._id} />
+                    <input type="hidden" name="content" value={editContent} />
+                    
+                    <textarea
+                        bind:value={editContent}
+                        class="w-full bg-transparent text-white text-2xl resize-none border border-vocal_lightest rounded-lg p-3 focus:outline-none focus:border-vocal_lightest"
+                        rows="4"
+                        placeholder="What's on your mind?"
+                        disabled={isSubmitting}
+                    ></textarea>
+                    
+                    <div class="flex justify-end gap-2 mt-3">
+                        <button
+                            type="button"
+                            on:click={cancelEdit}
+                            class="px-4 py-2 text-lg border border-gray-500 rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
+                            disabled={isSubmitting}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            class="px-4 py-2 text-lg bg-vocal_lightest text-white rounded-lg hover:bg-vocal_light transition disabled:opacity-50"
+                            disabled={isSubmitting || !editContent.trim()}
+                        >
+                            {isSubmitting ? 'Saving...' : 'Save'}
+                        </button>
+                    </div>
+                </form>
+            {:else}
+                <p class="whitespace-pre-wrap">
+                    {#each parseContent(String(post.content)) as part}
+                        {#if part.type === 'hashtag'}
+                            <a href="/hashtag/{part.tag}" class="text-vocal_lightest rounded">
+                                {part.content}
+                            </a>
+                        {:else}
                             {part.content}
-                        </a>
-                    {:else}
-                        {part.content}
-                    {/if}
-                {/each}
-            </p>
+                        {/if}
+                    {/each}
+                </p>
 
-            {#if post.attachments.length > 0}
-                {#if post.attachments.length === 1}
-                    <div class="grid max-w-[520px]">
-                        <Dialog.Root>
-                            <Dialog.Trigger class="inline-flex w-fit h-fit">
-                                <img
-                                    src={post.attachments[0].url}
-                                    alt={post.attachments[0].name}
-                                    class=" aspect-square w-full max-w-[250px] rounded object-cover cursor-pointer hover:brightness-90 transition"
-                                />
-                            </Dialog.Trigger>
-                            <Dialog.Content
-                                class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg"
-                            >
-                                <Dialog.Header>
-                                    <Dialog.Description>
-                                        <img
-                                            src={post.attachments[0].url}
-                                            alt={post.attachments[0].name}
-                                            class="w-full max-w-[500px] rounded object-cover"
-                                        />
-                                    </Dialog.Description>
-                                </Dialog.Header>
-                            </Dialog.Content>
-                        </Dialog.Root>
-                    </div>
-                {:else if post.attachments.length === 3}
-                    <div
-                        class="grid grid-cols-2 gap-2 max-w-[520px] sm:grid-cols-3"
-                        style="grid-auto-rows: 1fr;"
-                    >
-                        {#each post.attachments as attachment}
-                            <Dialog.Root>
-                                <Dialog.Trigger class="inline-flex w-full h-full">
-                                    <div class="aspect-square w-full overflow-hidden rounded">
-                                        <img
-                                            src={attachment.url}
-                                            alt={attachment.name}
-                                            class="w-full h-full object-cover cursor-pointer hover:brightness-90 transition"
-                                        />
-                                    </div>
-                                </Dialog.Trigger>
-                                <Dialog.Content class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg">
-                                    <Dialog.Header>
-                                        <Dialog.Description>
-                                            <img
-                                                src={attachment.url}
-                                                alt={attachment.name}
-                                                class="w-full h-full rounded object-cover"
-                                            />
-                                        </Dialog.Description>
-                                    </Dialog.Header>
-                                </Dialog.Content>
-                            </Dialog.Root>
-                        {/each}
-                    </div>
-                {:else if post.attachments.length === 3}
-                    {#if screenSmaller}
-                        <div class="grid grid-cols-2 gap-2 max-w-[520px]">
-                            {#each post.attachments.slice(0, 2) as attachment}
-                                <Dialog.Root>
-                                    <Dialog.Trigger class="inline-flex w-fit h-fit">
-                                        <div
-                                            class="aspect-square w-full overflow-hidden rounded"
-                                        >
-                                            <img
-                                                src={attachment.url}
-                                                alt={attachment.name}
-                                                class="h-full w-full object-cover cursor-pointer hover:brightness-90 transition"
-                                            />
-                                        </div>
-                                    </Dialog.Trigger>
-                                    <Dialog.Content
-                                        class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg"
-                                    >
-                                        <Dialog.Header>
-                                            <Dialog.Description>
-                                                <img
-                                                    src={attachment.url}
-                                                    alt={attachment.name}
-                                                    class="w-full max-w-[500px] rounded object-cover"
-                                                />
-                                            </Dialog.Description>
-                                        </Dialog.Header>
-                                    </Dialog.Content>
-                                </Dialog.Root>
-                            {/each}
-                        </div>
-                        <div class="grid mt-2">
+                {#if post.attachments.length > 0}
+                    {#if post.attachments.length === 1}
+                        <div class="grid max-w-[520px]">
                             <Dialog.Root>
                                 <Dialog.Trigger class="inline-flex w-fit h-fit">
-                                    <div
-                                        class="w-full max-w-[500px] overflow-hidden rounded"
-                                    >
-                                        <img
-                                            src={post.attachments[2].url}
-                                            alt={post.attachments[2].name}
-                                            class="w-full object-cover cursor-pointer hover:brightness-90 transition"
-                                        />
-                                    </div>
+                                    <img
+                                        src={post.attachments[0].url}
+                                        alt={post.attachments[0].name}
+                                        class=" aspect-square w-full max-w-[250px] rounded object-cover cursor-pointer hover:brightness-90 transition"
+                                    />
                                 </Dialog.Trigger>
                                 <Dialog.Content
                                     class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg"
@@ -317,8 +308,8 @@
                                     <Dialog.Header>
                                         <Dialog.Description>
                                             <img
-                                                src={post.attachments[2].url}
-                                                alt={post.attachments[2].name}
+                                                src={post.attachments[0].url}
+                                                alt={post.attachments[0].name}
                                                 class="w-full max-w-[500px] rounded object-cover"
                                             />
                                         </Dialog.Description>
@@ -326,18 +317,78 @@
                                 </Dialog.Content>
                             </Dialog.Root>
                         </div>
-                    {:else}
-                        <div class="grid grid-cols-3 gap-2 max-w-[520px]">
+                    {:else if post.attachments.length === 2}
+                        <div
+                            class="grid grid-cols-2 gap-2 max-w-[520px] sm:grid-cols-2"
+                            style="grid-auto-rows: 1fr;"
+                        >
                             {#each post.attachments as attachment}
                                 <Dialog.Root>
-                                    <Dialog.Trigger class="inline-flex w-fit h-fit">
-                                        <div
-                                            class="aspect-square w-full overflow-hidden rounded"
-                                        >
+                                    <Dialog.Trigger class="inline-flex w-full h-full">
+                                        <div class="aspect-square w-full overflow-hidden rounded">
                                             <img
                                                 src={attachment.url}
                                                 alt={attachment.name}
-                                                class="h-full w-full object-cover cursor-pointer hover:brightness-90 transition"
+                                                class="w-full h-full object-cover cursor-pointer hover:brightness-90 transition"
+                                            />
+                                        </div>
+                                    </Dialog.Trigger>
+                                    <Dialog.Content class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg">
+                                        <Dialog.Header>
+                                            <Dialog.Description>
+                                                <img
+                                                    src={attachment.url}
+                                                    alt={attachment.name}
+                                                    class="w-full h-full rounded object-cover"
+                                                />
+                                            </Dialog.Description>
+                                        </Dialog.Header>
+                                    </Dialog.Content>
+                                </Dialog.Root>
+                            {/each}
+                        </div>
+                    {:else if post.attachments.length === 3}
+                        {#if screenSmaller}
+                            <div class="grid grid-cols-2 gap-2 max-w-[520px]">
+                                {#each post.attachments.slice(0, 2) as attachment}
+                                    <Dialog.Root>
+                                        <Dialog.Trigger class="inline-flex w-fit h-fit">
+                                            <div
+                                                class="aspect-square w-full overflow-hidden rounded"
+                                            >
+                                                <img
+                                                    src={attachment.url}
+                                                    alt={attachment.name}
+                                                    class="h-full w-full object-cover cursor-pointer hover:brightness-90 transition"
+                                                />
+                                            </div>
+                                        </Dialog.Trigger>
+                                        <Dialog.Content
+                                            class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg"
+                                        >
+                                            <Dialog.Header>
+                                                <Dialog.Description>
+                                                    <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="w-full max-w-[500px] rounded object-cover"
+                                                    />
+                                                </Dialog.Description>
+                                            </Dialog.Header>
+                                        </Dialog.Content>
+                                    </Dialog.Root>
+                                {/each}
+                            </div>
+                            <div class="grid mt-2">
+                                <Dialog.Root>
+                                    <Dialog.Trigger class="inline-flex w-fit h-fit">
+                                        <div
+                                            class="w-full max-w-[500px] overflow-hidden rounded"
+                                        >
+                                            <img
+                                                src={post.attachments[2].url}
+                                                alt={post.attachments[2].name}
+                                                class="w-full object-cover cursor-pointer hover:brightness-90 transition"
                                             />
                                         </div>
                                     </Dialog.Trigger>
@@ -347,83 +398,116 @@
                                         <Dialog.Header>
                                             <Dialog.Description>
                                                 <img
-                                                    src={attachment.url}
-                                                    alt={attachment.name}
+                                                    src={post.attachments[2].url}
+                                                    alt={post.attachments[2].name}
                                                     class="w-full max-w-[500px] rounded object-cover"
                                                 />
                                             </Dialog.Description>
                                         </Dialog.Header>
                                     </Dialog.Content>
                                 </Dialog.Root>
-                            {/each}
-                        </div>
-                    {/if}
-                {:else}
-                    <div class="grid {postExpanded ? 'grid-cols-4' : 'grid-cols-2'} gap-2 { postExpanded ? 'max-w-[65rem]' : 'max-w-[520px]' }">
-                        {#each (postExpanded ? post.attachments : post.attachments.slice(0, 4)) as attachment, i}
-                            <div class="relative aspect-square rounded overflow-hidden">
-                                <Dialog.Root>
-                                    <Dialog.Trigger class="inline-flex w-fit h-fit">
-                                        <img
-                                            src={attachment.url}
-                                            alt={attachment.name}
-                                            class="absolute top-0 left-0 w-full h-full object-cover cursor-pointer hover:brightness-90 transition"
-                                        />
-                                    </Dialog.Trigger>
-                                    <Dialog.Content class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg">
-                                        <Dialog.Header>
-                                            <Dialog.Description>
+                            </div>
+                        {:else}
+                            <div class="grid grid-cols-3 gap-2 max-w-[520px]">
+                                {#each post.attachments as attachment}
+                                    <Dialog.Root>
+                                        <Dialog.Trigger class="inline-flex w-fit h-fit">
+                                            <div
+                                                class="aspect-square w-full overflow-hidden rounded"
+                                            >
                                                 <img
                                                     src={attachment.url}
                                                     alt={attachment.name}
-                                                    class="w-full max-w-[500px] rounded object-cover"
+                                                    class="h-full w-full object-cover cursor-pointer hover:brightness-90 transition"
                                                 />
-                                            </Dialog.Description>
-                                        </Dialog.Header>
-                                    </Dialog.Content>
-                                </Dialog.Root>
-
-                                {#if !postExpanded}
-                                    {#if i === 3 && post.attachments.length > 4}
-                                        <a
-                                            href="/posts/{post._id}"
-                                            class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-2xl font-bold"
+                                            </div>
+                                        </Dialog.Trigger>
+                                        <Dialog.Content
+                                            class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg"
                                         >
-                                            +{post.attachments.length - 4}
-                                        </a>
-                                    {/if}
-                                {/if}
+                                            <Dialog.Header>
+                                                <Dialog.Description>
+                                                    <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="w-full max-w-[500px] rounded object-cover"
+                                                    />
+                                                </Dialog.Description>
+                                            </Dialog.Header>
+                                        </Dialog.Content>
+                                    </Dialog.Root>
+                                {/each}
                             </div>
-                        {/each}
-                    </div>
+                        {/if}
+                    {:else}
+                        <div class="grid {postExpanded ? 'grid-cols-4' : 'grid-cols-2'} gap-2 { postExpanded ? 'max-w-[65rem]' : 'max-w-[520px]' }">
+                            {#each (postExpanded ? post.attachments : post.attachments.slice(0, 4)) as attachment, i}
+                                <div class="relative aspect-square rounded overflow-hidden">
+                                    <Dialog.Root>
+                                        <Dialog.Trigger class="inline-flex w-fit h-fit">
+                                            <img
+                                                src={attachment.url}
+                                                alt={attachment.name}
+                                                class="absolute top-0 left-0 w-full h-full object-cover cursor-pointer hover:brightness-90 transition"
+                                            />
+                                        </Dialog.Trigger>
+                                        <Dialog.Content class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg">
+                                            <Dialog.Header>
+                                                <Dialog.Description>
+                                                    <img
+                                                        src={attachment.url}
+                                                        alt={attachment.name}
+                                                        class="w-full max-w-[500px] rounded object-cover"
+                                                    />
+                                                </Dialog.Description>
+                                            </Dialog.Header>
+                                        </Dialog.Content>
+                                    </Dialog.Root>
+
+                                    {#if !postExpanded}
+                                        {#if i === 3 && post.attachments.length > 4}
+                                            <a
+                                                href="/posts/{post._id}"
+                                                class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-2xl font-bold"
+                                            >
+                                                +{post.attachments.length - 4}
+                                            </a>
+                                        {/if}
+                                    {/if}
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
                 {/if}
             {/if}
         {/if}
     </div>
 
-    <div class="post-bottom flex items-center gap-5 mt-2">
-        <a class="flex items-center gap-2 mt-2" href={reply ? `/replies/${post?._id}` : `/posts/${post?._id}`}>
-            <MessageCircle class="size-4 stroke-vocal_lightest" />
-            <p class="size-6 text-lg">
-                {postReplies.length}
-            </p>
-        </a>
-        <form
-            action="/api/posts/like/{post?._id}"
-            method="post"
-            use:enhance={likePost}
-        >
-            <button
-                class="flex items-center mt-2"
-                type="submit"
+    {#if !isEditing}
+        <div class="post-bottom flex items-center gap-5 mt-2">
+            <a class="flex items-center gap-2 mt-2" href={reply ? `/replies/${post?._id}` : `/posts/${post?._id}`}>
+                <MessageCircle class="size-4 stroke-vocal_lightest" />
+                <p class="size-6 text-lg">
+                    {postReplies.length}
+                </p>
+            </a>
+            <form
+                action="/api/posts/like/{post?._id}"
+                method="post"
+                use:enhance={likePost}
             >
-                <Heart
-                    class={`size-4 stroke-vocal_lightest ${liked ? 'fill-vocal_lightest' : ''}`}
-                />
-                <p class="size-6 text-lg">{likeCount}</p>
-            </button>
-        </form>
-    </div>
+                <button
+                    class="flex items-center mt-2"
+                    type="submit"
+                >
+                    <Heart
+                        class={`size-4 stroke-vocal_lightest ${liked ? 'fill-vocal_lightest' : ''}`}
+                    />
+                    <p class="size-6 text-lg">{likeCount}</p>
+                </button>
+            </form>
+        </div>
+    {/if}
 </div>
 
 <style>
@@ -482,5 +566,16 @@
     }
     .post-bottom button:hover {
         color: #a481f6;
+    }
+
+    .edit-form textarea {
+        min-height: 120px;
+        font-family: inherit;
+        line-height: 1.4;
+    }
+
+    .edit-form textarea:focus {
+        border-color: #9072d7;
+        box-shadow: 0 0 0 2px rgba(144, 114, 215, 0.2);
     }
 </style>

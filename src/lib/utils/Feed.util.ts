@@ -9,144 +9,160 @@ import { cosineSimilarity } from "./TF-IDF.util";
 export interface FeedOptions {
     limit?: number;
     minSimilarity?: number;
-    skip?: number
+    skip?: number;
+    seenIds?: Array<string>;
 }
 
 export class FeedAlgorithm {
     static async generateFeed(userId: string, options: FeedOptions = {}) {
-        const { limit = 15, minSimilarity = 0.1, skip = 0 } = options;
+        const { limit = 15, minSimilarity = 0.1, seenIds = [] } = options;
 
         const user = await UserModel.findById(userId);
-        if (!user) throw new Error('User not found');
+        if (!user) throw new Error("User not found");
 
-        const allPosts_pre = await PostModel.find({})
-            .populate('author', 'username displayName avatarUrl')
+        const rawPosts = await PostModel.find({
+            _id: { $nin: seenIds }
+        })
+            .populate("author", "username displayName avatarUrl")
             .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
+            .limit(100)
             .lean();
 
-        const allPosts = await Promise.all(allPosts_pre.map(async (post) => {
-            const authorObj = await UserModel.findOne({ _id: post.author }).lean();
-            return { ...post, authorObj };
-        }));
+        if (rawPosts.length === 0) return [];
 
-        const feedSections = await Promise.all([
-            this.getFollowingPosts(user, allPosts, Math.floor(limit * 0.10)),
-            this.getFollowedHashtagPosts(user, allPosts, Math.floor(limit * 0.15)),
-            this.getRecommendedPosts(user, allPosts, Math.floor(limit * 0.70)),
-            this.getRandomPosts(allPosts, Math.floor(limit * 0.05))
-        ]);
+        const posts = await Promise.all(
+            rawPosts.map(async (post) => {
+                const authorObj = await UserModel.findById(post.author).lean();
+                return { ...post, authorObj };
+            })
+        );
 
-        const seenIds = new Set();
+        const usedPostIds = new Set<string>();
         const finalFeed: any[] = [];
 
-        for (const section of feedSections) {
-            for (const post of section) {
-                if (!seenIds.has(post._id.toString())) {
-                    finalFeed.push(post);
-                    seenIds.add(post._id.toString());
-                }
-            }
+        const addPostsToFeed = (postsToAdd: any[], maxCount: number) => {
+            const available = postsToAdd.filter(p => !usedPostIds.has(p._id.toString()));
+            const toAdd = available.slice(0, Math.min(maxCount, limit - finalFeed.length));
+            
+            toAdd.forEach(post => {
+                usedPostIds.add(post._id.toString());
+                finalFeed.push(post);
+            });
+        };
+
+        if (finalFeed.length < limit) {
+            const followingPosts = await this.getFollowingPosts(user, posts);
+            addPostsToFeed(followingPosts, Math.floor(limit * 0.10));
         }
 
         if (finalFeed.length < limit) {
-            const remainingPosts = limit - finalFeed.length;
-            const extraPosts = this.getRandomPosts(
-                allPosts.filter(p => !seenIds.has(p._id.toString())),
-                remainingPosts
-            );
-            finalFeed.push(...extraPosts);
+            const hashtagPosts = this.getFollowedHashtagPosts(user, posts);
+            addPostsToFeed(hashtagPosts, Math.floor(limit * 0.15));
+        }
+
+        if (finalFeed.length < limit) {
+            const recommendedPosts = await this.getRecommendedPosts(user, posts, minSimilarity);
+            addPostsToFeed(recommendedPosts, Math.floor(limit * 0.70));
+        }
+
+        if (finalFeed.length < limit) {
+            const unusedPosts = posts.filter(p => !usedPostIds.has(p._id.toString()));
+            const randomPosts = this.getRandomPosts(unusedPosts);
+            addPostsToFeed(randomPosts, Math.floor(limit * 0.05));
+        }
+
+        if (finalFeed.length < limit) {
+            const unusedPosts = posts.filter(p => !usedPostIds.has(p._id.toString()));
+            addPostsToFeed(unusedPosts, limit);
         }
 
         return finalFeed.slice(0, limit);
     }
 
-    private static async getFollowingPosts(user: UserType, allPosts: PostType[], count: number) {
-        const following = await FollowModel.find({ followerId: user._id });
+    private static async getFollowingPosts(user: UserType, posts: PostType[]) {
+        const follows = await FollowModel.find({ followerId: user._id });
+        if (!follows.length) return [];
 
-        if (!following || following.length === 0) return [];
+        const followingIds = new Set(follows.map((f: FollowType) => f.followingId.toString()));
 
-        const followingIds = following.map((f: FollowType) => f.followingId);
-        const followingPosts = allPosts.filter(post =>
-            followingIds.includes(post.author)
+        return posts.filter(p =>
+            followingIds.has(p.author.toString())
         );
-
-        return this.shuffleArray(followingPosts).slice(0, count);
     }
 
-    private static getFollowedHashtagPosts(user: UserType, allPosts: PostType[], count: number) {
-        if(!user.followedHashtags || user.followedHashtags.length === 0) return [];
+    private static getFollowedHashtagPosts(user: UserType, posts: PostType[]) {
+        if (!user.followedHashtags?.length) return [];
 
-        const followedHashtags = user.followedHashtags.map((h: string) => h.toLowerCase());
-        const hashtagPosts = allPosts.filter(post => {
-            const postHashtags = this.extractHashtags(String(post.content));
-            return postHashtags.some((hashtag: string) => {
-                followedHashtags.includes(hashtag.toLowerCase())
-            });
+        const tags = user.followedHashtags.map(h => h.toLowerCase());
+
+        return posts.filter((post) => {
+            const postTags = this.extractHashtags(String(post.content));
+            return postTags.some(tag => tags.includes(tag));
+        });
+    }
+
+    private static async getRecommendedPosts(
+        user: UserType,
+        posts: PostType[],
+        minSimilarity: number
+    ) {
+        const userVec = user.userInterestVectors ?? {};
+        const excluded = user.excludedKeywords ?? [];
+
+        const scored = posts.map((post) => {
+            const postVec = post.postVectors ?? {};
+            const sim = cosineSimilarity(userVec, postVec);
+
+            if (sim < minSimilarity) {
+                return { post, score: -1 };
+            }
+
+            const blocked = excluded.some(keyword =>
+                post.content.toLowerCase().includes(keyword.toLowerCase())
+            );
+
+            if (blocked) {
+                return { post, score: -1 };
+            }
+
+            const overlap = this.calculateHashtagOverlap(user, post);
+            const score = sim * 0.6 + overlap * 0.4;
+
+            return { post, score };
         });
 
-        return this.shuffleArray(hashtagPosts).slice(0, count);
+        return scored
+            .filter(s => s.score >= 0)
+            .sort((a, b) => b.score - a.score)
+            .map(s => s.post);
     }
 
-    private static async getRecommendedPosts(user: UserType, allPosts: PostType[], count: number) {
-        const userVector = user.userInterestVectors || {};
-        const excludedKeywords = user.excludedKeywords || [];
-
-        const scoredPosts = allPosts.map((post: PostType) => {
-            const postVector = post.postVectors || {};
-            const similarityScore = cosineSimilarity(userVector, postVector);
-
-            const hasExcludedKeyword = excludedKeywords.some((keyword: string) => {
-                post.content.toLowerCase().includes(keyword.toLowerCase());
-            });
-
-            const hashtagOverlapScore = this.calculateHashtagOverlap(user, post);
-
-            const score = hasExcludedKeyword ? -1 :
-                (similarityScore * 0.6) + (hashtagOverlapScore * 0.4);
-            
-            return { post, score }
-        });
-
-        const filteredPosts = scoredPosts
-            .filter((i) => i.score >= 0)
-            .sort((a, b) => b.score - a.score);
-        
-        return filteredPosts.slice(0, count).map((i) => i.post);
-    }
-
-    private static getRandomPosts(allPosts: PostType[], count: number) {
-        return this.shuffleArray(allPosts).slice(0, count);
+    private static getRandomPosts(posts: PostType[]) {
+        return this.shuffleArray([...posts]);
     }
 
     private static calculateHashtagOverlap(user: UserType, post: PostType) {
-        if(!user.followedHashtags || user.followedHashtags.length === 0) return 0;
+        if (!user.followedHashtags?.length) return 0;
 
-        const postHashtags = this.extractHashtags(String(post.content));
-        const userHashtags = user.followedHashtags.map((hashtag: string) => hashtag.toLowerCase());
-        
-        const matches = postHashtags.filter((hashtag: string) => {
-            userHashtags.includes(hashtag.toLowerCase())
-        });
+        const postTags = this.extractHashtags(String(post.content));
+        const userTags = user.followedHashtags.map(h => h.toLowerCase());
 
-        return matches.length / Math.max(userHashtags.length, 1);
+        const matches = postTags.filter(tag => userTags.includes(tag));
+        return matches.length / Math.max(userTags.length, 1);
     }
 
     private static extractHashtags(content: string) {
-        const hashtagRegex = /#(\w+)/g;
-        const matches = content.match(hashtagRegex);
-        return matches ? matches.map((m) => m.slice(1).toLowerCase()) : [];
+        const regex = /#(\w+)/g;
+        const match = content.match(regex);
+        return match ? match.map(m => m.slice(1).toLowerCase()) : [];
     }
 
-    private static shuffleArray(array: any[]) {
-        const shuffled = [...array];
-
-        for(let i = shuffled.length - 1; i > 0; i--) {
+    private static shuffleArray<T>(arr: T[]): T[] {
+        const out = [...arr];
+        for (let i = out.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            [out[i], out[j]] = [out[j], out[i]];
         }
-
-        return shuffled;
+        return out;
     }
 }
