@@ -103,7 +103,7 @@
             <h1 class="text-3xl font-bold text-white">Home</h1>
             {#if data.user}
                 <div class="flex items-center gap-2">
-                    <a href="/users/{data.user._id}">
+                    <a href="/users/{data.user.username}">
                         <Avatar.Root>
                             <Avatar.Image
                                 src={data.user.avatarUrl}
