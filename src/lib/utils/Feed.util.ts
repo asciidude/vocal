@@ -16,7 +16,7 @@ export interface FeedOptions {
 
 export interface SearchQuery {
     _id?: Object, // seen ids
-    content?: Object // content
+    content?: Object // hashtags
 }
 
 export class FeedAlgorithm {
