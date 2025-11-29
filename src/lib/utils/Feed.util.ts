@@ -11,18 +11,34 @@ export interface FeedOptions {
     minSimilarity?: number;
     skip?: number;
     seenIds?: Array<string>;
+    hashtag?: string;
+}
+
+export interface SearchQuery {
+    _id?: Object, // seen ids
+    content?: Object // content
 }
 
 export class FeedAlgorithm {
     static async generateFeed(userId: string, options: FeedOptions = {}) {
         const { limit = 15, minSimilarity = 0.1, seenIds = [] } = options;
+        let { hashtag = null } = options;
+        let search: SearchQuery = { _id: { $nin: seenIds } };
 
         const user = await UserModel.findById(userId);
         if (!user) throw new Error("User not found");
 
-        const rawPosts = await PostModel.find({
-            _id: { $nin: seenIds }
-        })
+        if (hashtag) {
+            if(!hashtag.startsWith('#')) {
+                hashtag = `#${hashtag}`;
+            }
+            
+            search.content = {
+                $regex: hashtag, $options: 'i'
+            }
+        }
+
+        const rawPosts = await PostModel.find(search)
             .populate("author", "username displayName avatarUrl")
             .sort({ createdAt: -1 })
             .limit(100)

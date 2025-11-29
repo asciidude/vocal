@@ -87,7 +87,7 @@
             if (result.type === 'success' && result.status === 200) {
                 if (post) {
                     post.content = editContent;
-                    //post.updatedAt = new Date().toISOString();
+                    //post.updatedAt = new Date();
                 }
                 
                 cancelEdit();
