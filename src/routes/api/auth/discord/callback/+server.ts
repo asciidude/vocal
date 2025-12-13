@@ -11,8 +11,6 @@ export const GET = async (event) => {
     const code = url.searchParams.get('code');
     if (!code) throw error(400, 'No code provided');
 
-    console.log('[OAuth] Starting Discord callback with code');
-
     const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -42,7 +40,6 @@ export const GET = async (event) => {
     }
 
     const userData = await userResponse.json();
-    console.log('[OAuth] Discord user data received');
 
     let jwtToken;
     const userWithDiscord = await UserModel.findOne({ 'authProviders.id': userData.id });
