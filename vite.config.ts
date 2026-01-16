@@ -2,12 +2,13 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	plugins: [
-		sveltekit()
-	],
+	plugins: [sveltekit()],
 	server: {
 		hmr: {
-		  timeout: 120000 // Increase timeout to 120 seconds
+			timeout: 120000
 		}
+	},
+	preview: {
+		allowedHosts: ['vocal.wtf', 'www.vocal.wtf']
 	}
 });
