@@ -1,5 +1,18 @@
 <title>Welcome to Vocal</title>
 
+<meta property="og:type" content="website">
+<meta property="og:title" content="Welcome to Vocal">
+<meta property="og:description" content="Vocal — Coming March 2026. Join our Discord or mailing list to get notified when we release.">
+<meta property="og:image" content="/images/vocal-banner.png">
+<meta property="og:image:alt" content="Vocal — Coming March 2026">
+<meta property="og:url" content="https://vocal.wtf">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Welcome to Vocal">
+<meta name="twitter:description" content="Vocal — Coming March 2026. Join our Discord or mailing list to get notified when we release.">
+<meta name="twitter:image" content="/images/vocal-banner.png">
+<meta name="twitter:image:alt" content="Vocal — Coming March 2026">
+
 <script lang="ts">
     let isSending = false;
     let email = "";
