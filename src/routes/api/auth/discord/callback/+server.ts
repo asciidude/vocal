@@ -92,7 +92,7 @@ export const GET = async (event) => {
                 { platform: "discord", id: userData.id, accessToken: tokenData.access_token }
             ],
             bio: "",
-            roles: [UserRoles.Beta],
+            roles: [],
             userInterestVectors: {},
             followedHashtags: [],
             excludedKeywords: []
