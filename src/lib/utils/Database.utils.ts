@@ -14,8 +14,8 @@ export const mongoConnection = {
 }
 
 export const connect = async () => {
-    console.log(process.env.NODE_ENV);
-    console.log(process.env.MONGO_URI);
+    console.log(NODE_ENV);
+    console.log(MONGO_URI);
     if(mongoConnection.connection_code === 1) {
         console.log('A connection has already been established to MongoDB.');
         return;
