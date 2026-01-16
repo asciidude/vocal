@@ -9,6 +9,6 @@ export default defineConfig({
 		}
 	},
 	preview: {
-		allowedHosts: ['vocal.wtf', 'www.vocal.wtf']
+		allowedHosts: ['vocal.wtf', 'www.vocal.wtf'] // add your domain(s) here
 	}
 });
