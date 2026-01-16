@@ -3,11 +3,18 @@ import { redirect, type Handle } from '@sveltejs/kit';
 import { connect } from '$lib/utils/Database.utils';
 import { UserModel } from '$lib/models/User.model';
 import jwt from 'jsonwebtoken';
-import type { UserType } from './lib/types/User.types';
-import { initializeTfIdf } from './lib/utils/TF-IDF.util';
+import type { UserType } from '$lib/types/User.types';
+import { initializeTfIdf } from '$lib/utils/TF-IDF.util';
 
-await connect();
-await initializeTfIdf().catch(console.error);
+let initialized = false;
+
+async function ensureInitialized() {
+    if (!initialized) {
+        await connect();
+        await initializeTfIdf().catch(console.error);
+        initialized = true;
+    }
+}
 
 export const handleError = ({ error }: { error: any }) => {
     console.error('SvelteKit error:', error);
@@ -15,14 +22,14 @@ export const handleError = ({ error }: { error: any }) => {
 };
 
 export const handle: Handle = async ({ event, resolve }) => {
-    let user: UserType | null = null;
+    await ensureInitialized();
 
+    let user: UserType | null = null;
     const token = event.cookies.get('session');
     if (token) {
         try {
             const decoded = jwt.verify(token, JWT_SECRET) as { id: string; username: string };
             const userDoc = await UserModel.findOne({ "authProviders.id": decoded.id }).lean();
-
             if (userDoc) {
                 user = {
                     _id: userDoc._id.toString(),
@@ -45,6 +52,5 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
 
     event.locals.user = user;
-
     return await resolve(event);
 };

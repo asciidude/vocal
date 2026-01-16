@@ -14,8 +14,13 @@ export const mongoConnection = {
 }
 
 export const connect = async () => {
-    console.log(NODE_ENV);
-    console.log(MONGO_URI);
+    console.log("NODE_ENV:", NODE_ENV);
+    console.log("MONGO_URI:", MONGO_URI);
+
+    if (!MONGO_URI) {
+        throw new Error("MONGO_URI is undefined! Check your .env file or env variables.");
+    }
+
     if(mongoConnection.connection_code === 1) {
         console.log('A connection has already been established to MongoDB.');
         return;
