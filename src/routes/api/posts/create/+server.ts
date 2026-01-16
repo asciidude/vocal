@@ -15,7 +15,7 @@ export const POST: RequestHandler = async({ request, locals }) => {
     const userDoc = await UserModel.findById(user._id);
 
     if(!user || !userDoc) {
-        throw error(401, 'Unauthorized');
+        throw error(401, 'You are not authenticated');
     }
 
     try {
@@ -24,7 +24,7 @@ export const POST: RequestHandler = async({ request, locals }) => {
         const content = formData.get('content');
 
         if(!content) {
-            throw error(422, 'Unprocessable Content');
+            throw error(422, 'Post content is missing');
         }
 
         const contentString = String(content);
@@ -45,7 +45,7 @@ export const POST: RequestHandler = async({ request, locals }) => {
             const replyParent = formData.get('replyParent');
 
             if(!replyParent || !isValidObjectId(replyParent)) {
-                throw error(422, 'Unprocessable Content');
+                throw error(422, 'Reply parent is missing');
             }
         
             post = await ReplyModel.create({

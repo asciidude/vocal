@@ -11,11 +11,11 @@ export const POST: RequestHandler = async({ params, request, locals }) => {
     const postId = params.slug;
 
     if(!postId) {
-        throw error(422, 'Unprocessable Entity');
+        throw error(422, 'Post ID not provided');
     }
 
     if(!user || user._id !== posterId) {
-        throw error(401, 'Unauthorized');
+        throw error(401, 'You are not authorized to edit this post');
     }
 
     try {

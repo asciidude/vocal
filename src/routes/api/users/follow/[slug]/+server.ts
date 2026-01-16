@@ -13,11 +13,11 @@ export const POST: RequestHandler = async({ params, request, locals }) => {
         || !followingUser
         || user._id == userId
     ) {
-        throw error(422, 'Unprocessable Entity');
+        throw error(422, 'Authenticated user or followed user does not exist');
     }
 
     if(!user) {
-        throw error(401, 'Unauthorized');
+        throw error(401, 'You are not authenticated');
     }
 
     try {
