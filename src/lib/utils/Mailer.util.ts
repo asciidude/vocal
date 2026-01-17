@@ -1,5 +1,3 @@
-import axios from "axios";
-
 export interface EmailType {
   email: string;
   name?: string;
@@ -49,12 +47,15 @@ export async function sendMail(
     if (attachments) payload.attachments = attachments;
 
     try {
-      const res = await axios.post("https://api.smtp2go.com/v3/email/send", payload, {
+      const res = await fetch("https://api.smtp2go.com/v3/email/send", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
-      results.push(res.data);
+      const data = await res.json();
+      results.push(data);
     } catch (err: any) {
-      console.error("SMTP2GO send error:", err.response?.data || err.message);
+      console.error("SMTP2GO send error:", err.message);
       results.push({ error: err.message });
     }
 
