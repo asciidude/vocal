@@ -43,7 +43,6 @@
     "@types/email-validator": "^1.0.30",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/natural": "^5.1.5",
-    "axios": "^1.13.2",
     "caniuse-lite": "^1.0.30001751",
     "dotenv": "^16.6.1",
     "email-validator": "^2.0.4",
