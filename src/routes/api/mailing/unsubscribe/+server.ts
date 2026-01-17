@@ -20,10 +20,11 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
         throw error(500, "Mailing list endpoint not configured");
     }
 
-    // Subscribe email to list
     const subscribed = await MailingSubscriberModel.findOne({ email });
 
     if (subscribed) {
+        await MailingSubscriberModel.findOneAndDelete({ email: email.trim() });
+
         const res = await fetch(endpoint, {
             method: "POST",
             headers: {
@@ -49,8 +50,6 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
             `,
             null
         );
-
-        await MailingSubscriberModel.findOneAndDelete({ email });
     } else {
         throw error(400, 'You are not subscribed');
     }

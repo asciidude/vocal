@@ -4,47 +4,33 @@ import { MailingSubscriberModel } from "src/lib/models/MailingSubscriber.model";
 import { sendMail } from "src/lib/utils/Mailer.util";
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
-    const formData = await request.formData();
-    const email = formData.get("email")?.toString();
+  const formData = await request.formData();
+  const email = formData.get("email")?.toString();
 
-    if (!email) {
-        throw error(400, "No email provided");
-    }
+  if (!email) {
+    throw error(400, "No email provided");
+  }
 
-    if (!EmailValidator.validate(email)) {
-        throw error(400, "Email is invalid");
-    }
+  if (!EmailValidator.validate(email)) {
+    throw error(400, "Email is invalid");
+  }
 
-    const endpoint = process.env.MAILING_LIST_ALERTS;
-    if (!endpoint) {
-        throw error(500, "Mailing list endpoint not configured");
-    }
+  const endpoint = process.env.MAILING_LIST_ALERTS;
+  if (!endpoint) {
+    throw error(500, "Mailing list endpoint not configured");
+  }
 
-    const subscribed = await MailingSubscriberModel.findOne({ email });
+  const subscribed = await MailingSubscriberModel.findOne({ email });
 
-    if (!subscribed) {
-        const res = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                content: `${email} has subscribed to the mailing list.`
-            })
-        });
+  if (!subscribed) {
+    await MailingSubscriberModel.create({ email });
 
-        if (!res.ok) {
-            throw error(502, "Failed to subscribe email");
-        }
-
-        await MailingSubscriberModel.create({ email });
-
-        await sendMail(
-            [{email}],
-            null,
-            "You're subscribed 🎉",
-            "Thanks for subscribing to updates on Vocal!",
-            `
+    await sendMail(
+      [{ email }],
+      null,
+      "You're subscribed 🎉",
+      "Thanks for subscribing to updates on Vocal!",
+      `
             <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#0b0b0b; font-family:Inter, Arial, sans-serif; color:#ffffff; margin:0; padding:0;">
               <tr>
                 <td align="center" style="padding:32px 16px;">
@@ -99,14 +85,28 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
               </tr>
             </table>
             `,
-            null
-        );
-    } else {
-      throw error(400, 'You are already subscribed');
-    }
+      null
+    );
 
-    return json({
-        status: 200,
-        message: 'Success -- you have been subscribed'
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        content: `${email} has subscribed to the mailing list.`
+      })
     });
+
+    if (!res.ok) {
+      throw error(502, "Failed to subscribe email");
+    }
+  } else {
+    throw error(400, 'You are already subscribed');
+  }
+
+  return json({
+    status: 200,
+    message: 'Success -- you have been subscribed'
+  });
 };
