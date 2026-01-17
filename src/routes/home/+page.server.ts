@@ -28,7 +28,7 @@ export const load: PageServerLoad = async ({ locals }) => {
         }
         
         const postsWithAuthors = await Promise.all(posts.map(async (post) => {
-            const authorObj = await UserModel.findOne({ _id: post.author }).lean();
+            const authorObj = await UserModel.findOne({ _id: { $eq: post.author } }).lean();
             return { ...post, authorObj };
         }));
         
