@@ -37,11 +37,13 @@
   "dependencies": {
     "@icons-pack/svelte-simple-icons": "^5.0.0",
     "@tailwindcss/vite": "^4.1.16",
+    "@types/axios": "^0.9.36",
     "@types/caniuse-lite": "^1.0.5",
     "@types/dotenv": "^6.1.1",
     "@types/email-validator": "^1.0.30",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/natural": "^5.1.5",
+    "axios": "^1.13.2",
     "caniuse-lite": "^1.0.30001751",
     "dotenv": "^16.6.1",
     "email-validator": "^2.0.4",
