@@ -79,7 +79,7 @@
                 <a href="/users/{user.username}">
                     <Avatar.Image src={currentUserAv} alt="@{user.username}" />
                     <Avatar.Fallback>
-                        {user.displayName || user.username}
+                        <img src="/images/fallback-pfp.jpg" alt="">
                     </Avatar.Fallback>
                 </a>
             </Avatar.Root>

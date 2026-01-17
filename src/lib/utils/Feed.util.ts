@@ -22,6 +22,11 @@ export interface SearchQuery {
 export class FeedAlgorithm {
     static async generateFeed(userId: string, options: FeedOptions = {}) {
         const { limit = 15, minSimilarity = 0.1, seenIds = [] } = options;
+        
+        if(limit > 100) {
+            console.warn('Feed limit cannot be over 100');
+        }
+
         let { hashtag = null } = options;
         let search: SearchQuery = { _id: { $nin: seenIds } };
 

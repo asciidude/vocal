@@ -158,9 +158,7 @@
                             alt="@{postAuthor?.username}"
                         />
                         <Avatar.Fallback>
-                            {getInitials(
-                                postAuthor?.displayName || postAuthor?.username,
-                            )}
+                            <img src="/images/fallback-pfp.jpg" alt="">
                         </Avatar.Fallback>
                     </Avatar.Root>
                     <div class="username">

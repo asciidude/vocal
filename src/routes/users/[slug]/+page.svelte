@@ -241,10 +241,7 @@
                     src={profileUser.avatarUrl}
                     alt="@{profileUser.username}"
                 />
-                <Avatar.Fallback
-                    >{profileUser.displayName ||
-                        profileUser.username}</Avatar.Fallback
-                >
+                <Avatar.Fallback><img src="/images/fallback-pfp.jpg" alt=""></Avatar.Fallback>
             </Avatar.Root>
             <div class="flex flex-row gap-3 justify-center mt-3 text-white">
                 <h1 class="text-4xl font-bold text-white">
@@ -325,6 +322,7 @@
                                             <img
                                                 src={f.avatarUrl}
                                                 alt={f.username}
+                                                onerror={(e: any) => e.target.src = '/images/fallback-pfp.jpg'} 
                                                 class="w-6 h-6 rounded-full"
                                             />
                                             <span
@@ -362,6 +360,7 @@
                                             <img
                                                 src={f.avatarUrl}
                                                 alt={f.username}
+                                                onerror={(e: any) => e.target.src = '/images/fallback-pfp.jpg'} 
                                                 class="w-6 h-6 rounded-full"
                                             />
                                             <span

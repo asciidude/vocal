@@ -14,9 +14,6 @@ export const mongoConnection = {
 }
 
 export const connect = async () => {
-    console.log("NODE_ENV:", NODE_ENV);
-    console.log("MONGO_URI:", MONGO_URI);
-
     if (!MONGO_URI) {
         throw new Error("MONGO_URI is undefined! Check your .env file or env variables.");
     }
