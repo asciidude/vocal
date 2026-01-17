@@ -8,7 +8,7 @@ export function load({ route, locals }) {
             routes: [ '/' ]
         },
         unauthenticated: {
-            except_routes: [ '/', '/tos', '/privacy' ]
+            except_routes: [ '/', '/tos', '/privacy', '/mailing' ]
         }
     }
 

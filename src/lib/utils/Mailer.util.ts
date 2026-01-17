@@ -29,7 +29,7 @@ export async function sendMail(
   const batches = chunk(emails, maxRecipients);
   const results: any[] = [];
 
-  const htmlWithUnsubscribe = `${html}<br><p>If you wish to unsubscribe, click <a href="https://vocal.wtf/unsubscribe">here</a>.</p>`;
+  const htmlWithUnsubscribe = `${html}<br><p>If you wish to unsubscribe, click <a href="https://vocal.wtf/mailing">here</a>.</p>`;
 
   for (const batch of batches) {
     if (!batch.length) continue;
