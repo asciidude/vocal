@@ -2,7 +2,7 @@
     import type { LikeType } from "src/lib/types/Like.type";
     import type { ReplyType } from "$lib/types/Reply.type";
     import type { PostType } from "$lib/types/Post.type";
-    import type { UserType } from "$lib/types/User.types";
+    import { UserRoles, type UserType } from "$lib/types/User.types";
 
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import * as Avatar from "$lib/components/ui/avatar";
@@ -180,7 +180,7 @@
                     class="text-white !bg-vocal_darkest border border-[#9072d7]"
                 >
                     <DropdownMenu.Group>
-                        {#if user?._id === postAuthor!._id}
+                        {#if user?._id === postAuthor!._id || user?.roles.includes(UserRoles.SuperAdmin)}
                             <form
                                 action="/api/posts/delete/{post._id}"
                                 method="post"

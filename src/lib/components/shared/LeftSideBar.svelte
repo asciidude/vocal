@@ -102,7 +102,11 @@
     
       <div class="flex items-center mt-4">
         <a href="/users/{user?.username}">
-          <img src="{avatarSrc}" alt="Avatar" class="rounded-full ring-2 ring-purple-500" />
+          <img
+            src="{avatarSrc}" alt="Avatar"
+            class="rounded-full ring-2 ring-purple-500"
+            onerror={(e: any) => e.target.src = '/images/fallback-pfp.jpg'}
+          />
         </a>
       </div>
     {:else}

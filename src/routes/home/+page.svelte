@@ -110,7 +110,7 @@
                                 alt="@{data.user.username}"
                             />
                             <Avatar.Fallback>
-                                {data.user.displayName || data.user.username}
+                                <img src="/images/fallback-pfp.jpg" alt="">
                             </Avatar.Fallback>
                         </Avatar.Root>
                     </a>
