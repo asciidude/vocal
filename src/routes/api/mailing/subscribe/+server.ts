@@ -20,36 +20,9 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
         throw error(500, "Mailing list endpoint not configured");
     }
 
-    // Subscribe email to list
     const subscribed = await MailingSubscriberModel.findOne({ email });
 
-    if (subscribed) {
-        const res = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                content: `${email} has unsubscribed from the mailing list.`
-            })
-        });
-
-        if (!res.ok) {
-            throw error(502, "Failed to subscribe email");
-        }
-
-        await sendMail(
-            email,
-            'You\'re unsubscribed',
-            'We have unsubscribed you from our mailing list, you will no longer recieve emails from us.',
-            `
-                <p>We have unsubscribed you from our mailing list, you will no longer recieve mail from us.</p>
-                <p>We're sorry to see you go. If you have any feedback, please <a href="https://discord.gg/4Rwr2pu2bW">let us know</a>.</p>
-            `
-        );
-
-        await MailingSubscriberModel.findOneAndDelete({ email });
-    } else {
+    if (!subscribed) {
         const res = await fetch(endpoint, {
             method: "POST",
             headers: {
@@ -67,7 +40,8 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
         await MailingSubscriberModel.create({ email });
 
         await sendMail(
-            email,
+            [{email}],
+            null,
             "You're subscribed 🎉",
             "Thanks for subscribing to updates on Vocal!",
             `
@@ -124,12 +98,15 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
                 </td>
               </tr>
             </table>
-            `
+            `,
+            null
         );
+    } else {
+      throw error(400, 'You are already subscribed');
     }
 
     return json({
         status: 200,
-        message: 'Success'
+        message: 'Success -- you have been subscribed'
     });
 };
