@@ -20,7 +20,7 @@ export const GET = async (event) => {
             grant_type: 'authorization_code',
             code,
             redirect_uri: NODE_ENV === 'production'
-                ? DISCORD_REDIRECT_URI
+                ? encodeURI(DISCORD_REDIRECT_URI)
                 : `http://localhost:${PORT}/api/auth/discord/callback`
         })
     });
