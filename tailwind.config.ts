@@ -20,6 +20,8 @@ const config: Config = {
 				vocal_medium: '#9072d7',
 				vocal_strong: '#7056ae',
 				vocal_strongest: '#563f8a',
+				vocal_dark: '#171226',
+				vocal_header: '#130f1b',
 				vocal_darkest: '#110b13', // use for bg
 				vocal_dark_bg: '#0a080f',
 
