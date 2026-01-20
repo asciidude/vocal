@@ -60,7 +60,7 @@
 
             <div class="flex flex-col sm:flex-row gap-4 justify-center text-xl">
                 <a
-                    href="https://discord.gg/YOURCODE"
+                    href="https://discord.gg/4Rwr2pu2bW"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="inline-flex items-center justify-center
