@@ -97,7 +97,7 @@
 
 <div class="flex flex-col min-h-screen bg-vocal_dark_bg">
     <header
-        class="sticky top-0 z-10 bg-[#130f1b] border-b border-[#2d2249] p-4"
+        class="top-0 z-10 bg-vocal_header border-b border-[#2d2249] p-4"
     >
         <div class="container mx-auto flex justify-between items-center">
             <h1 class="text-3xl font-bold text-white">Home</h1>
