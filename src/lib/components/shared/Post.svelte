@@ -11,7 +11,7 @@
     import { enhance } from "$app/forms";
     import type { SubmitFunction } from "@sveltejs/kit";
     import { onMount } from "svelte";
-    import Time from "svelte-time/Time.svelte";
+    import Time from "svelte-time";
 
     const props = $props<{
         post: PostType | null;
