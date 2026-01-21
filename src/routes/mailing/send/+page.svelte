@@ -18,26 +18,40 @@
         bannerFile = null;
         bannerPreview = null;
     }
+    let sending = false;
 
     async function handleSubmit(e: Event) {
         e.preventDefault();
+        sending = true;
+
         const formData = new FormData();
         formData.append("subject", subject);
         formData.append("body", body);
         if (bannerFile) formData.append("banner", bannerFile);
 
-        const res = await fetch("/mailing/send", {
-            method: "POST",
-            body: formData,
-        });
+        try {
+            const res = await fetch("/mailing/send", {
+                method: "POST",
+                body: formData,
+            });
 
-        if (!res.ok) return alert("Failed to send mailing");
+            const data = await res.json().catch(() => null);
 
-        alert("Mail sent!");
-        subject = "";
-        body = "";
-        bannerFile = null;
-        bannerPreview = null;
+            if (!res.ok) {
+                alert(data?.message || "Failed to send mailing");
+            } else {
+                alert(`Mail sent to ${data?.sent || "subscribers"}!`);
+                subject = "";
+                body = "";
+                bannerFile = null;
+                bannerPreview = null;
+            }
+        } catch (err) {
+            console.error("Mailing request failed:", err);
+            alert("Failed to send mailing (network error)");
+        } finally {
+            sending = false;
+        }
     }
 </script>
 
@@ -86,8 +100,9 @@
         <button
             type="submit"
             class="bg-vocal_lightest text-black px-6 py-2 rounded-lg font-medium mt-2"
+            disabled={sending}
         >
-            Send to all subscribers
+            {sending ? "Sending..." : "Send to all subscribers"}
         </button>
     </form>
 
