@@ -412,7 +412,7 @@
         </p>
         <p class="text-sm text-white">
           Or join our
-          <a href="https://discord.gg/example" class="underline text-blue-400"
+          <a href="https://discord.gg/4Rwr2pu2bW" class="underline text-blue-400"
             >Discord</a
           >
           community.
