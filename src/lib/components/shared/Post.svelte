@@ -415,6 +415,7 @@
                 {#if modalImages.length > 1}
                     <div class="flex items-center justify-center gap-4 mt-4">
                         <button
+                            title=""
                             type="button"
                             class="bg-gray-900 hover:bg-gray-800 text-white rounded-full p-3 disabled:opacity-50 disabled:cursor-not-allowed"
                             onclick={() =>
