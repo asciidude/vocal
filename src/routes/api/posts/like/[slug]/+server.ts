@@ -7,7 +7,6 @@ import type { PostType } from "src/lib/types/Post.type";
 
 export const POST: RequestHandler = async ({ params, request, locals }) => {
     const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
-    console.log(user);
 
     const postId = params.slug;
 
