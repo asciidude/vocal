@@ -494,6 +494,7 @@
                 method="post"
                 use:enhance={likePost}
             >
+                <input type="hidden" name="postType" value={reply ? 'reply' : 'post'}>
                 <button
                     class="flex items-center mt-2"
                     type="submit"
