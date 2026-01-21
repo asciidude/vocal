@@ -3,6 +3,9 @@
     let body = "";
     let bannerFile: File | null = null;
     let bannerPreview: string | null = null;
+    let sending = false;
+    let errorMsg: string | null = null;
+    let failedBatches: any[] = [];
 
     function handleBannerChange(e: Event) {
         const input = e.target as HTMLInputElement;
@@ -18,11 +21,12 @@
         bannerFile = null;
         bannerPreview = null;
     }
-    let sending = false;
 
     async function handleSubmit(e: Event) {
         e.preventDefault();
         sending = true;
+        errorMsg = null;
+        failedBatches = [];
 
         const formData = new FormData();
         formData.append("subject", subject);
@@ -34,13 +38,13 @@
                 method: "POST",
                 body: formData,
             });
-
             const data = await res.json().catch(() => null);
 
-            if (!res.ok) {
-                alert(data?.message || "Failed to send mailing");
+            if (!data?.success) {
+                errorMsg = data?.error || "Unknown error";
+                failedBatches = data?.batches || [];
             } else {
-                alert(`Mail sent to ${data?.sent || "subscribers"}!`);
+                alert(`Mail sent to ${data.sent} subscribers!`);
                 subject = "";
                 body = "";
                 bannerFile = null;
@@ -48,7 +52,7 @@
             }
         } catch (err) {
             console.error("Mailing request failed:", err);
-            alert("Failed to send mailing (network error)");
+            errorMsg = "Failed to send mailing (network error)";
         } finally {
             sending = false;
         }
@@ -86,13 +90,15 @@
                     <img
                         src={bannerPreview}
                         alt="banner"
-                        style="width:100%; height:100px; object-fit:cover; display:block; border-radius:8px;"
+                        class="w-full h-24 object-cover rounded-lg"
                     />
                     <button
                         type="button"
                         class="absolute top-2 right-2 bg-black/50 px-2 rounded text-white"
-                        on:click={removeBanner}>×</button
+                        on:click={removeBanner}
                     >
+                        ×
+                    </button>
                 </div>
             {/if}
         </div>
@@ -104,58 +110,68 @@
         >
             {sending ? "Sending..." : "Send to all subscribers"}
         </button>
+
+        {#if errorMsg}
+            <p class="text-red-500 mt-2">{errorMsg}</p>
+            {#if failedBatches.length}
+                <ul class="mt-1 text-red-400 list-disc list-inside">
+                    {#each failedBatches as b, i}
+                        <li>Batch {i + 1} failed ({b.failed || 0} emails)</li>
+                    {/each}
+                </ul>
+            {/if}
+        {/if}
     </form>
 
+    <!-- Live Preview -->
     <div class="flex-1">
         <table
             width="100%"
             cellpadding="0"
             cellspacing="0"
             role="presentation"
-            style="background-color:#0b0b0b; font-family:Inter, Arial, sans-serif; color:#ffffff; margin:0; padding:0;"
+            class="bg-[#0b0b0b] font-sans text-white m-0 p-0"
         >
             <tbody>
                 <tr>
-                    <td align="center" style="padding:32px 16px;">
+                    <td align="center" class="p-8">
                         <table
-                            width="100%"
-                            style="max-width:600px; background:#121212; border-radius:12px; overflow:hidden;"
+                            class="w-full max-w-lg bg-[#121212] rounded-lg overflow-hidden"
                         >
                             <tbody>
                                 {#if bannerPreview}
                                     <tr>
-                                        <td align="center" style="padding:0;">
+                                        <td align="center" class="p-0">
                                             <img
                                                 src={bannerPreview}
                                                 alt="banner"
-                                                style="width:100%; height:100px; object-fit:cover; display:block;"
+                                                class="w-full h-24 object-cover block"
                                             />
                                         </td>
                                     </tr>
                                 {/if}
-
                                 <tr>
-                                    <td style="padding:24px 28px;">
+                                    <td class="p-6">
                                         <p
-                                            style="margin:0; line-height:1.7; color:#d1d1d1; white-space:pre-wrap;"
+                                            class="m-0 leading-7 text-[#d1d1d1] whitespace-pre-wrap"
                                         >
                                             {body ||
                                                 "Your email body will appear here…"}
                                         </p>
                                     </td>
                                 </tr>
-
                                 <tr>
                                     <td
-                                        style="padding:16px 28px; border-top:1px solid #1f1f1f; font-size:13px; color:#777;"
+                                        class="p-4 border-t border-[#1f1f1f] text-xs text-[#777]"
                                     >
-                                        <p style="margin:0;">
+                                        <p class="m-0">
                                             — The Vocal Team<br />
                                             <a
                                                 href="https://vocal.wtf"
-                                                style="color:#777; text-decoration:none;"
-                                                >vocal.wtf</a
-                                            > · support@vocal.wtf
+                                                class="text-[#777] no-underline"
+                                            >
+                                                vocal.wtf
+                                            </a> · support@vocal.wtf
                                         </p>
                                     </td>
                                 </tr>

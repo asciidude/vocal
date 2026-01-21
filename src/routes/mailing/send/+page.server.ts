@@ -20,15 +20,13 @@ export const actions: Actions = {
     const subject = String(form.get("subject") || "");
     const body = String(form.get("body") || "");
 
-    if (!subject || !body) throw error(400, "Subject and body required");
+    if (!subject || !body) return { success: false, error: "Subject and body required" };
 
-    // handle banner (in-memory base64)
+    // handle banner
     let bannerHtml = "";
     const bannerFile = form.get("banner") as File | null;
     if (bannerFile && bannerFile.size > 0) {
-      const bannerBase64 = Buffer.from(await bannerFile.arrayBuffer()).toString(
-        "base64"
-      );
+      const bannerBase64 = Buffer.from(await bannerFile.arrayBuffer()).toString("base64");
       const mime = bannerFile.type;
       bannerHtml = `
         <tr>
@@ -40,12 +38,10 @@ export const actions: Actions = {
         </tr>`;
     }
 
-    // get subscribers
-    const subscribers = await MailingSubscriberModel.find({}, { email: 1 });
-    if (!subscribers.length) throw error(400, "No subscribers found");
-    const emails = subscribers.map((s) => ({ email: s.email }));
+    const subscribers = await MailingSubscriberModel.find({}, { email: 1, _id: 0 });
+    if (!subscribers.length) return { success: false, error: "No subscribers found" };
+    const emails = subscribers.map(s => ({ email: s.email }));
 
-    // build HTML exactly like the live preview
     const html = `
       <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#0b0b0b; font-family:Inter, Arial, sans-serif; color:#ffffff; margin:0; padding:0;">
         <tbody>
@@ -74,15 +70,16 @@ export const actions: Actions = {
       </table>
     `;
 
-    await sendMail(
-      emails,
-      null,
-      subject,
-      body,
-      html,
-      null // no attachments
-    );
+    try {
+      const results = await sendMail(emails, null, subject, body, html, null);
 
-    return { success: true, sent: emails.length };
+      const failedBatches = results.filter(r => !r.success);
+      return failedBatches.length
+        ? { success: false, error: `Failed ${failedBatches.length} batch(es)`, batches: failedBatches }
+        : { success: true, sent: emails.length, batches: results };
+    } catch (err: any) {
+      console.error("Mailing action error:", err);
+      return { success: false, error: err.message || "Unknown error" };
+    }
   }
 };

@@ -36,11 +36,11 @@ export async function sendMail(
       api_key: process.env.SMTP_API_KEY,
       sender: "Vocal <noreply@vocal.wtf>",
       from: "Vocal <noreply@vocal.wtf>",
-      to: ["noreply@vocal.wtf"], // dummy 'to', must be verified in SMTP2GO
+      to: ["noreply@vocal.wtf"], // required dummy 'to'
       subject,
       text_body: text,
       html_body: htmlWithUnsubscribe,
-      bcc: batch.map((r) => r.email),
+      bcc: batch.map(r => r.email),
     };
 
     if (cc_email) payload.cc = [cc_email];
@@ -52,26 +52,24 @@ export async function sendMail(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       const data = await res.json();
 
-      if (data?.data?.status !== "success") {
-        console.error("SMTP2GO error response:", data);
-        results.push({ batch, error: data });
+      if (data?.data?.failed && data.data.failed > 0) {
+        results.push({
+          success: false,
+          failed: data.data.failed,
+          raw: data,
+          emails: batch.map(e => e.email),
+        });
       } else {
-        results.push({ batch, success: true });
+        results.push({ success: true, raw: data, emails: batch.map(e => e.email) });
       }
     } catch (err: any) {
-      console.error("SMTP2GO send error:", err.message);
-      results.push({ batch, error: err.message });
+      console.error("SMTP2GO send error:", err);
+      results.push({ success: false, error: err.message, emails: batch.map(e => e.email) });
     }
 
-    await new Promise((r) => setTimeout(r, 500));
-  }
-
-  const failed = results.filter((r) => r.error);
-  if (failed.length === results.length) {
-    throw new Error(`All batches failed. See server logs for details.`);
+    await new Promise(r => setTimeout(r, 200));
   }
 
   return results;
