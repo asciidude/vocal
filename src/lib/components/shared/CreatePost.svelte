@@ -3,25 +3,28 @@
     import { Plus, Image } from "lucide-svelte";
     import X from "@lucide/svelte/icons/x";
     import type { UserType } from "$lib/types/User.types";
+    import type { PostType } from "$lib/types/Post.type";
     import { getImage } from "$lib/utils/Cache.util";
     import * as Avatar from "$lib/components/ui/avatar/index.js";
 
-    export let user: UserType | null = null;
-    export let postSubmission: (post: any) => void;
-    export let postType: "reply" | "post";
-    export let replyParent: string = "";
+    const props = $props<{
+        user: UserType | null;
+        postSubmission: (post: PostType) => void;
+        postType: "reply" | "post";
+        replyParent?: string;
+    }>();
 
     type FileWithPreview = { file: File; previewUrl: string };
-    let files: FileWithPreview[] = [];
-    let isSubmitting = false;
-    let currentUserAv: string | null = null;
-    let newPostContent = "";
-    let screenWidth = 0;
-    $: screenSmaller = screenWidth <= 577;
+    let files = $state<FileWithPreview[]>([]);
+    let isSubmitting = $state(false);
+    let currentUserAv = $state<string | null>(null);
+    let newPostContent = $state("");
+    let screenWidth = $state(0);
+    let screenSmaller = $derived(screenWidth <= 577);
 
     onMount(async () => {
-        if (user?.avatarUrl) {
-            currentUserAv = await getImage(user.avatarUrl);
+        if (props.user?.avatarUrl) {
+            currentUserAv = await getImage(props.user.avatarUrl);
         }
     });
 
@@ -48,15 +51,25 @@
         files = [...files];
     }
 
-    async function submitPost(formEl: HTMLFormElement) {
-        if (isSubmitting) return; // guard against double submit
+    async function handleSubmit(event: Event) {
+        event.preventDefault();
+        if (isSubmitting) return;
         isSubmitting = true;
 
-        const formData = new FormData(formEl);
+        const form = event.target as HTMLFormElement;
+        const formData = new FormData(form);
+
+        if (!newPostContent.trim()) {
+            console.error("Post content is empty!");
+            isSubmitting = false;
+            return;
+        }
+    
+        formData.set("content", newPostContent);
         files.forEach((f) => formData.append("attachments", f.file));
 
         try {
-            const res = await fetch(formEl.action, {
+            const res = await fetch(form.action, {
                 method: "POST",
                 body: formData,
             });
@@ -66,7 +79,10 @@
                 newPostContent = "";
                 files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
                 files = [];
-                postSubmission(result.post);
+
+                props.postSubmission(result.post);
+            } else {
+                console.error("Failed to create post:", result.message);
             }
         } catch (err) {
             console.error("Post submission failed:", err);
@@ -78,14 +94,14 @@
 
 <svelte:window bind:innerWidth={screenWidth} />
 
-{#if user}
+{#if props.user}
     <div class="post mb-6">
         <div class="flex gap-3">
             <Avatar.Root class="flex-shrink-0">
-                <a href={`/users/${user.username}`}>
+                <a href={`/users/${props.user.username}`}>
                     <Avatar.Image
                         src={currentUserAv}
-                        alt={`@${user.username}`}
+                        alt={`@${props.user.username}`}
                     />
                     <Avatar.Fallback>
                         <img src="/images/fallback-pfp.jpg" alt="" />
@@ -98,18 +114,14 @@
                 method="post"
                 enctype="multipart/form-data"
                 class="flex-grow"
-                on:submit|preventDefault={() =>
-                    submitPost(
-                        document.getElementById("postForm") as HTMLFormElement,
-                    )}
-                id="postForm"
+                on:submit={handleSubmit}
             >
-                <input type="hidden" name="postType" value={postType} />
-                {#if postType === "reply"}
+                <input type="hidden" name="postType" value={props.postType} />
+                {#if props.postType === "reply" && props.replyParent}
                     <input
                         type="hidden"
                         name="replyParent"
-                        value={replyParent}
+                        value={props.replyParent}
                     />
                 {/if}
 
