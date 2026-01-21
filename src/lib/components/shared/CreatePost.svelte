@@ -1,6 +1,5 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { enhance } from "$app/forms";
     import { Plus, Image } from "lucide-svelte";
     import X from "@lucide/svelte/icons/x";
     import type { UserType } from "$lib/types/User.types";
@@ -8,34 +7,23 @@
     import * as Avatar from "$lib/components/ui/avatar/index.js";
 
     export let user: UserType | null = null;
-    export let postSubmission: any;
-    export let postType: 'reply' | 'post';
-    export let replyParent: string = '';
+    export let postSubmission: (post: any) => void;
+    export let postType: "reply" | "post";
+    export let replyParent: string = "";
 
     type FileWithPreview = { file: File; previewUrl: string };
-
     let files: FileWithPreview[] = [];
     let isSubmitting = false;
     let currentUserAv: string | null = null;
-
-    let newPostContent = '';
+    let newPostContent = "";
     let screenWidth = 0;
     $: screenSmaller = screenWidth <= 577;
 
-    const postSubmissionEnhance = ({ formData }: any) => {
-        files.forEach(({ file }) => formData.append("attachments", file));
-        isSubmitting = true;
-
-        return async ({ result, update }: any) => {
-            await update();
-            if (result.status === 200) {
-                newPostContent = "";
-                files = [];
-                postSubmission(result.post);
-            }
-            isSubmitting = false;
-        };
-    };
+    onMount(async () => {
+        if (user?.avatarUrl) {
+            currentUserAv = await getImage(user.avatarUrl);
+        }
+    });
 
     function handleFileChange(event: Event) {
         const input = event.target as HTMLInputElement;
@@ -43,13 +31,10 @@
 
         const selectedFiles = Array.from(input.files);
         const newFiles = selectedFiles.map((file) => {
-            let previewUrl = "";
-            if (
-                file.type.startsWith("image/") ||
-                file.type.startsWith("video/")
-            ) {
-                previewUrl = URL.createObjectURL(file);
-            }
+            const previewUrl =
+                file.type.startsWith("image/") || file.type.startsWith("video/")
+                    ? URL.createObjectURL(file)
+                    : "";
             return { file, previewUrl };
         });
 
@@ -63,11 +48,32 @@
         files = [...files];
     }
 
-    onMount(async () => {
-        if (user?.avatarUrl) {
-            currentUserAv = await getImage(user.avatarUrl);
+    async function submitPost(formEl: HTMLFormElement) {
+        if (isSubmitting) return; // guard against double submit
+        isSubmitting = true;
+
+        const formData = new FormData(formEl);
+        files.forEach((f) => formData.append("attachments", f.file));
+
+        try {
+            const res = await fetch(formEl.action, {
+                method: "POST",
+                body: formData,
+            });
+
+            const result = await res.json();
+            if (result.status === 200) {
+                newPostContent = "";
+                files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+                files = [];
+                postSubmission(result.post);
+            }
+        } catch (err) {
+            console.error("Post submission failed:", err);
+        } finally {
+            isSubmitting = false;
         }
-    });
+    }
 </script>
 
 <svelte:window bind:innerWidth={screenWidth} />
@@ -76,10 +82,13 @@
     <div class="post mb-6">
         <div class="flex gap-3">
             <Avatar.Root class="flex-shrink-0">
-                <a href="/users/{user.username}">
-                    <Avatar.Image src={currentUserAv} alt="@{user.username}" />
+                <a href={`/users/${user.username}`}>
+                    <Avatar.Image
+                        src={currentUserAv}
+                        alt={`@${user.username}`}
+                    />
                     <Avatar.Fallback>
-                        <img src="/images/fallback-pfp.jpg" alt="">
+                        <img src="/images/fallback-pfp.jpg" alt="" />
                     </Avatar.Fallback>
                 </a>
             </Avatar.Root>
@@ -88,14 +97,20 @@
                 action="/api/posts/create"
                 method="post"
                 enctype="multipart/form-data"
-                use:enhance={postSubmissionEnhance}
-                id="postSubmission"
                 class="flex-grow"
-                on:submit|preventDefault={() => (isSubmitting = true)}
+                on:submit|preventDefault={() =>
+                    submitPost(
+                        document.getElementById("postForm") as HTMLFormElement,
+                    )}
+                id="postForm"
             >
                 <input type="hidden" name="postType" value={postType} />
-                {#if postType === 'reply'}
-                    <input type="hidden" name="replyParent" value={replyParent} />
+                {#if postType === "reply"}
+                    <input
+                        type="hidden"
+                        name="replyParent"
+                        value={replyParent}
+                    />
                 {/if}
 
                 <textarea
@@ -104,70 +119,62 @@
                     placeholder="What's on your mind?"
                     bind:value={newPostContent}
                     name="content"
-                    id="content"
+                    disabled={isSubmitting}
                 ></textarea>
 
-                <div class="flex justify-end mt-2 flex-col gap-3">
-                    {#if files.length > 0}
-                        <div
-                            class="grid gap-2"
-                            style={`grid-template-columns: repeat(auto-fill, minmax(${screenSmaller ? "100px" : "120px"}, 1fr));`}
-                        >
-                            {#each files as file, i}
-                                <div
-                                    class="relative border border-vocal_strongest rounded overflow-hidden"
+                {#if files.length > 0}
+                    <div
+                        class="grid gap-2 mt-2"
+                        style={`grid-template-columns: repeat(auto-fill, minmax(${screenSmaller ? "100px" : "120px"}, 1fr));`}
+                    >
+                        {#each files as file, i}
+                            <div
+                                class="relative border border-vocal_strongest rounded overflow-hidden"
+                            >
+                                <img
+                                    src={file.previewUrl}
+                                    alt="Preview"
+                                    class="object-cover w-full h-24"
+                                />
+                                <button
+                                    type="button"
+                                    on:click={() => removeFile(i)}
+                                    class="absolute top-1 right-1 bg-vocal_strong hover:bg-vocal_strongest rounded-full p-1 transition"
+                                    disabled={isSubmitting}
                                 >
-                                    <img
-                                        src={file.previewUrl}
-                                        alt="Preview"
-                                        class="object-cover w-full h-24"
-                                    />
-                                    <button
-                                        type="button"
-                                        on:click={() => removeFile(i)}
-                                        class="absolute top-1 right-1 bg-vocal_strong hover:bg-vocal_strongest rounded-full p-1 transition"
-                                        disabled={isSubmitting}
-                                    >
-                                        <X class="size-3 text-white" />
-                                    </button>
-                                </div>
-                            {/each}
-                        </div>
-                    {/if}
-
-                    <div class="flex justify-end gap-2">
-                        <input
-                            id="fileUpload"
-                            type="file"
-                            name="attachments"
-                            class="hidden"
-                            accept="image/*"
-                            multiple
-                            on:change={handleFileChange}
-                        />
-
-                        <button
-                            class="bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default"
-                            disabled={isSubmitting ||
-                                !newPostContent.trim() ||
-                                files.length >= 10}
-                            on:click={() =>
-                                document.getElementById("fileUpload")?.click()}
-                            type="button"
-                        >
-                            <Image class="size-5" />
-                            <span class="text-xl">Upload</span>
-                        </button>
-
-                        <button
-                            class="ms-2 bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default"
-                            disabled={isSubmitting || !newPostContent.trim()}
-                            type="submit"
-                        >
-                            <Plus class="size-5" />
-                            <span class="text-xl">Post</span>
-                        </button>
+                                    <X class="size-3 text-white" />
+                                </button>
+                            </div>
+                        {/each}
                     </div>
+                {/if}
+
+                <div class="flex justify-end gap-2 mt-2">
+                    <input
+                        id="fileUpload"
+                        type="file"
+                        class="hidden"
+                        accept="image/*"
+                        multiple
+                        on:change={handleFileChange}
+                    />
+                    <button
+                        type="button"
+                        class="bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition disabled:bg-vocal_strong disabled:cursor-default"
+                        disabled={isSubmitting || files.length >= 10}
+                        on:click={() =>
+                            document.getElementById("fileUpload")?.click()}
+                    >
+                        <Image class="size-5" /> Upload
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="ms-2 bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition disabled:bg-vocal_strong disabled:cursor-default"
+                        disabled={isSubmitting || !newPostContent.trim()}
+                    >
+                        <Plus class="size-5" /> Post
+                    </button>
                 </div>
             </form>
         </div>

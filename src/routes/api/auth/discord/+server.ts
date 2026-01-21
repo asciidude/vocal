@@ -6,7 +6,7 @@ export const GET = () => {
     discordAuthUrl.searchParams.set('client_id', DISCORD_CLIENT_ID);
     discordAuthUrl.searchParams.set('redirect_uri',
         NODE_ENV === 'production' ?
-        encodeURI(DISCORD_REDIRECT_URI)
+        encodeURI(`http://localhost:${PORT}/api/auth/discord/callback`)
         : encodeURI(`http://localhost:${PORT}/api/auth/discord/callback`)
     );
     discordAuthUrl.searchParams.set('response_type', 'code');

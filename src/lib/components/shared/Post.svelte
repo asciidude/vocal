@@ -1,177 +1,214 @@
 <script lang="ts">
     import type { LikeType } from "src/lib/types/Like.type";
-    import type { ReplyType } from "$lib/types/Reply.type";
-    import type { PostType } from "$lib/types/Post.type";
+    import type { ReplyType } from "src/lib/types/Reply.type";
+    import type { PostType } from "src/lib/types/Post.type";
     import { UserRoles, type UserType } from "$lib/types/User.types";
-
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import * as Avatar from "$lib/components/ui/avatar";
     import * as Dialog from "$lib/components/ui/dialog/index.js";
     import { Ellipsis, Heart, MessageCircle } from "lucide-svelte";
-
     import { getImage } from "$lib/utils/Cache.util";
     import { enhance } from "$app/forms";
     import type { SubmitFunction } from "@sveltejs/kit";
+    import { onMount } from "svelte";
 
-    function getInitials(name: string | undefined) {
-        if (!name) return "?";
-        return name
-            .split(" ")
-            .map((word) => word[0])
-            .join("")
-            .toUpperCase();
-    }
+    const props = $props<{
+        post: PostType | null;
+        postAuthor: UserType | null;
+        user: UserType | null;
+        postLikes: LikeType[];
+        postReplies: ReplyType[];
+        postExpanded: boolean;
+        redirectOnDelete: string | null;
+        reply: boolean;
+        postDeletion: any;
+    }>();
 
-    export let post: PostType | null = null;
-    export let postAuthor: UserType | null = null;
-    export let user: UserType | null = null;
-    export let postLikes: LikeType[] = [];
-    export let postReplies: ReplyType[] = [];
-    export let postExpanded: Boolean = false;
-    export let redirectOnDelete: String | null = null;
-    export let reply: boolean = false;
-    export let postDeletion: any = null;
-    let screenWidth = 0;
-    let isEditing = false;
-    let editContent = '';
-    let isSubmitting = false;
-
-    $: avatarSrc = "";
-
-    $: if (postAuthor) {
-        (async () => {
-            avatarSrc = await getImage(postAuthor.avatarUrl);
-        })();
-    }
-
-    function deletePost() {
-        return async ({ result }) => {
-            if (result.status === 200) {
-                if(redirectOnDelete === 'back') {
-                    if(document.referrer && document.referrer.startsWith(location.origin)) {
-                        history.back();
-                        return;
-                    } else {
-                        window.location.href = '/home';
-                    }
-                } else if(redirectOnDelete) {
-                    window.location.href = String(redirectOnDelete);
-                }
-
-                document
-                    .getElementById(`post-${post!._id}`)
-                    ?.classList.add("hidden");
-                
-                postDeletion(post?._id);
-            }
-        };
-    }
-
-    function enableEditMode() {
-        if (!post) return;
-        isEditing = true;
-        editContent = String(post.content);
-    }
-
-    function cancelEdit() {
-        isEditing = false;
-        editContent = '';
-    }
-
-    const editPost: SubmitFunction = () => {
-        isSubmitting = true;
-    
-        return async ({ result }) => {
-            isSubmitting = false;
-            
-            if (result.type === 'success' && result.status === 200) {
-                if (post) {
-                    post.content = editContent;
-                    //post.updatedAt = new Date();
-                }
-                
-                cancelEdit();
-            }
-        }
-    }
-
-    let liked = false;
-    let likeCount = 0;
-
-    $: if (postLikes && user) {
-        liked = postLikes.some(like => like.author.toString() === user._id);
-        likeCount = postLikes.length;
-    }
-
-    function likePost() {
-        return async ({ result }) => {
-            if (result.status === 200) {
-                if (result.newlyLiked) {
-                    likeCount++;
-                    liked = true;
-                } else {
-                    likeCount--;
-                    liked = false;
-                }
-            }
-        };
-    }
+    // Use $state for reactive variables
+    let screenWidth = $state(0);
+    let screenSmaller = $derived(screenWidth <= 713);
+    let isEditing = $state(false);
+    let editContent = $state("");
+    let isSubmitting = $state(false);
+    let liked = $state(false);
+    let likeCount = $state(0);
+    let avatarSrc = $state("");
+    let modalOpen = $state(false);
+    let modalImages = $state<string[]>([]);
+    let modalStartIndex = $state(0);
 
     function parseContent(content: string) {
         const hashtagRegex = /(#\w+)/g;
         const parts = content.split(hashtagRegex);
-        
-        return parts.map((part, index) => {
-            if (part.match(hashtagRegex)) {
-                const tag = part.slice(1);
-                return {
-                    type: 'hashtag',
-                    content: part,
-                    tag: tag,
-                    key: index
-                };
-            }
-            return {
-                type: 'text',
-                content: part,
-                key: index
-            };
-        });
+        return parts.map((part, index) =>
+            part.match(hashtagRegex)
+                ? {
+                      type: "hashtag",
+                      content: part,
+                      tag: part.slice(1),
+                      key: index,
+                  }
+                : { type: "text", content: part, key: index },
+        );
     }
 
-    $: screenSmaller = screenWidth <= 713;
+    function enableEditMode() {
+        if (!props.post) return;
+        isEditing = true;
+        editContent = String(props.post.content);
+    }
+
+    function cancelEdit() {
+        isEditing = false;
+        editContent = "";
+    }
+
+    function getPostImages(): string[] {
+        return props.post?.attachments?.map((a) => a.url).filter(Boolean) || [];
+    }
+
+    function openModal(images: string[], startIndex = 0) {
+        modalImages = images;
+        modalStartIndex = startIndex;
+        modalOpen = true;
+    }
+
+    // Initialize state from props
+    $effect(() => {
+        if (props.postLikes && props.user) {
+            liked = props.postLikes.some(
+                (like) => like.author.toString() === props.user!._id,
+            );
+            likeCount = props.postLikes.length;
+        }
+    });
+
+    // Load avatar on mount
+    onMount(async () => {
+        if (props.postAuthor) {
+            avatarSrc = await getImage(props.postAuthor.avatarUrl);
+        }
+    });
+
+    // Simplified like function without enhance
+    async function likePost(e: Event) {
+        e.preventDefault();
+        if (!props.post || isSubmitting) return;
+
+        isSubmitting = true;
+
+        try {
+            const formData = new FormData();
+            formData.append("postType", props.reply ? "reply" : "post");
+
+            const res = await fetch(`/api/posts/like/${props.post._id}`, {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!res.ok) throw new Error("Failed to like");
+
+            const data = await res.json();
+            console.log("Like response data:", data);
+
+            if (data.status === 200) {
+                // Update state based on response
+                liked = !!data.newlyLiked;
+                likeCount = data.likeCount;
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            isSubmitting = false;
+        }
+    }
+
+    const deletePost: SubmitFunction = async ({ formData, formElement }) => {
+        isSubmitting = true;
+        try {
+            const res = await fetch(formElement.action, {
+                method: "POST",
+                body: formData,
+            });
+            if (!res.ok) throw new Error("Failed to delete");
+
+            const data = await res.json();
+            if (data.status === 200) {
+                if (props.redirectOnDelete === "back") {
+                    if (document.referrer?.startsWith(location.origin))
+                        history.back();
+                    else window.location.href = "/home";
+                } else if (props.redirectOnDelete) {
+                    window.location.href = String(props.redirectOnDelete);
+                }
+                document
+                    .getElementById(`post-${props.post!._id}`)
+                    ?.classList.add("hidden");
+                props.postDeletion?.(props.post?._id);
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            isSubmitting = false;
+        }
+    };
+
+    const editPost: SubmitFunction = async ({ formData, formElement }) => {
+        isSubmitting = true;
+        try {
+            const res = await fetch(formElement.action, {
+                method: "POST",
+                body: formData,
+            });
+            if (!res.ok) throw new Error("Failed to edit");
+
+            const data = await res.json();
+            if (data.status === 200 && props.post) {
+                props.post.content = editContent;
+                cancelEdit();
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            isSubmitting = false;
+        }
+    };
 </script>
 
 <svelte:window bind:innerWidth={screenWidth} />
 
-<div class="post text-white" id="post-{post?._id}">
-    <div class="post-header">
-        {#if post}
+<div class="post text-white" id="post-{props.post?._id}">
+    <!-- header -->
+    {#if props.post}
+        <div class="post-header">
             <div class="left-section">
                 <a
-                    href="/users/{postAuthor?.username}"
+                    href="/users/{props.postAuthor?.username}"
                     class="flex items-center gap-2"
                 >
                     <Avatar.Root>
                         <Avatar.Image
                             src={avatarSrc}
-                            alt="@{postAuthor?.username}"
+                            alt="@{props.postAuthor?.username}"
                         />
-                        <Avatar.Fallback>
-                            <img src="/images/fallback-pfp.jpg" alt="">
-                        </Avatar.Fallback>
+                        <Avatar.Fallback
+                            ><img
+                                src="/images/fallback-pfp.jpg"
+                                alt=""
+                            /></Avatar.Fallback
+                        >
                     </Avatar.Root>
                     <div class="username">
                         <p class="leading-none text-2xl">
-                            {postAuthor?.displayName || postAuthor?.username}
+                            {props.postAuthor?.displayName ||
+                                props.postAuthor?.username}
                         </p>
                         <p class="text-gray-400 text-md">
-                            @{postAuthor?.username}
+                            @{props.postAuthor?.username}
                         </p>
                     </div>
                 </a>
             </div>
-
             <DropdownMenu.Root>
                 <DropdownMenu.Trigger
                     ><Ellipsis class="size-5" /></DropdownMenu.Trigger
@@ -180,333 +217,280 @@
                     class="text-white !bg-vocal_darkest border border-[#9072d7]"
                 >
                     <DropdownMenu.Group>
-                        {#if user?._id === postAuthor!._id || user?.roles.includes(UserRoles.SuperAdmin)}
+                        {#if props.user?._id === props.postAuthor!._id || props.user?.roles.includes(UserRoles.SuperAdmin)}
                             <form
-                                action="/api/posts/delete/{post._id}"
+                                action="/api/posts/delete/{props.post._id}"
                                 method="post"
                                 use:enhance={deletePost}
-                                id="deletePost-{post._id}"
+                                id="deletePost-{props.post._id}"
                             >
                                 <input
                                     type="hidden"
                                     name="postType"
-                                    value="{reply ? 'reply' : 'post'}"
+                                    value={props.reply ? "reply" : "post"}
                                 />
                                 <input
                                     type="hidden"
                                     name="posterId"
-                                    value={postAuthor!._id}
+                                    value={props.postAuthor!._id}
                                 />
                             </form>
-
-                            <DropdownMenu.Item
-                                class="cursor-pointer font-light text-xl"
-                            >
+                            <DropdownMenu.Item>
                                 <button
                                     type="button"
-                                    on:click={() =>
+                                    onclick={() =>
                                         (
                                             document.getElementById(
-                                                `deletePost-${post._id}`,
+                                                `deletePost-${props.post._id}`,
                                             ) as HTMLFormElement
-                                        ).requestSubmit()}
+                                        ).requestSubmit()}>Delete</button
                                 >
-                                    <span class="text-xl">Delete</span>
-                                </button>
                             </DropdownMenu.Item>
-
-                            <DropdownMenu.Item
-                                class="cursor-pointer font-light text-xl"
-                            >
-                                <button
-                                    type="button"
-                                    on:click={enableEditMode}
+                            <DropdownMenu.Item>
+                                <button type="button" onclick={enableEditMode}
+                                    >Edit</button
                                 >
-                                    <span class="text-xl">Edit</span>
-                                </button>
                             </DropdownMenu.Item>
                         {/if}
-                        <DropdownMenu.Item
-                            class="text-red-400 cursor-pointer text-xl font-light"
+                        <DropdownMenu.Item class="text-red-400"
+                            >Report</DropdownMenu.Item
                         >
-                            Report
-                        </DropdownMenu.Item>
                     </DropdownMenu.Group>
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
-        {/if}
-    </div>
+        </div>
+    {/if}
 
+    <!-- content -->
     <div class="post-content text-2xl">
-        {#if post}
+        {#if props.post}
             {#if isEditing}
                 <form
-                    action="/api/posts/edit/{post._id}"
+                    action="/api/posts/edit/{props.post._id}"
                     method="post"
                     use:enhance={editPost}
-                    class="edit-form"
                 >
-                    <input type="hidden" name="postType" value="{reply ? 'reply' : 'post'}" />
-                    <input type="hidden" name="posterId" value={postAuthor!._id} />
+                    <input
+                        type="hidden"
+                        name="postType"
+                        value={props.reply ? "reply" : "post"}
+                    />
+                    <input
+                        type="hidden"
+                        name="posterId"
+                        value={props.postAuthor!._id}
+                    />
                     <input type="hidden" name="content" value={editContent} />
-                    
                     <textarea
                         bind:value={editContent}
-                        class="w-full bg-transparent text-white text-2xl resize-none border border-vocal_lightest rounded-lg p-3 focus:outline-none focus:border-vocal_lightest"
+                        class="w-full bg-transparent text-white text-2xl resize-none border border-vocal_lightest rounded-lg p-3"
                         rows="4"
-                        placeholder="What's on your mind?"
-                        disabled={isSubmitting}
                     ></textarea>
-                    
                     <div class="flex justify-end gap-2 mt-3">
-                        <button
-                            type="button"
-                            on:click={cancelEdit}
-                            class="px-4 py-2 text-lg border border-gray-500 rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
-                            disabled={isSubmitting}
+                        <button type="button" onclick={cancelEdit}
+                            >Cancel</button
                         >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            class="px-4 py-2 text-lg bg-vocal_lightest text-white rounded-lg hover:bg-vocal_light transition disabled:opacity-50"
-                            disabled={isSubmitting || !editContent.trim()}
+                        <button type="submit" disabled={!editContent.trim()}
+                            >{isSubmitting ? "Saving..." : "Save"}</button
                         >
-                            {isSubmitting ? 'Saving...' : 'Save'}
-                        </button>
                     </div>
                 </form>
             {:else}
                 <p class="whitespace-pre-wrap">
-                    {#each parseContent(String(post.content)) as part}
-                        {#if part.type === 'hashtag'}
-                            <a href="/hashtag/{part.tag}" class="text-vocal_lightest rounded">
-                                {part.content}
-                            </a>
-                        {:else}
-                            {part.content}
-                        {/if}
+                    {#each parseContent(String(props.post.content)) as part}
+                        {#if part.type === "hashtag"}
+                            <a
+                                href="/hashtag/{part.tag}"
+                                class="text-vocal_lightest">{part.content}</a
+                            >
+                        {:else}{part.content}{/if}
                     {/each}
                 </p>
 
-                {#if post.attachments.length > 0}
-                    {#if post.attachments.length === 1}
-                        <div class="grid max-w-[520px]">
-                            <Dialog.Root>
-                                <Dialog.Trigger class="inline-flex w-fit h-fit">
-                                    <img
-                                        src={post.attachments[0].url}
-                                        alt={post.attachments[0].name}
-                                        class=" aspect-square w-full max-w-[250px] rounded object-cover cursor-pointer hover:brightness-90 transition"
-                                    />
-                                </Dialog.Trigger>
-                                <Dialog.Content
-                                    class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg"
-                                >
-                                    <Dialog.Header>
-                                        <Dialog.Description>
-                                            <img
-                                                src={post.attachments[0].url}
-                                                alt={post.attachments[0].name}
-                                                class="w-full max-w-[500px] rounded object-cover"
-                                            />
-                                        </Dialog.Description>
-                                    </Dialog.Header>
-                                </Dialog.Content>
-                            </Dialog.Root>
-                        </div>
-                    {:else if post.attachments.length === 2}
-                        <div
-                            class="grid grid-cols-2 gap-2 max-w-[520px] sm:grid-cols-2"
-                            style="grid-auto-rows: 1fr;"
-                        >
-                            {#each post.attachments as attachment}
-                                <Dialog.Root>
-                                    <Dialog.Trigger class="inline-flex w-full h-full">
-                                        <div class="aspect-square w-full overflow-hidden rounded">
-                                            <img
-                                                src={attachment.url}
-                                                alt={attachment.name}
-                                                class="w-full h-full object-cover cursor-pointer hover:brightness-90 transition"
-                                            />
-                                        </div>
-                                    </Dialog.Trigger>
-                                    <Dialog.Content class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg">
-                                        <Dialog.Header>
-                                            <Dialog.Description>
-                                                <img
-                                                    src={attachment.url}
-                                                    alt={attachment.name}
-                                                    class="w-full h-full rounded object-cover"
-                                                />
-                                            </Dialog.Description>
-                                        </Dialog.Header>
-                                    </Dialog.Content>
-                                </Dialog.Root>
-                            {/each}
-                        </div>
-                    {:else if post.attachments.length === 3}
-                        {#if screenSmaller}
-                            <div class="grid grid-cols-2 gap-2 max-w-[520px]">
-                                {#each post.attachments.slice(0, 2) as attachment}
-                                    <Dialog.Root>
-                                        <Dialog.Trigger class="inline-flex w-fit h-fit">
-                                            <div
-                                                class="aspect-square w-full overflow-hidden rounded"
-                                            >
-                                                <img
-                                                    src={attachment.url}
-                                                    alt={attachment.name}
-                                                    class="h-full w-full object-cover cursor-pointer hover:brightness-90 transition"
-                                                />
-                                            </div>
-                                        </Dialog.Trigger>
-                                        <Dialog.Content
-                                            class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg"
-                                        >
-                                            <Dialog.Header>
-                                                <Dialog.Description>
-                                                    <img
-                                                        src={attachment.url}
-                                                        alt={attachment.name}
-                                                        class="w-full max-w-[500px] rounded object-cover"
-                                                    />
-                                                </Dialog.Description>
-                                            </Dialog.Header>
-                                        </Dialog.Content>
-                                    </Dialog.Root>
-                                {/each}
-                            </div>
-                            <div class="grid mt-2">
-                                <Dialog.Root>
-                                    <Dialog.Trigger class="inline-flex w-fit h-fit">
-                                        <div
-                                            class="w-full max-w-[500px] overflow-hidden rounded"
-                                        >
-                                            <img
-                                                src={post.attachments[2].url}
-                                                alt={post.attachments[2].name}
-                                                class="w-full object-cover cursor-pointer hover:brightness-90 transition"
-                                            />
-                                        </div>
-                                    </Dialog.Trigger>
-                                    <Dialog.Content
-                                        class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg"
+                {#if getPostImages().length > 0}
+                    <div
+                        class="post-images grid gap-2 mt-2"
+                        style={`grid-template-columns: repeat(auto-fill, minmax(${screenSmaller ? "100px" : "120px"}, 1fr))`}
+                    >
+                        {#each props.postExpanded ? getPostImages() : getPostImages().slice(0, 4) as img, i}
+                            <button
+                                type="button"
+                                class="relative cursor-pointer p-0 border-0 bg-transparent"
+                                onclick={() => openModal(getPostImages(), i)}
+                            >
+                                <img
+                                    src={img}
+                                    class="object-cover w-full h-24 rounded-lg"
+                                    alt="Post image"
+                                />
+                                {#if !props.postExpanded && i === 3 && getPostImages().length > 4}
+                                    <a
+                                        href={`/posts/${props.post._id}`}
+                                        class="absolute inset-0 bg-black/60 flex justify-center items-center text-white text-2xl rounded-lg"
                                     >
-                                        <Dialog.Header>
-                                            <Dialog.Description>
-                                                <img
-                                                    src={post.attachments[2].url}
-                                                    alt={post.attachments[2].name}
-                                                    class="w-full max-w-[500px] rounded object-cover"
-                                                />
-                                            </Dialog.Description>
-                                        </Dialog.Header>
-                                    </Dialog.Content>
-                                </Dialog.Root>
-                            </div>
-                        {:else}
-                            <div class="grid grid-cols-3 gap-2 max-w-[520px]">
-                                {#each post.attachments as attachment}
-                                    <Dialog.Root>
-                                        <Dialog.Trigger class="inline-flex w-fit h-fit">
-                                            <div
-                                                class="aspect-square w-full overflow-hidden rounded"
-                                            >
-                                                <img
-                                                    src={attachment.url}
-                                                    alt={attachment.name}
-                                                    class="h-full w-full object-cover cursor-pointer hover:brightness-90 transition"
-                                                />
-                                            </div>
-                                        </Dialog.Trigger>
-                                        <Dialog.Content
-                                            class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg"
-                                        >
-                                            <Dialog.Header>
-                                                <Dialog.Description>
-                                                    <img
-                                                        src={attachment.url}
-                                                        alt={attachment.name}
-                                                        class="w-full max-w-[500px] rounded object-cover"
-                                                    />
-                                                </Dialog.Description>
-                                            </Dialog.Header>
-                                        </Dialog.Content>
-                                    </Dialog.Root>
-                                {/each}
-                            </div>
-                        {/if}
-                    {:else}
-                        <div class="grid {postExpanded ? 'grid-cols-4' : 'grid-cols-2'} gap-2 { postExpanded ? 'max-w-[65rem]' : 'max-w-[520px]' }">
-                            {#each (postExpanded ? post.attachments : post.attachments.slice(0, 4)) as attachment, i}
-                                <div class="relative aspect-square rounded overflow-hidden">
-                                    <Dialog.Root>
-                                        <Dialog.Trigger class="inline-flex w-fit h-fit">
-                                            <img
-                                                src={attachment.url}
-                                                alt={attachment.name}
-                                                class="absolute top-0 left-0 w-full h-full object-cover cursor-pointer hover:brightness-90 transition"
-                                            />
-                                        </Dialog.Trigger>
-                                        <Dialog.Content class="bg-vocal_darkest text-white border-vocal_strong p-4 rounded-lg">
-                                            <Dialog.Header>
-                                                <Dialog.Description>
-                                                    <img
-                                                        src={attachment.url}
-                                                        alt={attachment.name}
-                                                        class="w-full max-w-[500px] rounded object-cover"
-                                                    />
-                                                </Dialog.Description>
-                                            </Dialog.Header>
-                                        </Dialog.Content>
-                                    </Dialog.Root>
-
-                                    {#if !postExpanded}
-                                        {#if i === 3 && post.attachments.length > 4}
-                                            <a
-                                                href="/posts/{post._id}"
-                                                class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-2xl font-bold"
-                                            >
-                                                +{post.attachments.length - 4}
-                                            </a>
-                                        {/if}
-                                    {/if}
-                                </div>
-                            {/each}
-                        </div>
-                    {/if}
+                                        +{getPostImages().length - 4}
+                                    </a>
+                                {/if}
+                            </button>
+                        {/each}
+                    </div>
                 {/if}
             {/if}
         {/if}
     </div>
 
+    <!-- bottom actions -->
     {#if !isEditing}
         <div class="post-bottom flex items-center gap-5 mt-2">
-            <a class="flex items-center gap-2 mt-2" href={reply ? `/replies/${post?._id}` : `/posts/${post?._id}`}>
+            <a
+                class="flex items-center gap-2 mt-2"
+                href={props.reply
+                    ? `/replies/${props.post?._id}`
+                    : `/posts/${props.post?._id}`}
+            >
                 <MessageCircle class="size-4 stroke-vocal_lightest" />
-                <p class="size-6 text-lg">
-                    {postReplies.length}
-                </p>
+                <p class="size-6 text-lg">{props.postReplies.length}</p>
             </a>
             <form
-                action="/api/posts/like/{post?._id}"
+                action="/api/posts/like/{props.post?._id}"
                 method="post"
-                use:enhance={likePost}
+                onsubmit={likePost}
             >
-                <input type="hidden" name="postType" value={reply ? 'reply' : 'post'}>
+                <input
+                    type="hidden"
+                    name="postType"
+                    value={props.reply ? "reply" : "post"}
+                />
                 <button
                     class="flex items-center mt-2"
                     type="submit"
+                    disabled={isSubmitting}
                 >
                     <Heart
-                        class={`size-4 stroke-vocal_lightest ${liked ? 'fill-vocal_lightest' : ''}`}
+                        class={`size-4 stroke-vocal_lightest ${liked ? "fill-vocal_lightest" : ""}`}
                     />
                     <p class="size-6 text-lg">{likeCount}</p>
                 </button>
             </form>
         </div>
     {/if}
+
+    <Dialog.Root bind:open={modalOpen}>
+        <Dialog.Content
+            class="bg-transparent border-none shadow-none max-w-[90vw] max-h-[90vh]"
+        >
+            <button
+                onclick={() => (modalOpen = false)}
+                class="absolute top-2 right-2 z-50 bg-gray-900 rounded-full p-2 hover:bg-gray-800 transition-colors"
+                aria-label="Close"
+            >
+                <svg
+                    class="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                    />
+                </svg>
+            </button>
+
+            <div
+                class="relative flex flex-col items-center justify-center w-full h-full"
+            >
+                <!-- Main image -->
+                <div class="flex items-center justify-center w-full h-full">
+                    <img
+                        src={modalImages[modalStartIndex]}
+                        class="max-h-[70vh] max-w-[80vw] object-contain rounded-lg"
+                        alt="Post image"
+                    />
+                </div>
+
+                <!-- Navigation arrows -->
+                {#if modalImages.length > 1}
+                    <div class="flex items-center justify-center gap-4 mt-4">
+                        <button
+                            type="button"
+                            class="bg-gray-900 hover:bg-gray-800 text-white rounded-full p-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                            onclick={() =>
+                                (modalStartIndex =
+                                    (modalStartIndex - 1 + modalImages.length) %
+                                    modalImages.length)}
+                            disabled={modalImages.length <= 1}
+                        >
+                            <svg
+                                class="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15 19l-7-7 7-7"
+                                />
+                            </svg>
+                        </button>
+
+                        <div class="text-white text-lg">
+                            {modalStartIndex + 1} / {modalImages.length}
+                        </div>
+
+                        <button
+                            type="button"
+                            class="bg-gray-900 hover:bg-gray-800 text-white rounded-full p-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                            onclick={() =>
+                                (modalStartIndex =
+                                    (modalStartIndex + 1) % modalImages.length)}
+                            disabled={modalImages.length <= 1}
+                            title="showmodal"
+                        >
+                            <svg
+                                class="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 5l7 7-7 7"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                {/if}
+
+                <!-- Thumbnail preview -->
+                {#if modalImages.length > 1}
+                    <div
+                        class="flex gap-2 mt-4 overflow-x-auto py-2 max-w-full"
+                    >
+                        {#each modalImages as img, i}
+                            <button
+                                type="button"
+                                class={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden ${i === modalStartIndex ? "ring-2 ring-vocal_lightest" : "opacity-60 hover:opacity-80"}`}
+                                onclick={() => (modalStartIndex = i)}
+                            >
+                                <img
+                                    src={img}
+                                    class="w-full h-full object-cover"
+                                    alt={`Thumbnail ${i + 1}`}
+                                />
+                            </button>
+                        {/each}
+                    </div>
+                {/if}
+            </div>
+        </Dialog.Content>
+    </Dialog.Root>
 </div>
 
 <style>
@@ -515,66 +499,41 @@
         border-radius: 8px;
         padding: 1.25rem;
         border: 1px solid rgb(45, 34, 73);
-        transition: border-color 0.2s;
     }
-
     .post:hover {
         border-color: #9072d7;
     }
-
     .post-content {
-        text-align: left;
         margin: 0.75rem 0;
     }
-
     .post-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        width: 100%;
     }
-
     .post-header .left-section {
         display: flex;
         align-items: center;
         gap: 10px;
     }
-
-    .post-header .username {
-        margin-bottom: 0;
-    }
-
     .post-bottom {
         border-top: 1px solid #3a3a3a;
         padding-top: 0.75rem;
     }
-
-    .post-bottom a {
-        color: #ccc;
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-    .post-bottom button {
-        color: #ccc;
-        text-decoration: none;
-        transition: color 0.2s;
+    .post-images img {
+        border-radius: 6px;
+        object-fit: cover;
     }
 
-    .post-bottom a:hover {
-        color: #a481f6;
-    }
-    .post-bottom button:hover {
-        color: #a481f6;
-    }
-
-    .edit-form textarea {
-        min-height: 120px;
-        font-family: inherit;
-        line-height: 1.4;
+    /* Modal styles */
+    :global(.dialog-overlay) {
+        background-color: rgba(0, 0, 0, 0.8) !important;
+        backdrop-filter: blur(4px);
     }
 
-    .edit-form textarea:focus {
-        border-color: #9072d7;
-        box-shadow: 0 0 0 2px rgba(144, 114, 215, 0.2);
+    :global(.dialog-content) {
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
     }
 </style>

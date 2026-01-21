@@ -55,6 +55,8 @@
   const theme = writable<"light" | "dark">("dark");
 </script>
 
+<title>Vocal - Settings</title>
+
 <main class="max-w-6xl mx-auto px-6 py-8">
   <div class="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-8">
     <!-- Sidebar -->
