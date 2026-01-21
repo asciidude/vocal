@@ -24,6 +24,6 @@ export interface UserType {
 export enum UserRoles {
     Tester = 'tester',        // Site Testers
     Beta = 'beta',            // Beta Testers
-    Admin = 'administrator',  // Site Admin
+    Admin = 'admin',  // Site Admin
     SuperAdmin = 'superadmin' // Site Owner
 }
