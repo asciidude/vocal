@@ -22,9 +22,6 @@ export const handleError = ({ error }: { error: any }) => {
 };
 
 export const handle: Handle = async ({ event, resolve }) => {
-    console.log('Request URL:', event.url.pathname, 'Method:', event.request.method);
-    console.log('Cookies:', event.cookies.get('session'));
-    
     await ensureInitialized();
 
     let user: UserType | null = null;
