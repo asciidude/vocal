@@ -52,6 +52,7 @@
     "mongoose": "^8.19.2",
     "natural": "^8.1.0",
     "pg": "^8.16.3",
+    "svelte-time": "^2.1.0",
     "svelte-twemojify": "^2.1.1"
   }
 }

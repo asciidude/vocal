@@ -6,11 +6,12 @@
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import * as Avatar from "$lib/components/ui/avatar";
     import * as Dialog from "$lib/components/ui/dialog/index.js";
-    import { Ellipsis, Heart, MessageCircle } from "lucide-svelte";
+    import { Dot, Ellipsis, Heart, MessageCircle } from "lucide-svelte";
     import { getImage } from "$lib/utils/Cache.util";
     import { enhance } from "$app/forms";
     import type { SubmitFunction } from "@sveltejs/kit";
     import { onMount } from "svelte";
+    import Time from "svelte-time/Time.svelte";
 
     const props = $props<{
         post: PostType | null;
@@ -199,11 +200,25 @@
                         >
                     </Avatar.Root>
                     <div class="username">
-                        <p class="leading-none text-2xl">
-                            {props.postAuthor?.displayName ||
-                                props.postAuthor?.username}
-                        </p>
-                        <p class="text-gray-400 text-md">
+                        <div class="flex items-center gap-1 leading-none">
+                            <p class="text-2xl font-medium">
+                                {props.postAuthor?.displayName ||
+                                    props.postAuthor?.username}
+                            </p>
+                    
+                            <span class="flex items-center">
+                                <Dot class="size-3 text-gray-500 stroke-[3]" />
+                            </span>
+                    
+                            <span class="text-gray-500 text-sm whitespace-nowrap">
+                                <Time
+                                    timestamp={new Date(props.post!.createdAt)}
+                                    relative
+                                />
+                            </span>
+                        </div>
+                    
+                        <p class="text-gray-400 text-md leading-tight">
                             @{props.postAuthor?.username}
                         </p>
                     </div>
