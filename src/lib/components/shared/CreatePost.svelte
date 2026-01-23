@@ -95,51 +95,6 @@
         files.splice(index, 1);
         files = [...files];
     }
-
-    async function handleSubmit(event: Event) {
-        event.preventDefault();
-        if (isSubmitting) return;
-        isSubmitting = true;
-
-        const form = event.target as HTMLFormElement;
-        const formData = new FormData(form);
-
-        if (!newPostContent.trim()) {
-            console.error("Post content is empty!");
-            isSubmitting = false;
-            return;
-        }
-
-        formData.set("content", newPostContent);
-        files.forEach((f) => formData.append("attachments", f.file));
-
-        try {
-            const res = await fetch(form.action, {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!res.ok) {
-                const text = await res.text();
-                console.error("Post submission failed:", res.status, text);
-                return;
-            }
-
-            const result = await res.json();
-            if (result.status === 200) {
-                newPostContent = "";
-                files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
-                files = [];
-                props.postSubmission(result.post);
-            } else {
-                console.error("Failed to create post:", result.message);
-            }
-        } catch (err) {
-            console.error("Post submission failed:", err);
-        } finally {
-            isSubmitting = false;
-        }
-    }
 </script>
 
 <svelte:window bind:innerWidth={screenWidth} />
@@ -159,7 +114,7 @@
                 </a>
             </Avatar.Root>
 
-            <form class="flex-grow" onsubmit={handleSubmit}>
+            <form class="flex-grow">
                 <input type="hidden" name="postType" value={props.postType} />
                 {#if props.postType === "reply" && props.replyParent}
                     <input

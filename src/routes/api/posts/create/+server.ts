@@ -1,12 +1,10 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
-import { isValidObjectId } from "mongoose";
+import fs from "node:fs";
+import path from "node:path";
 import { PostModel } from "src/lib/models/Post.model";
 import { ReplyModel } from "src/lib/models/Reply.model";
 import { UserModel } from "src/lib/models/User.model";
-import fs from 'node:fs';
-import path from 'node:path';
 import type { AttachmentType } from "src/lib/types/Attachment.type";
-import { computeDocumentVector, tfidf } from "src/lib/utils/TF-IDF.util";
 
 export const POST: RequestHandler = async ({ request, locals }) => {
     try {
@@ -25,17 +23,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         const attachmentsLimited = attachments.filter(f => f.name).slice(0, 10);
 
         let post;
-        let vector: Record<string, number> = {};
-
         if (postType === 'post') {
-            tfidf.addDocument(content);
-            vector = computeDocumentVector(content);
-            post = await PostModel.create({ author: user._id, content, attachments: [], postVectors: vector });
+            post = await PostModel.create({ author: user._id, content, attachments: [] });
         } else if (postType === 'reply') {
             const replyParent = String(formData.get('replyParent') || '');
-            if (!replyParent || !isValidObjectId(replyParent)) {
-                return json({ success: false, message: 'Reply parent is missing or invalid' }, { status: 422 });
-            }
+            if (!replyParent) return json({ success: false, message: 'Reply parent is missing' }, { status: 422 });
             post = await ReplyModel.create({ parent_post: replyParent, author: user._id, content, attachments: [] });
         } else {
             return json({ success: false, message: 'Invalid postType' }, { status: 400 });
@@ -68,22 +60,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
             await post.save();
         }
 
-        if (postType === 'post') {
-            const updatedVector = { ...(userDoc.userInterestVectors || {}) };
-            for (const [token, weight] of Object.entries(vector)) {
-                updatedVector[token] = (updatedVector[token] || 0) + weight;
-            }
-
-            const mag = Math.sqrt(Object.values(updatedVector).reduce((s, v) => s + v * v, 0)) || 1;
-            for (const k in updatedVector) updatedVector[k] = updatedVector[k] / mag;
-
-            userDoc.userInterestVectors = updatedVector;
-            await userDoc.save();
-        }
-
         return json({ success: true, message: 'Success', user, post });
-    } catch (err) {
+    } catch (err: any) {
         console.error(err);
-        return json({ success: false, message: 'An error occured' }, { status: 500 });
+        return json({ success: false, message: err.message || 'An error occurred' }, { status: 500 });
     }
 };
