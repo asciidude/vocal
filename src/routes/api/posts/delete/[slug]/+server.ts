@@ -12,21 +12,34 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
             return json({ status: 401, message: 'You are not authenticated' }, { status: 401 });
         }
 
-        const formData = await request.formData();
-        const posterId = String(formData.get('posterId') || '');
         const postId = params.slug;
-
         if (!postId) {
             return json({ status: 422, message: 'Post not found' }, { status: 422 });
         }
 
+        const contentType = request.headers.get('content-type') || '';
+        let body: any = {};
+        let attachments: File[] = [];
+
+        if (contentType.includes('application/json')) {
+            body = await request.json();
+        } else if (contentType.includes('form-data')) {
+            const formData = await request.formData();
+            body.posterId = formData.get('posterId') as string;
+            body.postType = formData.get('postType') as string;
+            body.content = (formData.get('content') as string) || '';
+            attachments = formData.getAll('attachments') as File[];
+        } else {
+            return json({ status: 400, message: 'Unsupported content type' }, { status: 400 });
+        }
+
+        const posterId = body.posterId;
         if (user._id !== posterId) {
             return json({ status: 401, message: 'You are not authorized to edit this post' }, { status: 401 });
         }
 
-        const postType = String(formData.get('postType') || '');
-        const content = String(formData.get('content') || '').trim();
-
+        const postType = body.postType;
+        const content = body.content?.trim() || '';
         if (!content) {
             return json({ status: 422, message: 'Post content cannot be empty' }, { status: 422 });
         }
@@ -46,8 +59,6 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 
         post.content = content;
 
-        // handle attachments if any
-        const attachments = formData.getAll('attachments') as File[];
         if (attachments.length > 0) {
             const uploadDir = path.join('static', 'posts', post._id.toString(), 'uploads');
             fs.mkdirSync(uploadDir, { recursive: true });
@@ -55,7 +66,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
             const newAttachments: AttachmentType[] = [];
 
             for (const file of attachments.slice(0, 10)) {
-                if (!file.name) continue;
+                if (!(file instanceof File) || !file.name) continue;
 
                 const parts = file.name.split('.');
                 const ext = parts.length > 1 ? '.' + parts.pop() : '';

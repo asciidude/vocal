@@ -28,8 +28,8 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
             );
         }
 
-        const formData = await request.formData();
-        const postType = String(formData.get('postType') || '');
+        const body = await request.json();
+        const postType = body.postType;
 
         if (postType !== 'post' && postType !== 'reply') {
             return json(
