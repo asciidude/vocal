@@ -113,7 +113,7 @@
         }
     }
 
-    const deletePost: SubmitFunction = async ({ formData, formElement }) => {
+    const deletePost: SubmitFunction = async ({ formElement }) => {
         isSubmitting = true;
         try {
             const res = await fetch(formElement.action, {
@@ -145,7 +145,7 @@
         }
     };
 
-    const editPost: SubmitFunction = async ({ formData, formElement }) => {
+    const editPost: SubmitFunction = async ({ formElement }) => {
         isSubmitting = true;
         try {
             const res = await fetch(formElement.action, {
