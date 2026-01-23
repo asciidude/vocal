@@ -336,7 +336,7 @@
                                 <img
                                     src={img}
                                     class="object-cover w-full h-24 rounded-lg"
-                                    alt="Post image"
+                                    alt="Post attachment"
                                 />
                                 {#if !props.postExpanded && i === 3 && getPostImages().length > 4}
                                     <a
@@ -422,7 +422,7 @@
                     <img
                         src={modalImages[modalStartIndex]}
                         class="max-h-[70vh] max-w-[80vw] object-contain rounded-lg"
-                        alt="Post image"
+                        alt="Post attachment"
                     />
                 </div>
 
