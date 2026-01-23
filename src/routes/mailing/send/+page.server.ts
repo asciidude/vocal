@@ -1,8 +1,6 @@
 import { redirect, error } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { UserRoles } from "$lib/types/User.types";
-import { MailingSubscriberModel } from "$lib/models/MailingSubscriber.model";
-import { sendMail } from "$lib/utils/Mailer.util";
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (!locals.user || !locals.user.roles.includes(UserRoles.SuperAdmin)) {

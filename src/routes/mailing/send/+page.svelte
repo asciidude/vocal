@@ -14,8 +14,7 @@
         if (input.files?.[0]) {
             const file = input.files[0];
 
-            const maxSizeMB = 5; // 5 MB
-            if (file.size > maxSizeMB * 1024 * 1024) {
+            if (file.size > 5 * (1024 * 1024)) { // 5 MB
                 toast.error(`File too large! Max size is ${maxSizeMB} MB.`);
                 return;
             }
@@ -46,6 +45,7 @@
             const res = await fetch("/api/mailing/send", {
                 method: "POST",
                 body: formData,
+                credentials: 'include'
             });
             const data = await res.json().catch(() => null);
 
@@ -70,6 +70,8 @@
         }
     }
 </script>
+
+<title>Vocal - Send Mail</title>
 
 <div class="max-w-6xl mx-auto p-6 flex flex-col md:flex-row gap-6 text-white">
     <!-- Form -->
