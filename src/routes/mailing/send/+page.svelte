@@ -15,7 +15,7 @@
             const file = input.files[0];
 
             if (file.size > 5 * (1024 * 1024)) { // 5 MB
-                toast.error(`File too large! Max size is ${maxSizeMB} MB.`);
+                toast.error(`File too large! Max size is 5 MB.`);
                 return;
             }
 
