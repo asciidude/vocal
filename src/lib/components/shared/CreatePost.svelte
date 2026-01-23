@@ -28,6 +28,46 @@
         }
     });
 
+    async function submitPost() {
+        if (!newPostContent.trim() || isSubmitting) return;
+
+        isSubmitting = true;
+        const formData = new FormData();
+        formData.append("content", newPostContent);
+        formData.append("postType", props.postType);
+        if (props.postType === "reply" && props.replyParent) {
+            formData.append("replyParent", props.replyParent);
+        }
+        files.forEach((f) => formData.append("attachments", f.file));
+
+        try {
+            const res = await fetch("/api/posts/create", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!res.ok) {
+                const text = await res.text();
+                console.error("Post submission failed:", res.status, text);
+                return;
+            }
+
+            const result = await res.json();
+            if (result.status === 200) {
+                newPostContent = "";
+                files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+                files = [];
+                props.postSubmission(result.post);
+            } else {
+                console.error("Failed to create post:", result.message);
+            }
+        } catch (err) {
+            console.error("Post submission failed:", err);
+        } finally {
+            isSubmitting = false;
+        }
+    }
+
     function handleFileChange(event: Event) {
         const input = event.target as HTMLInputElement;
         if (!input.files) return;
@@ -113,13 +153,7 @@
                 </a>
             </Avatar.Root>
 
-            <form
-                action="/api/posts/create"
-                method="post"
-                enctype="multipart/form-data"
-                class="flex-grow"
-                onsubmit={handleSubmit}
-            >
+            <form class="flex-grow" onsubmit={handleSubmit}>
                 <input type="hidden" name="postType" value={props.postType} />
                 {#if props.postType === "reply" && props.replyParent}
                     <input
@@ -138,6 +172,7 @@
                     disabled={isSubmitting}
                 ></textarea>
 
+                <!-- file previews -->
                 {#if files.length > 0}
                     <div
                         class="grid gap-2 mt-2"
@@ -165,6 +200,7 @@
                     </div>
                 {/if}
 
+                <!-- buttons -->
                 <div class="flex justify-end gap-2 mt-2">
                     <input
                         id="fileUpload"
@@ -174,6 +210,7 @@
                         multiple
                         onchange={handleFileChange}
                     />
+
                     <button
                         type="button"
                         class="bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition disabled:bg-vocal_strong disabled:cursor-default"
@@ -185,9 +222,10 @@
                     </button>
 
                     <button
-                        type="submit"
+                        type="button"
                         class="ms-2 bg-vocal_medium hover:bg-vocal_lightest text-white px-4 py-2 rounded-full flex items-center gap-2 transition disabled:bg-vocal_strong disabled:cursor-default"
                         disabled={isSubmitting || !newPostContent.trim()}
+                        onclick={submitPost}
                     >
                         <Plus class="size-5" /> Post
                     </button>
