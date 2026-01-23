@@ -12,7 +12,15 @@
     function handleBannerChange(e: Event) {
         const input = e.target as HTMLInputElement;
         if (input.files?.[0]) {
-            bannerFile = input.files[0];
+            const file = input.files[0];
+
+            const maxSizeMB = 5; // 5 MB
+            if (file.size > maxSizeMB * 1024 * 1024) {
+                toast.error(`File too large! Max size is ${maxSizeMB} MB.`);
+                return;
+            }
+
+            bannerFile = file;
             const reader = new FileReader();
             reader.onload = () => (bannerPreview = reader.result as string);
             reader.readAsDataURL(bannerFile);
