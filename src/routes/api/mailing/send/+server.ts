@@ -13,7 +13,7 @@ export const POST = async ({ request, locals }) => {
     const body = String(form.get("body") || "");
 
     if (!subject || !body) {
-        return json({ success: false, error: "Subject and body required" }, { status: 400 });
+      return json({ success: false, message: "Subject and body required" }, { status: 400 });
     }
 
     let bannerHtml = "";
@@ -33,7 +33,7 @@ export const POST = async ({ request, locals }) => {
 
     const subscribers = await MailingSubscriberModel.find({}, { email: 1, _id: 0 });
     if (!subscribers.length) {
-        return json({ success: false, error: "No subscribers found" }, { status: 404 });
+        return json({ success: false, message: "No subscribers found" }, { status: 404 });
     }
     const emails = subscribers.map(s => ({ email: s.email }));
 
@@ -72,7 +72,7 @@ export const POST = async ({ request, locals }) => {
         if (failedBatches.length) {
             return json({
                 success: false,
-                error: `Failed ${failedBatches.length} batch(es)`,
+                message: `Failed ${failedBatches.length} batch(es)`,
                 batches: failedBatches
             }, { status: 500 });
         }
@@ -80,6 +80,6 @@ export const POST = async ({ request, locals }) => {
         return json({ success: true, sent: emails.length });
     } catch (err: any) {
         console.error("Mailing error:", err);
-        return json({ success: false, error: err.message || "Unknown error" }, { status: 500 });
+        return json({ success: false, message: err.message || "Unknown error" }, { status: 500 });
     }
 };
