@@ -247,7 +247,8 @@
                                 Edit
                             </DropdownMenu.Item>
                         {/if}
-                        <DropdownMenu.Item class="text-red-400 hover:cursor-pointer"
+                        <DropdownMenu.Item
+                            class="text-red-400 hover:cursor-pointer"
                             >Report</DropdownMenu.Item
                         >
                     </DropdownMenu.Group>
