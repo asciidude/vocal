@@ -26,10 +26,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     let user: UserType | null = null;
     const token = event.cookies.get('session');
+
     if (token) {
         try {
             const decoded = jwt.verify(token, JWT_SECRET) as { id: string; username: string };
             const userDoc = await UserModel.findOne({ "authProviders.id": decoded.id }).lean();
+
             if (userDoc) {
                 user = {
                     _id: userDoc._id.toString(),
@@ -46,11 +48,22 @@ export const handle: Handle = async ({ event, resolve }) => {
                 };
             }
         } catch (err) {
-            console.error(`JWT Verification Failure: ${err}`);
+            console.warn(`JWT Verification Failure: ${err}`);
             event.cookies.delete('session', { path: '/' });
+
+            if (event.url.pathname.startsWith('/api/')) {
+                return new Response(
+                    JSON.stringify({ status: 401, message: 'Unauthorized: invalid session' }),
+                    {
+                        status: 401,
+                        headers: { 'Content-Type': 'application/json' }
+                    }
+                );
+            }
         }
     }
 
     event.locals.user = user;
+
     return await resolve(event);
 };

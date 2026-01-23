@@ -1,15 +1,26 @@
-// TF-IDF.util.ts
 import natural from "natural";
 import { PostModel } from "../models/Post.model";
 
 const TfIdf = natural.TfIdf;
-export const tfidf = new TfIdf();
+
+if (!(global as any).tfidf) {
+    (global as any).tfidf = new TfIdf();
+}
+export const tfidf = (global as any).tfidf;
+
+if (!(global as any).tfidfInitialized) {
+    (global as any).tfidfInitialized = false;
+}
 
 export async function initializeTfIdf() {
+    if ((global as any).tfidfInitialized) return;
+
     const posts = await PostModel.find({}, 'content').lean();
     posts.forEach(p => {
         if (p.content) tfidf.addDocument(String(p.content));
     });
+
+    (global as any).tfidfInitialized = true;
     console.log(`TF-IDF initialized with ${tfidf.documents.length} documents`);
 }
 
@@ -22,43 +33,38 @@ export function normalize(vec: Record<string, number>) {
 
 export function computeDocumentVector(text: string) {
     if (!text || !text.trim()) return { unknown: 1 };
-    
+
     const tempTfIdf = new TfIdf();
     tempTfIdf.addDocument(text);
-    
+
     const vector: Record<string, number> = {};
-    
     const terms = new Set<string>();
     tempTfIdf.listTerms(0).forEach(term => {
-        if (term.tfidf > 0) {
-            terms.add(term.term);
-        }
+        if (term.tfidf > 0) terms.add(term.term);
     });
-    
+
     terms.forEach(term => {
         tfidf.tfidfs(term, (i, measure) => {
-            if (measure > 0) {
-                vector[term] = measure;
-            }
+            if (measure > 0) vector[term] = measure;
         });
     });
-    
+
     return normalize(vector);
 }
 
 export function computeVector(text: string) {
     if (!text || !text.trim()) return { unknown: 1 };
+
     const vector: Record<string, number> = {};
     tfidf.tfidfs(text, (i, measure, key) => {
         if (typeof key === 'string' && measure > 0) vector[key] = measure;
     });
+
     return normalize(vector);
 }
 
 export function cosineSimilarity(a: Record<string, number>, b: Record<string, number>) {
     let sum = 0;
-    for (const k in a) {
-        if (b[k] !== undefined) sum += a[k] * b[k];
-    }
+    for (const k in a) if (b[k] !== undefined) sum += a[k] * b[k];
     return sum;
 }

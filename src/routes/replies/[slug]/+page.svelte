@@ -35,6 +35,9 @@
         postReplies={replies?.filter((p: ReplyType) => p.parent_post === post._id )}
         user={data.user}
         postExpanded={true}
+        redirectOnDelete={'back'}
+        reply={false}
+        postDeletion={deleteReply}
     />
 
     <hr class="mt-7 mb-7 border-vocal_strongest" />
@@ -49,13 +52,15 @@
     {#each replies as reply (reply._id)}
         {reply.content}
         <Post
-        {user}
+            {user}
             post={reply}
             postAuthor={reply.replyAuthor}
             postLikes={reply.likes}
             postReplies={reply.replies}
             reply={true}
+            redirectOnDelete={'back'}
             postDeletion={deleteReply}
+            postExpanded={false}
         />
     {/each}
 </div>
