@@ -1,89 +1,81 @@
-// /src/routes/api/posts/create/+server.ts
-import { error, json, type RequestHandler } from "@sveltejs/kit";
+import { json, type RequestHandler } from "@sveltejs/kit";
 import { isValidObjectId } from "mongoose";
 import { PostModel } from "src/lib/models/Post.model";
 import { ReplyModel } from "src/lib/models/Reply.model";
-import type { UserType } from "src/lib/types/User.types";
+import { UserModel } from "src/lib/models/User.model";
 import fs from 'node:fs';
 import path from 'node:path';
 import type { AttachmentType } from "src/lib/types/Attachment.type";
-import { computeDocumentVector, tfidf } from "src/lib/utils/TF-IDF.util"; // Changed import
-import { UserModel } from "src/lib/models/User.model";
+import { computeDocumentVector, tfidf } from "src/lib/utils/TF-IDF.util";
 
-export const POST: RequestHandler = async({ request, locals }) => {
-    const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
-    const userDoc = await UserModel.findById(user._id);
-
-    if(!user || !userDoc) {
-        throw error(401, 'You are not authenticated');
-    }
-
+export const POST: RequestHandler = async ({ request, locals }) => {
     try {
-        const formData = await request.formData();
-        const postType = formData.get('postType');
-        const content = formData.get('content');
-
-        if(!content) {
-            throw error(422, 'Post content is missing');
+        const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
+        if (!user) {
+            return json({ status: 401, message: 'You are not authenticated' }, { status: 401 });
         }
 
-        const contentString = String(content);
+        const userDoc = await UserModel.findById(user._id);
+        if (!userDoc) {
+            return json({ status: 401, message: 'User not found' }, { status: 401 });
+        }
+
+        const formData = await request.formData();
+        const postType = String(formData.get('postType') || '');
+        const content = String(formData.get('content') || '').trim();
+
+        if (!content) {
+            return json({ status: 422, message: 'Post content is missing' }, { status: 422 });
+        }
+
         const attachments = formData.getAll('attachments') as File[];
-        const attachmentsLimited = attachments
-            .filter(file => file.name)
-            .slice(0,10);
+        const attachmentsLimited = attachments.filter(f => f.name).slice(0, 10);
 
         let post;
-
         let vector: Record<string, number> = {};
-        if(postType === 'post') {
-            tfidf.addDocument(contentString);
-            vector = computeDocumentVector(contentString);
-        }
 
-        if(postType === 'reply') {
-            const replyParent = formData.get('replyParent');
+        if (postType === 'post') {
+            tfidf.addDocument(content);
+            vector = computeDocumentVector(content);
 
-            if(!replyParent || !isValidObjectId(replyParent)) {
-                throw error(422, 'Reply parent is missing');
-            }
-        
-            post = await ReplyModel.create({
-                parent_post: replyParent,
-                author: (user as UserType)._id,
-                content: contentString,
-                attachments: [], // will be updated later
-            });
-        } else if(postType === 'post') {
             post = await PostModel.create({
                 author: user._id,
-                content: contentString,
-                attachments: [], // will be updated later
+                content,
+                attachments: [],
                 postVectors: vector
             });
+        } else if (postType === 'reply') {
+            const replyParent = formData.get('replyParent');
+            if (!replyParent || !isValidObjectId(replyParent)) {
+                return json({ status: 422, message: 'Reply parent is missing or invalid' }, { status: 422 });
+            }
+
+            post = await ReplyModel.create({
+                parent_post: replyParent,
+                author: user._id,
+                content,
+                attachments: []
+            });
         } else {
-            throw error(401, 'Invalid Request')
+            return json({ status: 400, message: 'Invalid postType' }, { status: 400 });
         }
 
-        let linkedFiles: AttachmentType[] = [];
-
-        if(attachmentsLimited.length > 0) {
+        // handle attachments
+        const linkedFiles: AttachmentType[] = [];
+        if (attachmentsLimited.length > 0) {
             const uploadDir = path.join('static', 'posts', post._id.toString(), 'uploads');
             fs.mkdirSync(uploadDir, { recursive: true });
 
-            for (const [i, file] of attachmentsLimited.entries()) {
-                if (!file.name) continue;
-
+            for (const file of attachmentsLimited) {
                 const parts = file.name.split('.');
                 const ext = parts.length > 1 ? '.' + parts.pop() : '';
                 const baseName = parts.join('.').replace(/[^a-zA-Z0-9_-]/g, "_");
                 const safeName = baseName + ext;
-
                 const filePath = path.join(uploadDir, safeName);
 
                 const buffer = Buffer.from(await file.arrayBuffer());
-
                 fs.writeFileSync(filePath, buffer);
+
                 linkedFiles.push({
                     url: `/posts/${post._id}/uploads/${safeName}`,
                     type: 'image',
@@ -91,21 +83,19 @@ export const POST: RequestHandler = async({ request, locals }) => {
                     size: String(file.size)
                 });
             }
-        }
 
-        if(linkedFiles.length > 0) {
             post.attachments = linkedFiles;
             await post.save();
         }
 
-        if (userDoc && postType === 'post') {
+        // update user interest vectors for posts (not replies)
+        if (postType === 'post') {
             const updatedVector = { ...(userDoc.userInterestVectors || {}) };
-
             for (const [token, weight] of Object.entries(vector)) {
                 updatedVector[token] = (updatedVector[token] || 0) + weight;
             }
 
-            const mag = Math.sqrt(Object.values(updatedVector).reduce((s, v) => s + v*v, 0)) || 1;
+            const mag = Math.sqrt(Object.values(updatedVector).reduce((s, v) => s + v * v, 0)) || 1;
             for (const k in updatedVector) {
                 updatedVector[k] = updatedVector[k] / mag;
             }
@@ -114,13 +104,9 @@ export const POST: RequestHandler = async({ request, locals }) => {
             await userDoc.save();
         }
 
-        return json({
-            status: 200,
-            message: 'Success',
-            user, post
-        });
-    } catch(err) {
-        console.log(err);
-        throw error(500, 'Internal Server Error');
+        return json({ status: 200, message: 'Success', user, post });
+    } catch (err) {
+        console.error(err);
+        return json({ status: 500, message: 'Internal Server Error' }, { status: 500 });
     }
-}
+};

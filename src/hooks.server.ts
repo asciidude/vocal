@@ -26,7 +26,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     let user: UserType | null = null;
     const token = event.cookies.get('session');
-    console.log('SESSION TOKEN:', token, 'URL:', event.url.href);
 
     if (token) {
         try {

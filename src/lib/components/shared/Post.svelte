@@ -8,7 +8,6 @@
     import * as Dialog from "$lib/components/ui/dialog/index.js";
     import { Dot, Ellipsis, Heart, MessageCircle } from "lucide-svelte";
     import { getImage } from "$lib/utils/Cache.util";
-    import { enhance } from "$app/forms";
     import type { SubmitFunction } from "@sveltejs/kit";
     import { onMount } from "svelte";
     import Time from "svelte-time";
@@ -25,7 +24,6 @@
         postDeletion: any;
     }>();
 
-    // Use $state for reactive variables
     let screenWidth = $state(0);
     let screenSmaller = $derived(screenWidth <= 713);
     let isEditing = $state(false);
@@ -74,7 +72,6 @@
         modalOpen = true;
     }
 
-    // Initialize state from props
     $effect(() => {
         if (props.postLikes && props.user) {
             liked = props.postLikes.some(
@@ -84,36 +81,26 @@
         }
     });
 
-    // Load avatar on mount
     onMount(async () => {
-        if (props.postAuthor) {
+        if (props.postAuthor)
             avatarSrc = await getImage(props.postAuthor.avatarUrl);
-        }
     });
 
-    // Simplified like function without enhance
     async function likePost(e: Event) {
         e.preventDefault();
         if (!props.post || isSubmitting) return;
-
         isSubmitting = true;
-
         try {
-            const formData = new FormData();
-            formData.append("postType", props.reply ? "reply" : "post");
-
             const res = await fetch(`/api/posts/like/${props.post._id}`, {
                 method: "POST",
-                body: formData,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    postType: props.reply ? "reply" : "post",
+                }),
             });
-
             if (!res.ok) throw new Error("Failed to like");
-
             const data = await res.json();
-            console.log("Like response data:", data);
-
             if (data.status === 200) {
-                // Update state based on response
                 liked = !!data.newlyLiked;
                 likeCount = data.likeCount;
             }
@@ -129,19 +116,21 @@
         try {
             const res = await fetch(formElement.action, {
                 method: "POST",
-                body: formData,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    postType: props.reply ? "reply" : "post",
+                    posterId: props.postAuthor!._id,
+                }),
             });
             if (!res.ok) throw new Error("Failed to delete");
-
             const data = await res.json();
             if (data.status === 200) {
                 if (props.redirectOnDelete === "back") {
                     if (document.referrer?.startsWith(location.origin))
                         history.back();
                     else window.location.href = "/home";
-                } else if (props.redirectOnDelete) {
+                } else if (props.redirectOnDelete)
                     window.location.href = String(props.redirectOnDelete);
-                }
                 document
                     .getElementById(`post-${props.post!._id}`)
                     ?.classList.add("hidden");
@@ -159,10 +148,14 @@
         try {
             const res = await fetch(formElement.action, {
                 method: "POST",
-                body: formData,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    postType: props.reply ? "reply" : "post",
+                    posterId: props.postAuthor!._id,
+                    content: editContent,
+                }),
             });
             if (!res.ok) throw new Error("Failed to edit");
-
             const data = await res.json();
             if (data.status === 200 && props.post) {
                 props.post.content = editContent;
@@ -179,7 +172,6 @@
 <svelte:window bind:innerWidth={screenWidth} />
 
 <div class="post text-white" id="post-{props.post?._id}">
-    <!-- header -->
     {#if props.post}
         <div class="post-header">
             <div class="left-section">
@@ -205,19 +197,20 @@
                                 {props.postAuthor?.displayName ||
                                     props.postAuthor?.username}
                             </p>
-                    
-                            <span class="flex items-center">
-                                <Dot class="size-3 text-gray-500 stroke-[3]" />
-                            </span>
-                    
-                            <span class="text-gray-500 text-sm whitespace-nowrap">
+                            <span class="flex items-center"
+                                ><Dot
+                                    class="size-3 text-gray-500 stroke-[3]"
+                                /></span
+                            >
+                            <span
+                                class="text-gray-500 text-sm whitespace-nowrap"
+                            >
                                 <Time
                                     timestamp={new Date(props.post!.createdAt)}
                                     relative
                                 />
                             </span>
                         </div>
-                    
                         <p class="text-gray-400 text-md leading-tight">
                             @{props.postAuthor?.username}
                         </p>
@@ -233,23 +226,6 @@
                 >
                     <DropdownMenu.Group>
                         {#if props.user?._id === props.postAuthor!._id || props.user?.roles.includes(UserRoles.SuperAdmin)}
-                            <form
-                                action="/api/posts/delete/{props.post._id}"
-                                method="post"
-                                use:enhance={deletePost}
-                                id="deletePost-{props.post._id}"
-                            >
-                                <input
-                                    type="hidden"
-                                    name="postType"
-                                    value={props.reply ? "reply" : "post"}
-                                />
-                                <input
-                                    type="hidden"
-                                    name="posterId"
-                                    value={props.postAuthor!._id}
-                                />
-                            </form>
                             <DropdownMenu.Item>
                                 <button
                                     type="button"
@@ -274,28 +250,13 @@
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
         </div>
-    {/if}
 
-    <!-- content -->
-    <div class="post-content text-2xl">
-        {#if props.post}
+        <div class="post-content text-2xl">
             {#if isEditing}
                 <form
                     action="/api/posts/edit/{props.post._id}"
                     method="post"
-                    use:enhance={editPost}
                 >
-                    <input
-                        type="hidden"
-                        name="postType"
-                        value={props.reply ? "reply" : "post"}
-                    />
-                    <input
-                        type="hidden"
-                        name="posterId"
-                        value={props.postAuthor!._id}
-                    />
-                    <input type="hidden" name="content" value={editContent} />
                     <textarea
                         bind:value={editContent}
                         class="w-full bg-transparent text-white text-2xl resize-none border border-vocal_lightest rounded-lg p-3"
@@ -351,11 +312,8 @@
                     </div>
                 {/if}
             {/if}
-        {/if}
-    </div>
+        </div>
 
-    <!-- bottom actions -->
-    {#if !isEditing}
         <div class="post-bottom flex items-center gap-5 mt-2">
             <a
                 class="flex items-center gap-2 mt-2"
@@ -366,147 +324,129 @@
                 <MessageCircle class="size-4 stroke-vocal_lightest" />
                 <p class="size-6 text-lg">{props.postReplies.length}</p>
             </a>
-            <form
-                action="/api/posts/like/{props.post?._id}"
-                method="post"
-                onsubmit={likePost}
-            >
-                <input
-                    type="hidden"
-                    name="postType"
-                    value={props.reply ? "reply" : "post"}
-                />
-                <button
-                    class="flex items-center mt-2"
-                    type="submit"
-                    disabled={isSubmitting}
-                >
-                    <Heart
-                        class={`size-4 stroke-vocal_lightest ${liked ? "fill-vocal_lightest" : ""}`}
-                    />
-                    <p class="size-6 text-lg">{likeCount}</p>
-                </button>
-            </form>
-        </div>
-    {/if}
-
-    <Dialog.Root bind:open={modalOpen}>
-        <Dialog.Content
-            class="bg-transparent border-none shadow-none max-w-[90vw] max-h-[90vh]"
-        >
             <button
-                onclick={() => (modalOpen = false)}
-                class="absolute top-2 right-2 z-50 bg-gray-900 rounded-full p-2 hover:bg-gray-800 transition-colors"
-                aria-label="Close"
+                class="flex items-center mt-2"
+                type="button"
+                onclick={likePost}
+                disabled={isSubmitting}
             >
-                <svg
-                    class="w-6 h-6 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"
-                    />
-                </svg>
+                <Heart
+                    class={`size-4 stroke-vocal_lightest ${liked ? "fill-vocal_lightest" : ""}`}
+                />
+                <p class="size-6 text-lg">{likeCount}</p>
             </button>
+        </div>
 
-            <div
-                class="relative flex flex-col items-center justify-center w-full h-full"
+        <Dialog.Root bind:open={modalOpen}>
+            <Dialog.Content
+                class="bg-transparent border-none shadow-none max-w-[90vw] max-h-[90vh]"
             >
-                <!-- Main image -->
-                <div class="flex items-center justify-center w-full h-full">
-                    <img
-                        src={modalImages[modalStartIndex]}
-                        class="max-h-[70vh] max-w-[80vw] object-contain rounded-lg"
-                        alt="Post attachment"
-                    />
-                </div>
-
-                <!-- Navigation arrows -->
-                {#if modalImages.length > 1}
-                    <div class="flex items-center justify-center gap-4 mt-4">
-                        <button
-                            title=""
-                            type="button"
-                            class="bg-gray-900 hover:bg-gray-800 text-white rounded-full p-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                            onclick={() =>
-                                (modalStartIndex =
-                                    (modalStartIndex - 1 + modalImages.length) %
-                                    modalImages.length)}
-                            disabled={modalImages.length <= 1}
-                        >
-                            <svg
-                                class="w-6 h-6"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M15 19l-7-7 7-7"
-                                />
-                            </svg>
-                        </button>
-
-                        <div class="text-white text-lg">
-                            {modalStartIndex + 1} / {modalImages.length}
-                        </div>
-
-                        <button
-                            type="button"
-                            class="bg-gray-900 hover:bg-gray-800 text-white rounded-full p-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                            onclick={() =>
-                                (modalStartIndex =
-                                    (modalStartIndex + 1) % modalImages.length)}
-                            disabled={modalImages.length <= 1}
-                            title="showmodal"
-                        >
-                            <svg
-                                class="w-6 h-6"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M9 5l7 7-7 7"
-                                />
-                            </svg>
-                        </button>
-                    </div>
-                {/if}
-
-                <!-- Thumbnail preview -->
-                {#if modalImages.length > 1}
-                    <div
-                        class="flex gap-2 mt-4 overflow-x-auto py-2 max-w-full"
+                <button
+                    onclick={() => (modalOpen = false)}
+                    class="absolute top-2 right-2 z-50 bg-gray-900 rounded-full p-2 hover:bg-gray-800 transition-colors"
+                    aria-label="Close"
+                >
+                    <svg
+                        class="w-6 h-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        ><path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        /></svg
                     >
-                        {#each modalImages as img, i}
-                            <button
-                                type="button"
-                                class={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden ${i === modalStartIndex ? "ring-2 ring-vocal_lightest" : "opacity-60 hover:opacity-80"}`}
-                                onclick={() => (modalStartIndex = i)}
-                            >
-                                <img
-                                    src={img}
-                                    class="w-full h-full object-cover"
-                                    alt={`Thumbnail ${i + 1}`}
-                                />
-                            </button>
-                        {/each}
+                </button>
+                <div
+                    class="relative flex flex-col items-center justify-center w-full h-full"
+                >
+                    <div class="flex items-center justify-center w-full h-full">
+                        <img
+                            src={modalImages[modalStartIndex]}
+                            class="max-h-[70vh] max-w-[80vw] object-contain rounded-lg"
+                            alt="Post attachment"
+                        />
                     </div>
-                {/if}
-            </div>
-        </Dialog.Content>
-    </Dialog.Root>
+                    {#if modalImages.length > 1}
+                        <div
+                            class="flex items-center justify-center gap-4 mt-4"
+                        >
+                            <button
+                                title=""
+                                type="button"
+                                class="bg-gray-900 hover:bg-gray-800 text-white rounded-full p-3"
+                                onclick={() =>
+                                    (modalStartIndex =
+                                        (modalStartIndex -
+                                            1 +
+                                            modalImages.length) %
+                                        modalImages.length)}
+                                disabled={modalImages.length <= 1}
+                            >
+                                <svg
+                                    class="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    ><path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15 19l-7-7 7-7"
+                                    /></svg
+                                >
+                            </button>
+                            <div class="text-white text-lg">
+                                {modalStartIndex + 1} / {modalImages.length}
+                            </div>
+                            <button
+                                title=""
+                                type="button"
+                                class="bg-gray-900 hover:bg-gray-800 text-white rounded-full p-3"
+                                onclick={() =>
+                                    (modalStartIndex =
+                                        (modalStartIndex + 1) %
+                                        modalImages.length)}
+                                disabled={modalImages.length <= 1}
+                            >
+                                <svg
+                                    class="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    ><path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 5l7 7-7 7"
+                                    /></svg
+                                >
+                            </button>
+                        </div>
+                        <div
+                            class="flex gap-2 mt-4 overflow-x-auto py-2 max-w-full"
+                        >
+                            {#each modalImages as img, i}
+                                <button
+                                    type="button"
+                                    class={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden ${i === modalStartIndex ? "ring-2 ring-vocal_lightest" : "opacity-60 hover:opacity-80"}`}
+                                    onclick={() => (modalStartIndex = i)}
+                                >
+                                    <img
+                                        src={img}
+                                        class="w-full h-full object-cover"
+                                        alt={`Thumbnail ${i + 1}`}
+                                    />
+                                </button>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+            </Dialog.Content>
+        </Dialog.Root>
+    {/if}
 </div>
 
 <style>
@@ -540,13 +480,10 @@
         border-radius: 6px;
         object-fit: cover;
     }
-
-    /* Modal styles */
     :global(.dialog-overlay) {
         background-color: rgba(0, 0, 0, 0.8) !important;
         backdrop-filter: blur(4px);
     }
-
     :global(.dialog-content) {
         background-color: transparent !important;
         border: none !important;
