@@ -4,8 +4,8 @@ import { MailingSubscriberModel } from "src/lib/models/MailingSubscriber.model";
 import { sendMail } from "src/lib/utils/Mailer.util";
 
 export const POST: RequestHandler = async ({ request, fetch }) => {
-  const formData = await request.formData();
-  const email = formData.get("email")?.toString();
+  const body = await request.json();
+  const email = body.email;
 
   if (!email) {
     throw error(400, "No email provided");

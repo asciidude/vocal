@@ -47,6 +47,7 @@
             {user}
             postExpanded={true}
             redirectOnDelete={"back"}
+            postDeletion={()=>{}}
             reply={false}
         />
 

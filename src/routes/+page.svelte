@@ -14,32 +14,34 @@
 <meta name="twitter:image:alt" content="Vocal — Coming March 2026">
 
 <script lang="ts">
+    import { toast } from "svelte-sonner";
+
     let isSending = false;
     let email = "";
     
-    async function handleSubmit(e: Event) {
-        e.preventDefault();
-        
-        if (!email || isSending) return;
-        
-        isSending = true;
-        
+    async function submitSubscription() {
+        if(!email || isSending) return;
+
         try {
-            const formData = new FormData();
-            formData.append("email", email);
-            
-            const response = await fetch("/api/mailing/subscribe", {
+            const res = await fetch(`/api/mailing/subscribe`, {
                 method: "POST",
-                body: formData
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email
+                }),
             });
-            
-            if (response.ok) {
-                email = "";
+
+            const data = await res.json();
+
+            if (!res.ok || data.status !== 200) {
+                toast.error(data.message || 'An error occured');
+                return;
             }
-        } catch (error) {
-            console.error("Failed to submit:", error);
-        } finally {
-            isSending = false;
+
+            email = '';
+            toast.success('You have been subscribed! Check your email to unsubscribe.');
+        } catch (err) {
+            console.error(err);
         }
     }
 </script>
@@ -74,7 +76,6 @@
                 </a>
 
                 <form
-                    on:submit|preventDefault={handleSubmit}
                     class="flex rounded-full overflow-hidden bg-white/10 backdrop-blur border border-white/20"
                 >
                     <input
@@ -86,9 +87,10 @@
                         bind:value={email}
                     />
                     <button
-                        type="submit"
+                        type="button"
                         class="px-6 py-4 font-semibold bg-white text-black transition hover:bg-white/90 flex items-center justify-center gap-2"
                         disabled={isSending}
+                        onclick={submitSubscription}
                     >
                         {#if isSending}
                             <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>

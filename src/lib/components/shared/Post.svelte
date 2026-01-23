@@ -125,6 +125,7 @@
                     posterId: props.post.author
                 }),
             });
+            
             const data = await res.json();
 
             if (!res.ok || data.status !== 200) {
