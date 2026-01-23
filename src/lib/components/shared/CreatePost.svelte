@@ -45,6 +45,9 @@
             const res = await fetch("/api/posts/create", {
                 method: "POST",
                 body: formData,
+                headers: {
+                    "x-sveltekit-action": "true"
+                }
             });
 
             const responseClone = res.clone();
