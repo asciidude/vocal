@@ -8,7 +8,6 @@
     import * as Dialog from "$lib/components/ui/dialog/index.js";
     import { Dot, Ellipsis, Heart, MessageCircle } from "lucide-svelte";
     import { getImage } from "$lib/utils/Cache.util";
-    import type { SubmitFunction } from "@sveltejs/kit";
     import { onMount } from "svelte";
     import Time from "svelte-time";
 
@@ -21,7 +20,7 @@
         postExpanded: boolean;
         redirectOnDelete: string | null;
         reply: boolean;
-        postDeletion: any;
+        postDeletion: (postId: string) => void;
     }>();
 
     let screenWidth = $state(0);
@@ -54,7 +53,98 @@
     function enableEditMode() {
         if (!props.post) return;
         isEditing = true;
-        editContent = String(props.post.content);
+        editContent = props.post.content ?? "";
+    }
+
+    function cancelEdit() {
+        isEditing = false;
+        editContent = "";
+    }
+
+    function getPostImages(): string[] {
+        return props.post?.attachments?.map((a) => a.url).filter(Boolean) ?? [];
+    }
+
+    function openModal(images: string[], startIndex = 0) {
+        modalImages = images;
+        modalStartIndex = startIndex;
+        modalOpen = true;
+    }
+
+    $effect(() => {
+        if (props.postLikes && props.user) {
+            liked = props.postLikes.some(
+                (like) => like.author.toString() === props.user?._id,
+            );
+            likeCount = props.postLikes.length;
+        }
+    });
+
+    onMount(async () => {
+        if (props.postAuthor?.avatarUrl) {
+            avatarSrc = await getImage(props.postAuthor.avatarUrl);
+        }
+    });
+
+    async function likePost(e: Event) {
+        e.preventDefault();
+        if (!props.post || isSubmitting) return;
+        isSubmitting = true;
+
+        try {
+            const res = await fetch(`/api/posts/like/${props.post._id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    postType: props.reply ? "reply" : "post",
+                }),
+            });
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.message || "Failed to like");
+
+            liked = !!data.newlyLiked;
+            likeCount = data.likeCount;
+        } catch (err) {
+            console.error(err);
+        } finally {
+            isSubmitting = false;
+        }
+    }
+
+    async function deletePost() {
+        if (!props.post) return;
+        isSubmitting = true;
+
+        try {
+            const res = await fetch(`/api/posts/delete/${props.post._id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    postType: props.reply ? "reply" : "post",
+                    posterId: props.post.author
+                }),
+            });
+            const data = await res.json();
+
+            if (!res.ok || data.status !== 200) {
+                throw new Error(data.message || "Failed to delete post");
+            }
+
+            props.postDeletion?.(props.post._id);
+
+            if (props.redirectOnDelete === "back") {
+                if (document.referrer?.startsWith(location.origin))
+                    history.back();
+                else window.location.href = "/home";
+            } else if (props.redirectOnDelete) {
+                window.location.href = props.redirectOnDelete;
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            isSubmitting = false;
+        }
     }
 
     async function submitEdit() {
@@ -67,138 +157,24 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     postType: props.reply ? "reply" : "post",
-                    posterId: props.postAuthor!._id,
+                    posterId: props.postAuthor?._id,
                     content: editContent,
                 }),
             });
 
             const data = await res.json();
 
-            if (!res.ok) throw new Error(data.message || "Failed to edit");
+            if (!res.ok || data.status !== 200)
+                throw new Error(data.message || "Failed to edit");
 
-            if (data.status === 200 && props.post) {
-                props.post.content = editContent;
-                cancelEdit();
-            }
+            props.post.content = editContent;
+            cancelEdit();
         } catch (err) {
             console.error(err);
         } finally {
             isSubmitting = false;
         }
     }
-
-    function cancelEdit() {
-        isEditing = false;
-        editContent = "";
-    }
-
-    function getPostImages(): string[] {
-        return props.post?.attachments?.map((a) => a.url).filter(Boolean) || [];
-    }
-
-    function openModal(images: string[], startIndex = 0) {
-        modalImages = images;
-        modalStartIndex = startIndex;
-        modalOpen = true;
-    }
-
-    $effect(() => {
-        if (props.postLikes && props.user) {
-            liked = props.postLikes.some(
-                (like) => like.author.toString() === props.user!._id,
-            );
-            likeCount = props.postLikes.length;
-        }
-    });
-
-    onMount(async () => {
-        if (props.postAuthor)
-            avatarSrc = await getImage(props.postAuthor.avatarUrl);
-    });
-
-    async function likePost(e: Event) {
-        e.preventDefault();
-        if (!props.post || isSubmitting) return;
-        isSubmitting = true;
-        try {
-            const res = await fetch(`/api/posts/like/${props.post._id}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    postType: props.reply ? "reply" : "post",
-                }),
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                throw new Error(data.message || "Failed to like");
-            }
-            if (data.status === 200) {
-                liked = !!data.newlyLiked;
-                likeCount = data.likeCount;
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            isSubmitting = false;
-        }
-    }
-
-    const deletePost: SubmitFunction = async ({ formElement }) => {
-        isSubmitting = true;
-        try {
-            const res = await fetch(formElement.action, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    postType: props.reply ? "reply" : "post",
-                    posterId: props.postAuthor!._id,
-                }),
-            });
-            if (!res.ok) throw new Error("Failed to delete");
-            const data = await res.json();
-            if (data.status === 200) {
-                if (props.redirectOnDelete === "back") {
-                    if (document.referrer?.startsWith(location.origin))
-                        history.back();
-                    else window.location.href = "/home";
-                } else if (props.redirectOnDelete)
-                    window.location.href = String(props.redirectOnDelete);
-                document
-                    .getElementById(`post-${props.post!._id}`)
-                    ?.classList.add("hidden");
-                props.postDeletion?.(props.post?._id);
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            isSubmitting = false;
-        }
-    };
-
-    const editPost: SubmitFunction = async ({ formElement }) => {
-        isSubmitting = true;
-        try {
-            const res = await fetch(formElement.action, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    postType: props.reply ? "reply" : "post",
-                    posterId: props.postAuthor!._id,
-                    content: editContent,
-                }),
-            });
-            if (!res.ok) throw new Error("Failed to edit");
-            const data = await res.json();
-            if (data.status === 200 && props.post) {
-                props.post.content = editContent;
-                cancelEdit();
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            isSubmitting = false;
-        }
-    };
 </script>
 
 <svelte:window bind:innerWidth={screenWidth} />
@@ -216,12 +192,9 @@
                             src={avatarSrc}
                             alt="@{props.postAuthor?.username}"
                         />
-                        <Avatar.Fallback
-                            ><img
-                                src="/images/fallback-pfp.jpg"
-                                alt=""
-                            /></Avatar.Fallback
-                        >
+                        <Avatar.Fallback>
+                            <img src="/images/fallback-pfp.jpg" alt="" />
+                        </Avatar.Fallback>
                     </Avatar.Root>
                     <div class="username">
                         <div class="flex items-center gap-1 leading-none">
@@ -229,16 +202,14 @@
                                 {props.postAuthor?.displayName ||
                                     props.postAuthor?.username}
                             </p>
-                            <span class="flex items-center"
-                                ><Dot
-                                    class="size-3 text-gray-500 stroke-[3]"
-                                /></span
-                            >
+                            <span class="flex items-center">
+                                <Dot class="size-3 text-gray-500 stroke-[3]" />
+                            </span>
                             <span
                                 class="text-gray-500 text-sm whitespace-nowrap"
                             >
                                 <Time
-                                    timestamp={new Date(props.post!.createdAt)}
+                                    timestamp={new Date(props.post.createdAt)}
                                     relative
                                 />
                             </span>
@@ -249,25 +220,24 @@
                     </div>
                 </a>
             </div>
+
             <DropdownMenu.Root>
-                <DropdownMenu.Trigger
-                    ><Ellipsis class="size-5" /></DropdownMenu.Trigger
-                >
+                <DropdownMenu.Trigger>
+                    <Ellipsis class="size-5" />
+                </DropdownMenu.Trigger>
                 <DropdownMenu.Content
                     class="text-white !bg-vocal_darkest border border-[#9072d7]"
                 >
                     <DropdownMenu.Group>
-                        {#if props.user?._id === props.postAuthor!._id || props.user?.roles.includes(UserRoles.SuperAdmin)}
+                        {#if props.user?._id === props.postAuthor?._id || props.user?.roles.includes(UserRoles.SuperAdmin)}
                             <DropdownMenu.Item>
                                 <button
                                     type="button"
-                                    onclick={() =>
-                                        (
-                                            document.getElementById(
-                                                `deletePost-${props.post._id}`,
-                                            ) as HTMLFormElement
-                                        ).requestSubmit()}>Delete</button
+                                    onclick={deletePost}
+                                    disabled={isSubmitting}
                                 >
+                                    Delete
+                                </button>
                             </DropdownMenu.Item>
                             <DropdownMenu.Item>
                                 <button type="button" onclick={enableEditMode}
@@ -306,7 +276,7 @@
                 </div>
             {:else}
                 <p class="whitespace-pre-wrap">
-                    {#each parseContent(String(props.post.content)) as part}
+                    {#each parseContent(props.post.content ?? "") as part}
                         {#if part.type === "hashtag"}
                             <a
                                 href="/hashtag/{part.tag}"
@@ -351,8 +321,8 @@
             <a
                 class="flex items-center gap-2 mt-2"
                 href={props.reply
-                    ? `/replies/${props.post?._id}`
-                    : `/posts/${props.post?._id}`}
+                    ? `/replies/${props.post._id}`
+                    : `/posts/${props.post._id}`}
             >
                 <MessageCircle class="size-4 stroke-vocal_lightest" />
                 <p class="size-6 text-lg">{props.postReplies.length}</p>
@@ -370,6 +340,7 @@
             </button>
         </div>
 
+        <!-- Image Modal -->
         <Dialog.Root bind:open={modalOpen}>
             <Dialog.Content
                 class="bg-transparent border-none shadow-none max-w-[90vw] max-h-[90vh]"
@@ -384,13 +355,14 @@
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
-                        ><path
+                    >
+                        <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
                             d="M6 18L18 6M6 6l12 12"
-                        /></svg
-                    >
+                        />
+                    </svg>
                 </button>
                 <div
                     class="relative flex flex-col items-center justify-center w-full h-full"
@@ -402,80 +374,6 @@
                             alt="Post attachment"
                         />
                     </div>
-                    {#if modalImages.length > 1}
-                        <div
-                            class="flex items-center justify-center gap-4 mt-4"
-                        >
-                            <button
-                                title=""
-                                type="button"
-                                class="bg-gray-900 hover:bg-gray-800 text-white rounded-full p-3"
-                                onclick={() =>
-                                    (modalStartIndex =
-                                        (modalStartIndex -
-                                            1 +
-                                            modalImages.length) %
-                                        modalImages.length)}
-                                disabled={modalImages.length <= 1}
-                            >
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    ><path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M15 19l-7-7 7-7"
-                                    /></svg
-                                >
-                            </button>
-                            <div class="text-white text-lg">
-                                {modalStartIndex + 1} / {modalImages.length}
-                            </div>
-                            <button
-                                title=""
-                                type="button"
-                                class="bg-gray-900 hover:bg-gray-800 text-white rounded-full p-3"
-                                onclick={() =>
-                                    (modalStartIndex =
-                                        (modalStartIndex + 1) %
-                                        modalImages.length)}
-                                disabled={modalImages.length <= 1}
-                            >
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    ><path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M9 5l7 7-7 7"
-                                    /></svg
-                                >
-                            </button>
-                        </div>
-                        <div
-                            class="flex gap-2 mt-4 overflow-x-auto py-2 max-w-full"
-                        >
-                            {#each modalImages as img, i}
-                                <button
-                                    type="button"
-                                    class={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden ${i === modalStartIndex ? "ring-2 ring-vocal_lightest" : "opacity-60 hover:opacity-80"}`}
-                                    onclick={() => (modalStartIndex = i)}
-                                >
-                                    <img
-                                        src={img}
-                                        class="w-full h-full object-cover"
-                                        alt={`Thumbnail ${i + 1}`}
-                                    />
-                                </button>
-                            {/each}
-                        </div>
-                    {/if}
                 </div>
             </Dialog.Content>
         </Dialog.Root>
@@ -512,14 +410,5 @@
     .post-images img {
         border-radius: 6px;
         object-fit: cover;
-    }
-    :global(.dialog-overlay) {
-        background-color: rgba(0, 0, 0, 0.8) !important;
-        backdrop-filter: blur(4px);
-    }
-    :global(.dialog-content) {
-        background-color: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
     }
 </style>

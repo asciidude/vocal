@@ -5,9 +5,9 @@ import { ReplyModel } from "src/lib/models/Reply.model";
 export const POST: RequestHandler = async({ params, request, locals }) => {
     const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
 
-    const formData = await request.formData();
-    const posterId = formData.get('posterId');
-    const content = formData.get('content');
+    const body = await request.json();
+    const posterId = body.posterId;
+    const content = body.content;
     const postId = params.slug;
 
     if(!postId) {
@@ -19,7 +19,7 @@ export const POST: RequestHandler = async({ params, request, locals }) => {
     }
 
     try {
-        const postType = formData.get('postType');
+        const postType = body.postType;
 
         if(postType === 'reply') {
             await ReplyModel.updateOne({ _id: postId }, { content: content });
