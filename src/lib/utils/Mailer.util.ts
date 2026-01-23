@@ -66,7 +66,11 @@ export async function sendMail(
       }
     } catch (err: any) {
       console.error("SMTP2GO send error:", err);
-      results.push({ success: false, error: err.message, emails: batch.map(e => e.email) });
+      results.push({
+        success: false,
+        error: err?.message || String(err) || "Unknown error",
+        emails: batch.map(e => e.email)
+      });
     }
 
     await new Promise(r => setTimeout(r, 200));
