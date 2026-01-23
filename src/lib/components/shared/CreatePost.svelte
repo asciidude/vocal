@@ -47,11 +47,18 @@
                 body: formData,
             });
 
+            const responseClone = res.clone();
             let result: any;
+
             try {
                 result = await res.json();
             } catch {
-                result = { message: await res.text() };
+                const textResult = await responseClone.text();
+                try {
+                    result = JSON.parse(textResult);
+                } catch {
+                    result = { message: textResult || "Unknown error" };
+                }
             }
 
             if (!res.ok || result.success === false) {
