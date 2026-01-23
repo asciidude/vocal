@@ -57,6 +57,36 @@
         editContent = String(props.post.content);
     }
 
+    async function submitEdit() {
+        if (!props.post || !editContent.trim()) return;
+        isSubmitting = true;
+
+        try {
+            const res = await fetch(`/api/posts/edit/${props.post._id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    postType: props.reply ? "reply" : "post",
+                    posterId: props.postAuthor!._id,
+                    content: editContent,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.message || "Failed to edit");
+
+            if (data.status === 200 && props.post) {
+                props.post.content = editContent;
+                cancelEdit();
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            isSubmitting = false;
+        }
+    }
+
     function cancelEdit() {
         isEditing = false;
         editContent = "";
@@ -255,7 +285,7 @@
 
         <div class="post-content text-2xl">
             {#if isEditing}
-                <form action="/api/posts/edit/{props.post._id}" method="post">
+                <div>
                     <textarea
                         bind:value={editContent}
                         class="w-full bg-transparent text-white text-2xl resize-none border border-vocal_lightest rounded-lg p-3"
@@ -265,11 +295,15 @@
                         <button type="button" onclick={cancelEdit}
                             >Cancel</button
                         >
-                        <button type="submit" disabled={!editContent.trim()}
-                            >{isSubmitting ? "Saving..." : "Save"}</button
+                        <button
+                            type="button"
+                            onclick={submitEdit}
+                            disabled={!editContent.trim() || isSubmitting}
                         >
+                            {isSubmitting ? "Saving..." : "Save"}
+                        </button>
                     </div>
-                </form>
+                </div>
             {:else}
                 <p class="whitespace-pre-wrap">
                     {#each parseContent(String(props.post.content)) as part}
