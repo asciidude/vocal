@@ -23,7 +23,6 @@ COPY --from=build --chown=svelte:nodejs /app/build ./build
 COPY --from=build --chown=svelte:nodejs /app/node_modules ./node_modules
 COPY --from=build --chown=svelte:nodejs /app/package.json ./
 
-ENV NODE_ENV=production
 ENV PORT=3000
 
 USER svelte

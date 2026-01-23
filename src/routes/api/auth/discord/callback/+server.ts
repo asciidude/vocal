@@ -1,4 +1,5 @@
-import { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, NODE_ENV, PORT, JWT_SECRET } from "$env/static/private";
+import { dev } from "$app/environment";
+import { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, PORT, JWT_SECRET } from "$env/static/private";
 import { UserModel } from "$lib/models/User.model";
 import { UserRoles } from "$lib/types/User.types";
 import { error, redirect, type Cookies } from "@sveltejs/kit";
@@ -19,9 +20,9 @@ export const GET = async (event) => {
             client_secret: DISCORD_CLIENT_SECRET,
             grant_type: 'authorization_code',
             code,
-            redirect_uri: NODE_ENV === 'production'
-                ? encodeURI(DISCORD_REDIRECT_URI)
-                : `http://localhost:${PORT}/api/auth/discord/callback`
+            redirect_uri: dev
+                ? `http://localhost:${PORT}/api/auth/discord/callback`
+                : encodeURI(DISCORD_REDIRECT_URI)
         })
     });
 
@@ -110,7 +111,7 @@ export const GET = async (event) => {
 
     cookies.set('session', jwtToken, {
         httpOnly: true,
-        secure: NODE_ENV === 'production',
+        secure: !dev,
         path: '/',
         maxAge: 60 * 60 * 24 * 7,
         sameSite: 'lax'

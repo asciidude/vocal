@@ -10,7 +10,6 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
       - MONGO_URI=mongodb://mongodb:27017/vocal
       - SESSION_SECRET=
     depends_on:
