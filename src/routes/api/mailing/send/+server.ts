@@ -4,7 +4,9 @@ import { MailingSubscriberModel } from "$lib/models/MailingSubscriber.model";
 import { sendMail } from "$lib/utils/Mailer.util";
 
 export const POST = async ({ request, locals }) => {
-  if (!locals.user || !locals.user.roles.includes(UserRoles.SuperAdmin)) {
+  const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
+  
+  if (!user || !user.roles.includes(UserRoles.SuperAdmin)) {
     throw error(403, "Unauthorized");
   }
 

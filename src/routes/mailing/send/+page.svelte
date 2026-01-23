@@ -39,13 +39,13 @@
         const formData = new FormData();
         formData.append("subject", subject);
         formData.append("body", body);
+        formData.append("user", )
         if (bannerFile) formData.append("banner", bannerFile);
 
         try {
             const res = await fetch("/api/mailing/send", {
                 method: "POST",
-                body: formData,
-                credentials: 'include'
+                body: formData
             });
             const data = await res.json().catch(() => null);
 

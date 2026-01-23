@@ -16,7 +16,6 @@
     import * as Avatar from "$lib/components/ui/avatar";
     import { getImage } from "$lib/utils/Cache.util";
     import Post from "$lib/components/shared/Post.svelte";
-    import { enhance } from "$app/forms";
     import CreatePost from "src/lib/components/shared/CreatePost.svelte";
     import { toast } from "svelte-sonner";
 
