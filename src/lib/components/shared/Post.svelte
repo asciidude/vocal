@@ -10,6 +10,7 @@
     import { getImage } from "$lib/utils/Cache.util";
     import { onMount } from "svelte";
     import Time from "svelte-time";
+    import { toast } from "svelte-sonner";
 
     const props = $props<{
         post: PostType | null;
@@ -86,8 +87,7 @@
         }
     });
 
-    async function likePost(e: Event) {
-        e.preventDefault();
+    async function likePost() {
         if (!props.post || isSubmitting) return;
         isSubmitting = true;
 
@@ -122,14 +122,14 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     postType: props.reply ? "reply" : "post",
-                    posterId: props.post.author
+                    posterId: props.post.author,
                 }),
             });
-            
+
             const data = await res.json();
 
-            if (!res.ok || data.status !== 200) {
-                throw new Error(data.message || "Failed to delete post");
+            if (!res.ok) {
+                toast.error(data.message || "An error occured");
             }
 
             props.postDeletion?.(props.post._id);
@@ -138,6 +138,8 @@
                 if (document.referrer?.startsWith(location.origin))
                     history.back();
                 else window.location.href = "/home";
+            } else if (props.redirectOnDelete === "none") {
+                return;
             } else if (props.redirectOnDelete) {
                 window.location.href = props.redirectOnDelete;
             }
@@ -231,22 +233,21 @@
                 >
                     <DropdownMenu.Group>
                         {#if props.user?._id === props.postAuthor?._id || props.user?.roles.includes(UserRoles.SuperAdmin)}
-                            <DropdownMenu.Item>
-                                <button
-                                    type="button"
-                                    onclick={deletePost}
-                                    disabled={isSubmitting}
-                                >
-                                    Delete
-                                </button>
+                            <DropdownMenu.Item
+                                onclick={deletePost}
+                                disabled={isSubmitting}
+                                class="hover:cursor-pointer"
+                            >
+                                Delete
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item>
-                                <button type="button" onclick={enableEditMode}
-                                    >Edit</button
-                                >
+                            <DropdownMenu.Item
+                                onclick={enableEditMode}
+                                class="hover:cursor-pointer"
+                            >
+                                Edit
                             </DropdownMenu.Item>
                         {/if}
-                        <DropdownMenu.Item class="text-red-400"
+                        <DropdownMenu.Item class="text-red-400 hover:cursor-pointer"
                             >Report</DropdownMenu.Item
                         >
                     </DropdownMenu.Group>

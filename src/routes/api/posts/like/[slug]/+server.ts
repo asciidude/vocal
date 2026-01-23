@@ -13,29 +13,20 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
                 : locals.user;
 
         if (!user) {
-            return json(
-                { status: 401, message: 'Not authenticated' },
-                { status: 401 }
-            );
+            return json({ success: false, message: 'Not authenticated' }, { status: 401 });
         }
 
         const postId = params.slug;
 
         if (!postId) {
-            return json(
-                { status: 422, message: 'Post not found' },
-                { status: 422 }
-            );
+            return json({ success: false, message: 'Post not found' }, { status: 422 });
         }
 
         const body = await request.json();
         const postType = body.postType;
 
         if (postType !== 'post' && postType !== 'reply') {
-            return json(
-                { status: 400, message: 'Invalid postType' },
-                { status: 400 }
-            );
+            return json({ success: false, message: 'Invalid postType' }, { status: 400 });
         }
 
         const [userDoc, post] = await Promise.all([
@@ -46,10 +37,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
         ]);
 
         if (!userDoc || !post) {
-            return json(
-                { status: 404, message: 'Post not found' },
-                { status: 404 }
-            );
+            return json({ success: false, message: 'Post not found' }, { status: 404 });
         }
 
         const existingLike = await LikeModel.exists({
@@ -137,6 +125,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
         });
 
         return json({
+            success: true,
             status: 200,
             newlyLiked,
             likeCount,
@@ -145,9 +134,6 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
     } catch (err) {
         console.error(err);
 
-        return json(
-            { status: 500, message: 'Internal Server Error' },
-            { status: 500 }
-        );
+        return json({ success: false, message: 'Internal Server Error' }, { status: 500 });
     }
 };

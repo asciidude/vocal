@@ -11,11 +11,11 @@ export const POST: RequestHandler = async({ params, request, locals }) => {
     const postId = params.slug;
 
     if(!postId) {
-        throw error(422, 'Post ID not provided');
+        return json({ success: false, message: 'Post ID not provided' }, { status: 422 });
     }
 
     if(!user || user._id !== posterId) {
-        throw error(401, 'You are not authorized to edit this post');
+        return json({ success: false, message: 'You are not authorized to edit this post' }, { status: 401 });
     }
 
     try {
@@ -36,10 +36,10 @@ export const POST: RequestHandler = async({ params, request, locals }) => {
                 message: 'Success'
             });
         } else {
-            throw error(401, 'Invalid Request')
+            return json({ success: false, message: 'Post type is invalid' }, { status: 400 });
         }
     } catch(err) {
-        console.log(err);
-        throw error(500, 'Internal Server Error');
+        console.error(err);
+        return json({ success: false, message: 'An error occured' }, { status: 500 });
     }
 }

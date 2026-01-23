@@ -1,53 +1,34 @@
-import { error, json, type RequestHandler } from "@sveltejs/kit";
+import { json, type RequestHandler } from "@sveltejs/kit";
 import { FollowModel } from "src/lib/models/Follow.model";
 import { UserModel } from "src/lib/models/User.model";
 
-export const POST: RequestHandler = async({ params, request, locals }) => {
-    const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
-
-    const userId = params.slug;
-    const followingUser = await UserModel.exists({ _id: userId });
-
-    if(
-        !userId
-        || !followingUser
-        || user._id == userId
-    ) {
-        throw error(422, 'Authenticated user or followed user does not exist');
-    }
-
-    if(!user) {
-        throw error(401, 'You are not authenticated');
-    }
-
+export const POST: RequestHandler = async ({ params, locals }) => {
     try {
-        const following = await FollowModel.exists({ followerId: user._id, followingId: userId });
+        const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
 
-        if(!following) {
-            await FollowModel.create({
-                followerId: user._id,
-                followingId: userId
-            });
-            
-            return json({
-                status: 200,
-                newlyFollowed: true,
-                message: 'Success'
-            });
-        } else {
-            await FollowModel.deleteOne({
-                followerId: user._id,
-                followingId: userId
-            });
-
-            return json({
-                status: 200,
-                newlyFollowed: false,
-                message: 'Success'
-            });
+        if (!user) {
+            return json({ success: false, message: 'You are not authenticated' }, { status: 401 });
         }
-    } catch(err) {
-        console.log(err);
-        throw error(500, 'Internal Server Error');
+
+        const userId = params.slug;
+        const followingUser = await UserModel.exists({ _id: userId });
+
+        if (!userId || !followingUser || user._id === userId) {
+            return json({ success: false, message: 'Invalid user or cannot follow yourself' }, { status: 422 });
+        }
+
+        const existingFollow = await FollowModel.exists({ followerId: user._id, followingId: userId });
+
+        if (!existingFollow) {
+            await FollowModel.create({ followerId: user._id, followingId: userId });
+            return json({ success: true, newlyFollowed: true, message: 'Successfully followed' });
+        } else {
+            await FollowModel.deleteOne({ followerId: user._id, followingId: userId });
+            return json({ success: true, newlyFollowed: false, message: 'Successfully unfollowed' });
+        }
+
+    } catch (err) {
+        console.error(err);
+        return json({ success: false, message: 'Internal Server Error' }, { status: 500 });
     }
-}
+};

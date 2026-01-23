@@ -6,6 +6,7 @@
     import type { PostType } from "$lib/types/Post.type";
     import { getImage } from "$lib/utils/Cache.util";
     import * as Avatar from "$lib/components/ui/avatar/index.js";
+    import { toast } from "svelte-sonner";
 
     const props = $props<{
         user: UserType | null;
@@ -30,39 +31,44 @@
 
     async function submitPost() {
         if (!newPostContent.trim() || isSubmitting) return;
-
         isSubmitting = true;
-        const formData = new FormData();
-        formData.append("content", newPostContent);
-        formData.append("postType", props.postType);
-        if (props.postType === "reply" && props.replyParent) {
-            formData.append("replyParent", props.replyParent);
-        }
-        files.forEach((f) => formData.append("attachments", f.file));
 
         try {
+            const formData = new FormData();
+            formData.append("content", newPostContent);
+            formData.append("postType", props.postType);
+            if (props.postType === "reply" && props.replyParent) {
+                formData.append("replyParent", props.replyParent);
+            }
+            files.forEach((f) => formData.append("attachments", f.file));
+
             const res = await fetch("/api/posts/create", {
                 method: "POST",
                 body: formData,
             });
 
-            if (!res.ok) {
-                const text = await res.text();
-                console.error("Post submission failed:", res.status, text);
+            let result: any;
+            try {
+                result = await res.json();
+            } catch {
+                result = { message: await res.text() };
+            }
+
+            if (!res.ok || result.success === false) {
+                toast.error(
+                    result.message ||
+                        `Request failed with status ${res.status}`,
+                );
                 return;
             }
 
-            const result = await res.json();
-            if (result.status === 200) {
-                newPostContent = "";
-                files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
-                files = [];
-                props.postSubmission(result.post);
-            } else {
-                console.error("Failed to create post:", result.message);
-            }
-        } catch (err) {
-            console.error("Post submission failed:", err);
+            newPostContent = "";
+            files.forEach((f) => URL.revokeObjectURL(f.previewUrl));
+            files = [];
+            props.postSubmission(result.post);
+        } catch (err: any) {
+            console.error(err);
+            toast.error(err.message || "An unexpected error occurred");
         } finally {
             isSubmitting = false;
         }

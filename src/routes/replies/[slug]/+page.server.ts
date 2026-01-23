@@ -1,4 +1,3 @@
-import { PostModel } from '$lib/models/Post.model';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { UserModel } from '$lib/models/User.model';

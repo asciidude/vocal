@@ -5,13 +5,21 @@
     import * as Tooltip from "$lib/components/ui/tooltip/index.js";
     import * as Tabs from "$lib/components/ui/tabs";
     import { UserRoles } from "$lib/types/User.types";
-    import { HardHat, Shield, Sparkle, UserPlus, UserMinus, Bug } from "lucide-svelte";
+    import {
+        HardHat,
+        Shield,
+        Sparkle,
+        UserPlus,
+        UserMinus,
+        Bug,
+    } from "lucide-svelte";
     import * as Avatar from "$lib/components/ui/avatar";
     import { getImage } from "$lib/utils/Cache.util";
     import Post from "$lib/components/shared/Post.svelte";
     import { enhance } from "$app/forms";
     import CreatePost from "src/lib/components/shared/CreatePost.svelte";
-  
+    import { toast } from "svelte-sonner";
+
     const { data } = $props<{ data: PageData }>();
 
     const user = data?.user;
@@ -23,78 +31,112 @@
         posts: initialPosts?.posts || [],
         userReplies: initialPosts?.userReplies || [],
         media: [],
-        likes: []
+        likes: [],
     });
-    
+
     let pagination = $state({
         posts: { page: 1, isLoading: false, hasMore: true },
-        replies: { page: 1, isLoading: false, hasMore: true }
+        replies: { page: 1, isLoading: false, hasMore: true },
     });
-    
-    let observer: IntersectionObserver;
 
+    let observer: IntersectionObserver;
 
     const follow = {
         ing: data?.followingCount || 0,
         ers: data?.followersCount || 0,
         ersData: data?.followers || [],
-        ingData: data?.following || []
+        ingData: data?.following || [],
     };
 
-    let activeTab = $state('posts');
-  
+    let activeTab = $state("posts");
+
     const roleData = {
-        [UserRoles.SuperAdmin]: { icon: Sparkle, description: "This user is a site owner", priority: 3 },
-        [UserRoles.Admin]: { icon: Shield, description: "This user is a site admin", priority: 2 },
-        [UserRoles.Beta]: { icon: HardHat, description: "This user was apart of our beta program", priority: 1 },
-        [UserRoles.Tester]: { icon: Bug, description: "This user is Vocal tester", priority: 1 },
+        [UserRoles.SuperAdmin]: {
+            icon: Sparkle,
+            description: "This user is a site owner",
+            priority: 3,
+        },
+        [UserRoles.Admin]: {
+            icon: Shield,
+            description: "This user is a site admin",
+            priority: 2,
+        },
+        [UserRoles.Beta]: {
+            icon: HardHat,
+            description: "This user was apart of our beta program",
+            priority: 1,
+        },
+        [UserRoles.Tester]: {
+            icon: Bug,
+            description: "This user is Vocal tester",
+            priority: 1,
+        },
     };
 
-    let bannerSrc = '';
+    let bannerSrc = "";
     let mounted = false;
-    let avatarSrc = '';
+    let avatarSrc = "";
 
-    onMount(() => { 
+    onMount(() => {
         mounted = true;
         setupObserver();
     });
 
-    function followUser() {
-        return async ({ result }) => {
-            if (result.status === 200) {
-                if (result.newlyFollowed) {
+    async function followUser() {
+        try {
+            const response = await fetch(
+                `/api/users/follow/${profileUser._id}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+
+            const data = await response.json();
+
+            if (response.ok) {
+                if (data.newlyFollowed) {
                     isFollowing = true;
                     follow.ers++;
                     follow.ersData.push(user);
                 } else {
                     isFollowing = false;
                     follow.ers--;
-                    follow.ersData = follow.ersData.filter(u => u._id !== user?._id);
+                    follow.ersData = follow.ersData.filter(
+                        (u) => u._id !== user?._id,
+                    );
                 }
+            } else {
+                toast.error(data.error || "Something went wrong");
             }
-        };
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to follow/unfollow user.");
+        }
     }
 
     const submitPost = (post) => {
         posts = {
             ...posts,
-            posts: [{ ...post, authorObj: user }, ...posts.posts]
+            posts: [{ ...post, authorObj: user }, ...posts.posts],
         };
-    }
+    };
 
     const deletePost = (postId) => {
         posts = {
             ...posts,
-            posts: posts.posts.filter(p => p._id !== postId)
+            posts: posts.posts.filter((p) => p._id !== postId),
         };
-    }
+    };
 
     const deleteReply = (postId) => {
         posts = {
             ...posts,
-            userReplies: posts.userReplies.filter(p => p._id !== postId)
+            userReplies: posts.userReplies.filter((p) => p._id !== postId),
         };
-    }
+    };
 
     const loadMorePosts = async () => {
         if (pagination.posts.isLoading || !pagination.posts.hasMore) return;
@@ -103,20 +145,20 @@
         try {
             pagination.posts.page++;
 
-            const existingIds = posts.posts.map(p => p._id);
-            
-            const response = await fetch('/api/users/posts', {
-                method: 'POST',
+            const existingIds = posts.posts.map((p) => p._id);
+
+            const response = await fetch("/api/users/posts", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json'
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     userId: profileUser._id,
                     page: pagination.posts.page,
                     limit: 5,
                     seenIds: existingIds,
-                    postType: 'post'
-                })
+                    postType: "post",
+                }),
             });
 
             const result = await response.json();
@@ -128,16 +170,15 @@
 
             posts = {
                 ...posts,
-                posts: [...posts.posts, ...result.posts]
+                posts: [...posts.posts, ...result.posts],
             };
-            
         } catch (err) {
-            console.error('Failed to load more posts:', err);
+            console.error("Failed to load more posts:", err);
             pagination.posts.page--;
         } finally {
             pagination.posts.isLoading = false;
         }
-    }
+    };
 
     const loadMoreReplies = async () => {
         if (pagination.replies.isLoading || !pagination.replies.hasMore) return;
@@ -146,20 +187,20 @@
         try {
             pagination.replies.page++;
 
-            const existingIds = posts.userReplies.map(p => p._id);
-            
-            const response = await fetch('/api/users/posts', {
-                method: 'POST',
+            const existingIds = posts.userReplies.map((p) => p._id);
+
+            const response = await fetch("/api/users/posts", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json'
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     userId: profileUser._id,
                     page: pagination.replies.page,
                     limit: 5,
                     seenIds: existingIds,
-                    postType: 'reply'
-                })
+                    postType: "reply",
+                }),
             });
 
             const result = await response.json();
@@ -171,40 +212,50 @@
 
             posts = {
                 ...posts,
-                userReplies: [...posts.userReplies, ...result.replies]
+                userReplies: [...posts.userReplies, ...result.replies],
             };
-            
         } catch (err) {
-            console.error('Failed to load more replies:', err);
+            console.error("Failed to load more replies:", err);
             pagination.replies.page--;
         } finally {
             pagination.replies.isLoading = false;
         }
-    }
+    };
 
     const setupObserver = async () => {
         await tick();
-        
-        observer = new IntersectionObserver((entries) => {
-            if(entries[0].isIntersecting) {
-                if (activeTab === 'posts' && !pagination.posts.isLoading && pagination.posts.hasMore) {
-                    loadMorePosts();
-                } else if (activeTab === 'replies' && !pagination.replies.isLoading && pagination.replies.hasMore) {
-                    loadMoreReplies();
-                }
-            }
-        }, { threshold: 0.1 });
 
-        const sentinel = document.getElementById('sentinel');
+        observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    if (
+                        activeTab === "posts" &&
+                        !pagination.posts.isLoading &&
+                        pagination.posts.hasMore
+                    ) {
+                        loadMorePosts();
+                    } else if (
+                        activeTab === "replies" &&
+                        !pagination.replies.isLoading &&
+                        pagination.replies.hasMore
+                    ) {
+                        loadMoreReplies();
+                    }
+                }
+            },
+            { threshold: 0.1 },
+        );
+
+        const sentinel = document.getElementById("sentinel");
         if (sentinel) {
             observer.observe(sentinel);
         }
-    }
+    };
 
     $effect.pre(() => {
-        if(observer) {
+        if (observer) {
             observer.disconnect();
-            const sentinel = document.getElementById('sentinel');
+            const sentinel = document.getElementById("sentinel");
             if (sentinel) observer.observe(sentinel);
         }
     });
@@ -241,7 +292,12 @@
                     src={profileUser.avatarUrl}
                     alt="@{profileUser.username}"
                 />
-                <Avatar.Fallback><img src="/images/fallback-pfp.jpg" alt=""></Avatar.Fallback>
+                <Avatar.Fallback
+                    ><img
+                        src="/images/fallback-pfp.jpg"
+                        alt=""
+                    /></Avatar.Fallback
+                >
             </Avatar.Root>
             <div class="flex flex-row gap-3 justify-center mt-3 text-white">
                 <h1 class="text-4xl font-bold text-white">
@@ -273,14 +329,11 @@
 
             {#if user && user._id !== profileUser._id}
                 <div class="mt-2 mb-2 mx-auto">
-                    <form
-                        action="/api/users/follow/{profileUser?._id}"
-                        method="post"
-                        use:enhance={followUser}
-                    >
+                    <form>
                         <button
                             class="bg-vocal_strong hover:bg-vocal_strongest text-white px-5 py-1 rounded-full flex items-center gap-2 transition-colors cursor-pointer disabled:bg-vocal_strong disabled:cursor-default"
-                            type="submit"
+                            type="button"
+                            onclick={followUser}
                         >
                             {#if !isFollowing}
                                 <UserPlus size={16} />
@@ -322,7 +375,9 @@
                                             <img
                                                 src={f.avatarUrl}
                                                 alt={f.username}
-                                                onerror={(e: any) => e.target.src = '/images/fallback-pfp.jpg'} 
+                                                onerror={(e: any) =>
+                                                    (e.target.src =
+                                                        "/images/fallback-pfp.jpg")}
                                                 class="w-6 h-6 rounded-full"
                                             />
                                             <span
@@ -360,7 +415,9 @@
                                             <img
                                                 src={f.avatarUrl}
                                                 alt={f.username}
-                                                onerror={(e: any) => e.target.src = '/images/fallback-pfp.jpg'} 
+                                                onerror={(e: any) =>
+                                                    (e.target.src =
+                                                        "/images/fallback-pfp.jpg")}
                                                 class="w-6 h-6 rounded-full"
                                             />
                                             <span
@@ -432,6 +489,9 @@
                                 )}
                                 {user}
                                 postDeletion={deletePost}
+                                redirectOnDelete={"none"}
+                                reply={false}
+                                postExpanded={false}
                             />
                         {/each}
 
@@ -474,6 +534,8 @@
                                 {user}
                                 reply={true}
                                 postDeletion={deleteReply}
+                                redirectOnDelete={"none"}
+                                postExpanded={false}
                             />
                         {/each}
 

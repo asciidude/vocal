@@ -12,12 +12,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     try {
         const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
         if (!user) {
-            return json({ status: 401, message: 'You are not authenticated' }, { status: 401 });
+            return json({ success: false, message: 'You are not authenticated' }, { status: 401 });
         }
 
         const userDoc = await UserModel.findById(user._id);
         if (!userDoc) {
-            return json({ status: 401, message: 'User not found' }, { status: 401 });
+            return json({ success: false, message: 'User not found' }, { status: 401 });
         }
 
         const formData = await request.formData();
@@ -25,7 +25,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         const content = String(formData.get('content') || '').trim();
 
         if (!content) {
-            return json({ status: 422, message: 'Post content is missing' }, { status: 422 });
+            return json({ success: false, message: 'Post content is missing' }, { status: 422 });
         }
 
         const attachments = formData.getAll('attachments') as File[];
@@ -47,7 +47,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         } else if (postType === 'reply') {
             const replyParent = formData.get('replyParent');
             if (!replyParent || !isValidObjectId(replyParent)) {
-                return json({ status: 422, message: 'Reply parent is missing or invalid' }, { status: 422 });
+                return json({ success: false, message: 'Reply parent is missing or invalid' }, { status: 422 });
             }
 
             post = await ReplyModel.create({
@@ -57,7 +57,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
                 attachments: []
             });
         } else {
-            return json({ status: 400, message: 'Invalid postType' }, { status: 400 });
+            return json({ success: false, message: 'Invalid postType' }, { status: 400 });
         }
 
         // handle attachments
@@ -104,9 +104,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
             await userDoc.save();
         }
 
-        return json({ status: 200, message: 'Success', user, post });
+        return json({ success: true, message: 'Success', user, post });
     } catch (err) {
         console.error(err);
-        return json({ status: 500, message: 'Internal Server Error' }, { status: 500 });
+        return json({ success: false, message: 'An error occured' }, { status: 500 });
     }
 };

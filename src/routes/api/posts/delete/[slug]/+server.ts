@@ -8,7 +8,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
     try {
         const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
         if (!user) {
-            return json({ status: 401, message: 'You are not authenticated' }, { status: 401 });
+            return json({ success: false, message: 'You are not authenticated' }, { status: 401 });
         }
 
         const body = await request.json();
@@ -16,11 +16,11 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
         const postId = params.slug;
 
         if (!postId) {
-            return json({ status: 422, message: 'Post not found' }, { status: 422 });
+            return json({ success: false, message: 'Post not found' }, { status: 422 });
         }
 
         if (user._id !== posterId) {
-            return json({ status: 401, message: 'You are not authorized to delete this post' }, { status: 401 });
+            return json({ success: false, message: 'You are not authorized to delete this post' }, { status: 401 });
         }
 
         const postType = body.postType;
@@ -29,7 +29,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
         } else if (postType === 'post') {
             await PostModel.deleteOne({ _id: postId });
         } else {
-            return json({ status: 400, message: 'Bad request: invalid postType' }, { status: 400 });
+            return json({ success: false, message: 'Bad request: invalid postType' }, { status: 400 });
         }
 
         await ReplyModel.deleteMany({ parent_post: postId });
@@ -40,9 +40,9 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
             fs.rmSync(postMediaDir, { recursive: true, force: true });
         }
 
-        return json({ status: 200, message: 'Post deleted successfully' });
+        return json({ success: true, message: 'Post deleted successfully' });
     } catch (err) {
         console.error(err);
-        return json({ status: 500, message: 'Internal Server Error' }, { status: 500 });
+        return json({ success: false, message: 'Internal Server Error' }, { status: 500 });
     }
 };
