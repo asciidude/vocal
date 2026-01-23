@@ -39,7 +39,6 @@
         const formData = new FormData();
         formData.append("subject", subject);
         formData.append("body", body);
-        formData.append("user", )
         if (bannerFile) formData.append("banner", bannerFile);
 
         try {
