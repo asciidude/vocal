@@ -44,7 +44,8 @@
 
             const res = await fetch("/api/posts/create", {
                 method: "POST",
-                body: formData
+                body: formData,
+                credentials: 'same-origin'
             });
 
             const responseClone = res.clone();

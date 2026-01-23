@@ -6,6 +6,10 @@ import { ReplyModel } from "src/lib/models/Reply.model";
 import { UserModel } from "src/lib/models/User.model";
 import type { AttachmentType } from "src/lib/types/Attachment.type";
 
+export const config = {
+	csrf: false
+};
+
 export const POST: RequestHandler = async ({ request, locals }) => {
     try {
         const user = typeof locals.user === 'string' ? JSON.parse(locals.user) : locals.user;
