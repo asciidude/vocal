@@ -122,16 +122,7 @@
                 </a>
             </Avatar.Root>
 
-            <form class="flex-grow">
-                <input type="hidden" name="postType" value={props.postType} />
-                {#if props.postType === "reply" && props.replyParent}
-                    <input
-                        type="hidden"
-                        name="replyParent"
-                        value={props.replyParent}
-                    />
-                {/if}
-
+            <div class="flex-grow">
                 <textarea
                     class="w-full bg-transparent border border-[#2d2249] rounded-lg p-3 focus:border-vocal_medium focus:outline-none resize-none text-white placeholder-gray-500 text-2xl"
                     rows="3"
@@ -199,7 +190,7 @@
                         <Plus class="size-5" /> Post
                     </button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 {/if}
