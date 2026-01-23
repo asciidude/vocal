@@ -98,8 +98,10 @@
                     postType: props.reply ? "reply" : "post",
                 }),
             });
-            if (!res.ok) throw new Error("Failed to like");
             const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.message || "Failed to like");
+            }
             if (data.status === 200) {
                 liked = !!data.newlyLiked;
                 likeCount = data.likeCount;
@@ -253,10 +255,7 @@
 
         <div class="post-content text-2xl">
             {#if isEditing}
-                <form
-                    action="/api/posts/edit/{props.post._id}"
-                    method="post"
-                >
+                <form action="/api/posts/edit/{props.post._id}" method="post">
                     <textarea
                         bind:value={editContent}
                         class="w-full bg-transparent text-white text-2xl resize-none border border-vocal_lightest rounded-lg p-3"
