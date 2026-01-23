@@ -32,7 +32,7 @@
         if (bannerFile) formData.append("banner", bannerFile);
 
         try {
-            const res = await fetch("/mailing/send", {
+            const res = await fetch("/api/mailing/send", {
                 method: "POST",
                 body: formData,
             });

@@ -1,4 +1,3 @@
-import type { ObjectId } from "mongoose";
 import { UserModel } from "../models/User.model";
 
 function generateRandomSuffix(length = 4) {
