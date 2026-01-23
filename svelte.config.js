@@ -15,6 +15,13 @@ const config = {
 
 		alias: {
 			'src': 'src/*'
+		},
+
+		csrf: {
+			trustedOrigins: [
+				'http://localhost:5173',
+				'https://vocal.wtf'
+			]
 		}
 	}
 };
