@@ -7,8 +7,7 @@
     Bell, 
     Bookmark, 
     LogOut,
-    Search,
-    Menu
+    Search
   } from 'lucide-svelte';
   import { getImage } from '$lib/utils/Cache.util';
   import { onMount } from 'svelte';
@@ -35,7 +34,6 @@
 
   $: screenLarge = screenWidth <= 1475;
   $: screenSmaller = screenWidth <= 500;
-  $: menuActive = false;
 
   let avatarSrc = '';
   let mounted = false;
@@ -51,20 +49,12 @@
 
 <svelte:window bind:innerWidth={screenWidth} />
 
-{#if screenSmaller}
-  <Button
-    class="rounded-full fixed bottom-4 right-4 z-100 opacity-50 overflow-hidden cursor-pointer bg-vocal_strong border-vocal_lightest border hover:bg-vocal_strongest"
-    onclick={() => (menuActive = !menuActive)}
-  >
-    <Menu size={12} />
-  </Button>
-{/if}
-
+{#if !screenSmaller}
 <div
   class="fixed top-0 left-0 h-screen z-40 bg-[#110b13] border-r border-[#202225] p-4 flex flex-col text-sm overflow-y-auto transition-transform duration-300 transform"
   class:w-20={screenLarge}
   class:w-72={!screenLarge}
-  class:translate-x-[-100%]={!menuActive && screenSmaller}
+  class:translate-x-[-100%]={screenSmaller}
 >
   <div class="mb-6">
     {#if screenLarge}
@@ -127,5 +117,25 @@
     {/if}
   </div>
 </div>
+{:else}
+<nav
+  class="fixed bottom-0 left-0 right-0 z-50 bg-[#110b13] border-t border-[#202225]
+         flex justify-around items-center h-16"
+>
+  {#each navItems as item}
+    <a
+      href={item.href}
+      class="flex items-center p-3 rounded-md transition-colors text-gray-300 { isActive(item.href) ? '' : 'hover:bg-[#32353b] hover:text-purple-300' }"
+      class:bg-purple-900={isActive(item.href)}
+      class:text-purple-200={isActive(item.href)}
+    >
+      <svelte:component
+        this={item.icon}
+        class="h-5 w-5"
+      />
+    </a>
+  {/each}
+</nav>
+{/if}
 
 <div class="{ screenSmaller ? 'hidden' : '' } { screenLarge ? 'w-20' : 'w-72' }"></div>
