@@ -144,8 +144,8 @@
   </div>
 {:else}
   <nav
-    class="fixed bottom-0 left-0 right-0 z-50 bg-[#110b13] border-t border-[#202225]
-         flex justify-around items-center h-16"
+    class="p-3 fixed bottom-0 left-0 right-0 z-50 bg-[#110b13] border-t border-[#202225]
+         flex justify-around items-center h-19"
   >
     {#each navItems as item}
       <a
