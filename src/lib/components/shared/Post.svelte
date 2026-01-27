@@ -278,12 +278,13 @@
                     </div>
                 </div>
             {:else}
-                <p class="whitespace-pre-wrap">
+                <p class="whitespace-pre-wrap break-words text-wrap">
                     {#each parseContent(props.post.content ?? "") as part}
                         {#if part.type === "hashtag"}
                             <a
                                 href="/hashtag/{part.tag}"
-                                class="text-vocal_lightest">{part.content}</a
+                                class="text-vocal_lightest break-words"
+                                >{part.content}</a
                             >
                         {:else}{part.content}{/if}
                     {/each}
