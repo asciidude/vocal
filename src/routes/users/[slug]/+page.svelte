@@ -298,18 +298,20 @@
                     /></Avatar.Fallback
                 >
             </Avatar.Root>
-            <div class="flex flex-row gap-3 justify-center mt-3 text-white">
-                <h1 class="text-4xl font-bold text-white">
-                    {profileUser.displayName || profileUser.username}
-                </h1>
+            <h1 class="text-4xl font-bold text-white text-center">
+                {profileUser.displayName || profileUser.username}
+            </h1>
+            <div class="flex flex-wrap gap-3 justify-center mt-2 mb-2">
                 {#each profileUser.roles.sort((a, b) => roleData[a].priority - roleData[b].priority) as role}
                     {#if roleData[role]}
                         <Tooltip.Provider delayDuration={0}>
                             <Tooltip.Root>
-                                <Tooltip.Trigger>
+                                <Tooltip.Trigger
+                                    class="hover:scale-110 transition-transform"
+                                >
                                     {#if roleData[role].icon}
                                         {@const Icon = roleData[role].icon}
-                                        <Icon class="w-5 h-5" />
+                                        <Icon class="w-5 h-5 text-white" />
                                     {/if}
                                 </Tooltip.Trigger>
                                 <Tooltip.Content>
@@ -322,6 +324,7 @@
                     {/if}
                 {/each}
             </div>
+
             <p class="text-xl text-vocal_lightest opacity-50">
                 @{profileUser.username}
             </p>
