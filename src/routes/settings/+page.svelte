@@ -6,6 +6,9 @@
   import { Label } from "$lib/components/ui/label/index.js";
   import type { PageData } from "./$types";
   import { writable } from "svelte/store";
+  import * as Dialog from "$lib/components/ui/dialog/index.js";
+  import { Button } from "$lib/components/ui/button/index.js";
+  import { toast } from "svelte-sonner";
 
   export let data: PageData;
   $: user = data?.user;
@@ -53,6 +56,46 @@
   let hideSensitive = false;
   let language = "English";
   const theme = writable<"light" | "dark">("dark");
+
+  // Account Deletion
+
+  let deleteOpen = false;
+  let confirmText = "";
+  let deleting = false;
+
+  async function handleDelete() {
+    if (confirmText !== "DELETE") {
+      toast.error("Confirmation text is incorrect.");
+      deleteOpen = false;
+      return;
+    }
+
+    deleting = true;
+
+    try {
+      const res: any = await fetch("/api/account/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          confirmText,
+        }),
+      });
+
+      if (!res.ok) {
+        toast.error(res.message || "An error occured.");
+        return;
+      }
+
+      window.location.href = "/";
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occured.");
+    } finally {
+      deleting = false;
+    }
+  }
 </script>
 
 <title>Vocal - Settings</title>
@@ -116,7 +159,9 @@
     >
       <!-- Account -->
       {#if active === "account"}
-        <h3 class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1">
+        <h3
+          class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1"
+        >
           Account Information
         </h3>
         <div class="space-y-2">
@@ -147,19 +192,75 @@
           <p class="text-sm text-white">
             These actions are permanent and cannot be undone.
           </p>
-          <SettingsRow
-            title="Delete Account"
-            description="Permanently delete your account and all associated data."
-            href="/users/delete"
-            options={undefined}
-            value={undefined}
-          />
+          <Dialog.Root bind:open={deleteOpen}>
+            <Dialog.Trigger class="w-full">
+              <SettingsRow
+                title="Delete Account"
+                description="Permanently delete your account and all associated data."
+                href={undefined}
+                options={undefined}
+                value={undefined}
+              />
+            </Dialog.Trigger>
+
+            <Dialog.Content
+              class="max-w-md rounded-2xl border border-red-500/40 bg-[#171226] shadow-xl"
+            >
+              <Dialog.Header>
+                <Dialog.Title class="text-red-500">Delete Account</Dialog.Title>
+
+                <Dialog.Description class="text-sm text-muted-foreground">
+                  This action is permanent and cannot be undone.
+                </Dialog.Description>
+              </Dialog.Header>
+
+              <div class="space-y-4 py-4">
+                <p class="text-sm text-white">
+                  Type
+                  <span
+                    class="mx-1 rounded bg-[#2d2249] px-1.5 py-0.5 font-mono text-red-400"
+                  >
+                    DELETE
+                  </span>
+                  to confirm.
+                </p>
+
+                <input
+                  bind:value={confirmText}
+                  placeholder="DELETE"
+                  class="w-full rounded-md border border-[#2d2249] bg-[#171226] px-3 py-2 text-white outline-none transition focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+
+              <Dialog.Footer class="gap-2">
+                <Dialog.Close>
+                  <Button
+                    variant="ghost"
+                    class="text-white"
+                    onclick={() => confirmText = ''}
+                  >
+                    Cancel
+                  </Button>
+                </Dialog.Close>
+
+                <Button
+                  variant="destructive"
+                  disabled={confirmText !== "DELETE" || deleting}
+                  onclick={handleDelete}
+                >
+                  {deleting ? "Deleting..." : "Delete Account"}
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Root>
         </div>
       {/if}
 
       <!-- Privacy -->
       {#if active === "privacy"}
-        <h3 class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1">
+        <h3
+          class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1"
+        >
           Privacy Settings
         </h3>
         <div class="space-y-4">
@@ -188,7 +289,9 @@
           />
         </div>
 
-        <h3 class="text-xl font-semibold text-white mt-6 mb-3 border-b border-[#2d2249]/50 pb-1">
+        <h3
+          class="text-xl font-semibold text-white mt-6 mb-3 border-b border-[#2d2249]/50 pb-1"
+        >
           Security
         </h3>
         <div class="space-y-4">
@@ -220,7 +323,9 @@
 
       <!-- Notifications -->
       {#if active === "notifications"}
-        <h3 class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1">
+        <h3
+          class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1"
+        >
           Push Notifications
         </h3>
         <SettingsRow
@@ -287,7 +392,9 @@
           </div>
         </SettingsRow>
 
-        <h3 class="text-xl font-semibold text-white mt-6 mb-3 border-b border-[#2d2249]/50 pb-1">
+        <h3
+          class="text-xl font-semibold text-white mt-6 mb-3 border-b border-[#2d2249]/50 pb-1"
+        >
           Email Notifications
         </h3>
         <SettingsRow
@@ -315,7 +422,9 @@
 
       <!-- Content -->
       {#if active === "content"}
-        <h3 class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1">
+        <h3
+          class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1"
+        >
           Topics & Interests
         </h3>
         <SettingsRow
@@ -326,7 +435,9 @@
           value={undefined}
         />
 
-        <h3 class="text-xl font-semibold text-white mt-6 mb-3 border-b border-[#2d2249]/50 pb-1">
+        <h3
+          class="text-xl font-semibold text-white mt-6 mb-3 border-b border-[#2d2249]/50 pb-1"
+        >
           Content Filters
         </h3>
         <SettingsRow
@@ -345,7 +456,9 @@
           </div>
         </SettingsRow>
 
-        <h3 class="text-xl font-semibold text-white mt-6 mb-3 border-b border-[#2d2249]/50 pb-1">
+        <h3
+          class="text-xl font-semibold text-white mt-6 mb-3 border-b border-[#2d2249]/50 pb-1"
+        >
           Language
         </h3>
         <SettingsRow
@@ -367,7 +480,9 @@
 
       <!-- Appearance -->
       {#if active === "appearance"}
-        <h3 class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1">
+        <h3
+          class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1"
+        >
           Themes
         </h3>
         <RadioGroup.Root bind:value={$theme} class="flex gap-4">
@@ -402,7 +517,9 @@
 
       <!-- Support -->
       {#if active === "support"}
-        <h3 class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1">
+        <h3
+          class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1"
+        >
           Support
         </h3>
         <p class="text-sm text-white mb-2">
@@ -414,8 +531,9 @@
         </p>
         <p class="text-sm text-white">
           Or join our
-          <a href="https://discord.gg/4Rwr2pu2bW" class="underline text-blue-400"
-            >Discord</a
+          <a
+            href="https://discord.gg/4Rwr2pu2bW"
+            class="underline text-blue-400">Discord</a
           >
           community.
         </p>

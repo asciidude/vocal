@@ -4,7 +4,6 @@
     import type { LikeType } from "$lib/types/Like.type";
     import type { ReplyType } from "$lib/types/Reply.type";
     import type { PostType } from "$lib/types/Post.type";
-    import type { UserType } from "$lib/types/User.types";
     import CreatePost from "src/lib/components/shared/CreatePost.svelte";
 
     let { data } = $props<{ data: PageData }>();
