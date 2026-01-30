@@ -20,8 +20,8 @@
   let screenWidth = 0;
 
   $: navItems = [
-    { icon: Home, label: "Home", href: "/home" },
-    { icon: User, label: "Profile", href: `/users/${user?.username}` },
+    { icon: Home, label: "Home", href: "/home", pageReload: true },
+    { icon: User, label: "Profile", href: `/users/${user?.username}`, pageReload: true },
     { icon: Bell, label: "Notifications", href: "/notifications" },
     { icon: Bookmark, label: "Bookmarks", href: "/bookmarks" },
     { icon: Settings, label: "Settings", href: "/settings" },
@@ -84,6 +84,7 @@
             : 'hover:bg-[#32353b] hover:text-purple-300'}"
           class:bg-purple-900={isActive(item.href)}
           class:text-purple-200={isActive(item.href)}
+          data-sveltekit-reload={item.pageReload === true ? "" : undefined}
         >
           <svelte:component
             this={item.icon}
@@ -157,6 +158,7 @@
           : 'hover:bg-[#32353b] hover:text-purple-300'}"
         class:bg-purple-900={isActive(item.href)}
         class:text-purple-200={isActive(item.href)}
+        data-sveltekit-reload={item.pageReload ? "" : undefined}
       >
         <svelte:component this={item.icon} class="h-5 w-5" />
       </a>

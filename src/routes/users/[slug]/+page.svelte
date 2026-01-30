@@ -373,6 +373,7 @@
                                         <a
                                             href="/users/{f.username}"
                                             class="flex items-center gap-2 mt-3 text-xl"
+                                            data-sveltekit-reload
                                         >
                                             <img
                                                 src={f.avatarUrl}
@@ -413,6 +414,7 @@
                                         <a
                                             href="/users/{f.username}"
                                             class="flex items-center gap-2 mt-3 text-xl"
+                                            data-sveltekit-reload
                                         >
                                             <img
                                                 src={f.avatarUrl}
