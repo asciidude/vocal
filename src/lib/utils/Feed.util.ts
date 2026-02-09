@@ -1,9 +1,10 @@
 import { FollowModel } from "../models/Follow.model";
 import { PostModel } from "../models/Post.model";
 import { UserModel } from "../models/User.model";
+import { ViewedPostModel } from "../models/ViewedPosts.model";
 import type { FollowType } from "../types/Follow.type";
 import type { PostType } from "../types/Post.type";
-import type { UserType } from "../types/User.types";
+import type { UserType } from "../types/User.type";
 import { cosineSimilarity } from "./TF-IDF.util";
 
 export interface FeedOptions {
@@ -66,6 +67,12 @@ export class FeedAlgorithm {
             const toAdd = available.slice(0, Math.min(maxCount, limit - finalFeed.length));
             
             toAdd.forEach(post => {
+                ViewedPostModel.updateOne(
+                    { author: userId, parent_post: post._id },
+                    { author: userId, parent_post: post._id },
+                    { upsert: true }
+                );
+                
                 usedPostIds.add(post._id.toString());
                 finalFeed.push(post);
             });

@@ -1,5 +1,5 @@
 import { error, json } from "@sveltejs/kit";
-import { UserRoles } from "$lib/types/User.types";
+import { UserRoles } from "src/lib/types/User.type";
 import { MailingSubscriberModel } from "$lib/models/MailingSubscriber.model";
 import { sendMail } from "$lib/utils/Mailer.util";
 

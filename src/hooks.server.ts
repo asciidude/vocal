@@ -3,7 +3,7 @@ import { type Handle } from '@sveltejs/kit';
 import { connect } from '$lib/utils/Database.utils';
 import { UserModel } from '$lib/models/User.model';
 import jwt from 'jsonwebtoken';
-import type { UserType } from '$lib/types/User.types';
+import type { UserType } from 'src/lib/types/User.type';
 import { initializeTfIdf } from '$lib/utils/TF-IDF.util';
 
 let initialized = false;

@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { UserModel } from '$lib/models/User.model';
-import type { UserType } from '$lib/types/User.types';
+import type { UserType } from 'src/lib/types/User.type';
 import { FollowModel } from '$lib/models/Follow.model';
 import { PostModel } from '$lib/models/Post.model';
 import { ReplyModel } from '$lib/models/Reply.model';

@@ -1,7 +1,7 @@
 import { dev } from "$app/environment";
 import { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_REDIRECT_URI, PORT, JWT_SECRET } from "$env/static/private";
 import { UserModel } from "$lib/models/User.model";
-import { UserRoles } from "$lib/types/User.types";
+import { UserRoles } from "src/lib/types/User.type";
 import { error, redirect, type Cookies } from "@sveltejs/kit";
 import jwt from 'jsonwebtoken';
 import { getUniqueUsername } from "src/lib/utils/GetUniqueUsername";

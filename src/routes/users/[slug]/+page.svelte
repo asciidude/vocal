@@ -4,7 +4,7 @@
     import * as Dialog from "$lib/components/ui/dialog/index.js";
     import * as Tooltip from "$lib/components/ui/tooltip/index.js";
     import * as Tabs from "$lib/components/ui/tabs";
-    import { UserRoles } from "$lib/types/User.types";
+    import { UserRoles } from "$lib/types/User.type";
     import {
         HardHat,
         Shield,

@@ -1,6 +1,6 @@
 import { error, json, type RequestHandler } from "@sveltejs/kit";
 import { UserModel } from "$lib/models/User.model";
-import { UserRoles, type UserType } from "$lib/types/User.types";
+import { UserRoles, type UserType } from "src/lib/types/User.type";
 import { PostModel } from "$lib/models/Post.model";
 import { ReplyModel } from "$lib/models/Reply.model";
 import { FollowModel } from "$lib/models/Follow.model";

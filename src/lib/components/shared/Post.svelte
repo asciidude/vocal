@@ -2,7 +2,7 @@
     import type { LikeType } from "src/lib/types/Like.type";
     import type { ReplyType } from "src/lib/types/Reply.type";
     import type { PostType } from "src/lib/types/Post.type";
-    import { UserRoles, type UserType } from "$lib/types/User.types";
+    import { UserRoles, type UserType } from "$lib/types/User.type";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import * as Avatar from "$lib/components/ui/avatar";
     import * as Dialog from "$lib/components/ui/dialog/index.js";

@@ -45,6 +45,7 @@
     "@types/email-validator": "^1.0.32",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/natural": "^5.1.5",
+    "@types/persona": "^0.0.32",
     "caniuse-lite": "^1.0.30001769",
     "dotenv": "^16.6.1",
     "drizzle-orm": "^0.45.1",
@@ -54,6 +55,7 @@
     "lucide-svelte": "^0.477.0",
     "mongoose": "^8.22.1",
     "natural": "^8.1.0",
+    "persona": "^5.5.0",
     "pg": "^8.18.0",
     "svelte-time": "^2.1.0",
     "svelte-twemojify": "^2.1.1"

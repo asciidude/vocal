@@ -1,4 +1,4 @@
-import type { UserType } from '$lib/types/User.types';
+import type { UserType } from 'src/lib/types/User.type';
 
 /**
  * TODO: Link settings page to backend
