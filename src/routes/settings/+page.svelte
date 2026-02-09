@@ -1,3 +1,4 @@
+<!-- src/routes/settings/+page.svelte -->
 <script lang="ts">
   import SettingsRow from "$lib/components/shared/SettingsRow.svelte";
   import { Switch } from "$lib/components/ui/switch/index.js";
@@ -9,9 +10,12 @@
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { toast } from "svelte-sonner";
+  import PersonaEmbed from "$lib/components/shared/PersonaEmbed.svelte";
+  import { dev } from "$app/environment";
 
   export let data: PageData;
   $: user = data?.user;
+  let userId = user?._id;
 
   const sections = [
     { id: "account", label: "Account" },
@@ -43,7 +47,6 @@
     };
   }
 
-  // Settings state
   const visibilityOptions = ["Public", "Private"];
   const languageOptions = ["English", "Spanish", "French", "German"];
   let accountVisibility = "Public";
@@ -56,8 +59,6 @@
   let hideSensitive = false;
   let language = "English";
   const theme = writable<"light" | "dark">("dark");
-
-  // Account Deletion
 
   let deleteOpen = false;
   let confirmText = "";
@@ -75,34 +76,47 @@
     try {
       const res: any = await fetch("/api/account/delete", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          confirmText,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmText }),
       });
 
       if (!res.ok) {
-        toast.error(res.message || "An error occured.");
+        toast.error(res.message || "An error occurred.");
         return;
       }
 
       window.location.href = "/";
     } catch (err) {
       console.error(err);
-      toast.error("An error occured.");
+      toast.error("An error occurred.");
     } finally {
       deleting = false;
     }
   }
+
+  let ageVerificationEnabled = data?.ageVerificationEnabled;
+  let showAgeVerification = false;
+  let verificationCompleted = false;
+
+  const handleVerificationComplete = () => {
+    verificationCompleted = true;
+    showAgeVerification = false;
+    ageVerificationEnabled = true;
+    window.location.reload();
+  };
+
+  const handleVerificationCancel = () => {
+    showAgeVerification = false;
+    toast.info("You can verify your age later from settings");
+  };
 </script>
 
-<title>Vocal - Settings</title>
+<svelte:head>
+  <title>Vocal - Settings</title>
+</svelte:head>
 
 <main class="max-w-6xl mx-auto px-6 py-8">
   <div class="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-8">
-    <!-- Sidebar -->
     <aside class="hidden md:block space-y-1">
       {#each sections as section}
         <button
@@ -115,7 +129,6 @@
       {/each}
     </aside>
 
-    <!-- Mobile dropdown -->
     <div class="md:hidden relative" use:onClickOutside>
       <button
         on:click={() => (open = !open)}
@@ -131,7 +144,7 @@
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
-            stroke-width="2"
+            stroke-width={2}
             d="M19 9l-7 7-7-7"
           />
         </svg>
@@ -153,11 +166,35 @@
       {/if}
     </div>
 
-    <!-- Main Content -->
     <section
       class="rounded-2xl border border-[#2d2249] bg-[#171226] p-6 space-y-6"
     >
-      <!-- Account -->
+      {#if ageVerificationEnabled && user}
+        <section
+          class="rounded-2xl border border-red-500 bg-red-400 text-red-900 p-6 space-y-6"
+        >
+          <p class="text-sm text-white">
+            You have not verified your age! To use Vocal, in compliance with the
+            Digital Online Safety Act, you must verify your age.
+          </p>
+          <button
+            on:click={() => (showAgeVerification = true)}
+            class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+          >
+            Verify Your Age
+          </button>
+        </section>
+      {/if}
+
+      {#if showAgeVerification && user}
+        <PersonaEmbed
+          userId={user._id?.toString()}
+          onComplete={handleVerificationComplete}
+          onCancel={handleVerificationCancel}
+          environment={dev ? "sandbox" : "production"}
+        />
+      {/if}
+
       {#if active === "account"}
         <h3
           class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1"
@@ -169,22 +206,16 @@
             title="Edit profile"
             description="Change your user/display name, update your profile picture or banner."
             href="/users/edit"
-            options={undefined}
-            value={undefined}
           />
           <SettingsRow
             title="Change password"
             description="Manage your password. You'll receive a confirmation link by email."
             href="/users/edit"
-            options={undefined}
-            value={undefined}
           />
           <SettingsRow
             title="Update email"
             description="Change the email address associated with your account."
             href="/users/edit"
-            options={undefined}
-            value={undefined}
           />
         </div>
         <div class="rounded-lg border-2 border-red-400 bg-[#171226] p-4">
@@ -197,9 +228,6 @@
               <SettingsRow
                 title="Delete Account"
                 description="Permanently delete your account and all associated data."
-                href={undefined}
-                options={undefined}
-                value={undefined}
               />
             </Dialog.Trigger>
 
@@ -237,7 +265,7 @@
                   <Button
                     variant="ghost"
                     class="text-white"
-                    onclick={() => confirmText = ''}
+                    onclick={() => (confirmText = "")}
                   >
                     Cancel
                   </Button>
@@ -256,7 +284,6 @@
         </div>
       {/if}
 
-      <!-- Privacy -->
       {#if active === "privacy"}
         <h3
           class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1"
@@ -266,7 +293,6 @@
         <div class="space-y-4">
           <SettingsRow
             title="Account Visibility"
-            href={undefined}
             options={visibilityOptions}
             value={accountVisibility}
           >
@@ -283,9 +309,6 @@
           <SettingsRow
             title="Messaging Privacy"
             description="Not available yet"
-            href={undefined}
-            options={undefined}
-            value={undefined}
           />
         </div>
 
@@ -297,8 +320,6 @@
         <div class="space-y-4">
           <SettingsRow
             title="Two-Factor Authentication"
-            href={undefined}
-            options={undefined}
             value={twoFactorEnabled ? "Enabled" : "Disabled"}
           >
             <div class="flex items-center justify-between w-full">
@@ -315,25 +336,17 @@
             title="Login Activity"
             description="View recent logins and devices."
             href="/settings/privacy/login-activity"
-            options={undefined}
-            value={undefined}
           />
         </div>
       {/if}
 
-      <!-- Notifications -->
       {#if active === "notifications"}
         <h3
           class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1"
         >
           Push Notifications
         </h3>
-        <SettingsRow
-          title="Likes + Reposts"
-          href={undefined}
-          options={undefined}
-          value={notifLikes ? "On" : "Off"}
-        >
+        <SettingsRow title="Likes + Reposts" value={notifLikes ? "On" : "Off"}>
           <div class="flex items-center justify-between w-full">
             <span></span>
             <Switch
@@ -344,12 +357,7 @@
           </div>
         </SettingsRow>
 
-        <SettingsRow
-          title="Comments"
-          href={undefined}
-          options={undefined}
-          value={notifComments ? "On" : "Off"}
-        >
+        <SettingsRow title="Comments" value={notifComments ? "On" : "Off"}>
           <div class="flex items-center justify-between w-full">
             <span></span>
             <Switch
@@ -360,12 +368,7 @@
           </div>
         </SettingsRow>
 
-        <SettingsRow
-          title="Mentions"
-          href={undefined}
-          options={undefined}
-          value={notifMentions ? "On" : "Off"}
-        >
+        <SettingsRow title="Mentions" value={notifMentions ? "On" : "Off"}>
           <div class="flex items-center justify-between w-full">
             <span></span>
             <Switch
@@ -378,8 +381,6 @@
 
         <SettingsRow
           title="New Followers"
-          href={undefined}
-          options={undefined}
           value={notifFollowers ? "On" : "Off"}
         >
           <div class="flex items-center justify-between w-full">
@@ -397,16 +398,9 @@
         >
           Email Notifications
         </h3>
-        <SettingsRow
-          title="Marketing Emails"
-          href="/mailing"
-          options={undefined}
-          value={undefined}
-        />
+        <SettingsRow title="Marketing Emails" href="/mailing" />
         <SettingsRow
           title="Account Updates"
-          href={undefined}
-          options={undefined}
           value={accountUpdates ? "On" : "Off"}
         >
           <div class="flex items-center justify-between w-full">
@@ -420,7 +414,6 @@
         </SettingsRow>
       {/if}
 
-      <!-- Content -->
       {#if active === "content"}
         <h3
           class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1"
@@ -430,9 +423,6 @@
         <SettingsRow
           title="Manage Topics"
           description="See liked terms and remove them."
-          href={undefined}
-          options={undefined}
-          value={undefined}
         />
 
         <h3
@@ -442,8 +432,6 @@
         </h3>
         <SettingsRow
           title="Hide Sensitive Topics"
-          href={undefined}
-          options={undefined}
           value={hideSensitive ? "On" : "Off"}
         >
           <div class="flex items-center justify-between w-full">
@@ -463,7 +451,6 @@
         </h3>
         <SettingsRow
           title="Display Language"
-          href={undefined}
           options={languageOptions}
           value={language}
         >
@@ -478,7 +465,6 @@
         </SettingsRow>
       {/if}
 
-      <!-- Appearance -->
       {#if active === "appearance"}
         <h3
           class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1"
@@ -515,7 +501,6 @@
         </RadioGroup.Root>
       {/if}
 
-      <!-- Support -->
       {#if active === "support"}
         <h3
           class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1"

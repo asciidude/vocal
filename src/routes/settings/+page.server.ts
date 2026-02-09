@@ -1,3 +1,4 @@
+import { env } from '$env/dynamic/private';
 import type { UserType } from 'src/lib/types/User.type';
 
 /**
@@ -6,5 +7,6 @@ import type { UserType } from 'src/lib/types/User.type';
 
 export const load = async ({ params, locals }) => {
     const user = locals.user as UserType | null;
-    return { user }
+    const ageVerificationEnabled = Boolean(env.VERIFY_AGE);
+    return { user, ageVerificationEnabled }
 }

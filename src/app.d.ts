@@ -6,6 +6,10 @@ declare global {
             user: UserType | null;
         }
     }
+
+    interface Window {
+        Persona: any;
+    }
 }
 
 export {};
