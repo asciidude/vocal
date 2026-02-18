@@ -9,6 +9,6 @@ export default defineConfig({
 		}
 	},
 	preview: {
-		allowedHosts: ['vocal.wtf']
+		allowedHosts: ['vocal.wtf', 'api.smtp2go.com']
 	}
 });
