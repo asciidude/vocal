@@ -1,4 +1,3 @@
-<!-- src/routes/settings/+page.svelte -->
 <script lang="ts">
   import SettingsRow from "$lib/components/shared/SettingsRow.svelte";
   import { Switch } from "$lib/components/ui/switch/index.js";
@@ -10,12 +9,9 @@
   import * as Dialog from "$lib/components/ui/dialog/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { toast } from "svelte-sonner";
-  import PersonaEmbed from "$lib/components/shared/PersonaEmbed.svelte";
-  import { dev } from "$app/environment";
 
   export let data: PageData;
   $: user = data?.user;
-  let userId = user?._id;
 
   const sections = [
     { id: "account", label: "Account" },
@@ -93,22 +89,6 @@
       deleting = false;
     }
   }
-
-  let ageVerificationEnabled = data?.ageVerificationEnabled;
-  let showAgeVerification = false;
-  let verificationCompleted = false;
-
-  const handleVerificationComplete = () => {
-    verificationCompleted = true;
-    showAgeVerification = false;
-    ageVerificationEnabled = true;
-    window.location.reload();
-  };
-
-  const handleVerificationCancel = () => {
-    showAgeVerification = false;
-    toast.info("You can verify your age later from settings");
-  };
 </script>
 
 <svelte:head>
@@ -169,32 +149,6 @@
     <section
       class="rounded-2xl border border-[#2d2249] bg-[#171226] p-6 space-y-6"
     >
-      {#if ageVerificationEnabled && user}
-        <section
-          class="rounded-2xl border border-red-500 bg-red-400 text-red-900 p-6 space-y-6"
-        >
-          <p class="text-sm text-white">
-            You have not verified your age! To use Vocal, in compliance with the
-            Digital Online Safety Act, you must verify your age.
-          </p>
-          <button
-            on:click={() => (showAgeVerification = true)}
-            class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
-          >
-            Verify Your Age
-          </button>
-        </section>
-      {/if}
-
-      {#if showAgeVerification && user}
-        <PersonaEmbed
-          userId={user._id?.toString()}
-          onComplete={handleVerificationComplete}
-          onCancel={handleVerificationCancel}
-          environment={dev ? "sandbox" : "production"}
-        />
-      {/if}
-
       {#if active === "account"}
         <h3
           class="text-xl font-semibold text-white mb-3 border-b border-[#2d2249]/50 pb-1"
